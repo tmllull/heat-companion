@@ -20,7 +20,7 @@
 
 ### 📊 Seguimiento de resultados
 
-- **Registro rápido**: Introduce posiciones y DNFs en segundos.
+- **Registro rápido**: Introduce posiciones en segundos.
 - **Clasificación automática**: Cálculo instantáneo de puntos, victorias, podios y diferencias (Gap).
 - **Detalle de carreras**: Consulta el podio y las condiciones de cada carrera ya finalizada.
 
