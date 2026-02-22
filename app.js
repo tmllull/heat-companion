@@ -52,7 +52,7 @@ function loadState() {
         mods: r.mods || { garage: true, weather: false, sponsors: false },
         status: r.results?.length ? 'completed' : 'scheduled',
         results: (r.results || []).map(res => ({
-          playerId: res.playerId, position: res.position, dnf: res.dnf || false
+          playerId: res.playerId, position: res.position
         }))
       }));
       return migrated;
@@ -75,8 +75,7 @@ function getPointsArray() {
   return POINTS_SYSTEMS[state.championship.pointsSystem] || POINTS_SYSTEMS.f1;
 }
 
-function getPoints(position, dnf = false) {
-  if (dnf) return 0;
+function getPoints(position) {
   const arr = getPointsArray();
   return arr[position - 1] ?? 0;
 }
@@ -115,10 +114,10 @@ function getStandings() {
       const races = state.championship.calendar.filter(r => r.status === 'completed');
       const points = races.reduce((sum, r) => {
         const res = r.results.find(x => x.playerId === p.id);
-        return sum + (res ? getPoints(res.position, res.dnf) : 0);
+        return sum + (res ? getPoints(res.position) : 0);
       }, 0);
-      const wins   = races.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position === 1 && !res.dnf; }).length;
-      const podiums = races.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position <= 3 && !res.dnf; }).length;
+      const wins   = races.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position === 1; }).length;
+      const podiums = races.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position <= 3; }).length;
       const raceCount = races.filter(r => r.results.some(x => x.playerId === p.id)).length;
       return { player: p, points, wins, podiums, races: raceCount };
     })
@@ -248,7 +247,7 @@ function renderDashboard() {
   } else {
     recentEl.innerHTML = shown.map(race => {
       const circuit = getCircuitById(race.circuitId);
-      const winner  = race.results.find(r => r.position === 1 && !r.dnf);
+      const winner  = race.results.find(r => r.position === 1);
       const winnerP = winner ? getPlayerById(winner.playerId) : null;
       const isPending = race.status === 'scheduled';
       return `<div class="recent-race-row" data-cal-race-id="${race.id}">
@@ -290,7 +289,7 @@ function renderChampionship() {
       const enrolled = champ.playerIds.includes(p.id);
       return `<div class="enrolled-player-chip ${enrolled ? 'enrolled' : ''}" data-toggle-player="${p.id}">
         <div class="enrolled-avatar" style="background:${p.color}">${escHtml(p.icon || initials(p.name))}</div>
-        <span class="enrolled-name">${escHtml(p.name)}</span>
+        <span class="enrolled-name">${escHtml(p.name)} ${p.isLegend ? '🤖' : ''}</span>
         <span class="enrolled-check">${enrolled ? '✓' : '+'}</span>
       </div>`;
     }).join('');
@@ -323,7 +322,7 @@ function renderChampionship() {
 
       let podiumHtml = '';
       if (completed) {
-        const top3 = race.results.filter(r => !r.dnf).sort((a, b) => a.position - b.position).slice(0, 3);
+        const top3 = race.results.sort((a, b) => a.position - b.position).slice(0, 3);
         podiumHtml = `<div class="cal-podium">${top3.map((r, j) => {
           const p = getPlayerById(r.playerId);
           return p ? `<div class="cal-podium-chip p${j+1}"><div class="podium-chip-dot" style="background:${p.color}"></div>${escHtml(p.name)}</div>` : '';
@@ -450,7 +449,7 @@ function renderPlayers() {
   grid.innerHTML = state.players.map(p => {
     const points  = state.championship.calendar
       .filter(r => r.status === 'completed')
-      .reduce((sum, r) => { const res = r.results.find(x => x.playerId === p.id); return sum + (res ? getPoints(res.position, res.dnf) : 0); }, 0);
+      .reduce((sum, r) => { const res = r.results.find(x => x.playerId === p.id); return sum + (res ? getPoints(res.position) : 0); }, 0);
     const enrolled = state.championship.playerIds.includes(p.id);
 
     const upgBadges = (p.upgrades || []).map(uid => {
@@ -461,7 +460,10 @@ function renderPlayers() {
     return `<div class="player-card" style="--player-color:${p.color}">
       ${enrolled ? '<div class="player-enrolled-dot" title="Inscrito en el campeonato"></div>' : ''}
       <div class="player-avatar" style="background:${p.color}">${escHtml(p.icon || initials(p.name))}</div>
-      <div class="player-name">${escHtml(p.name)}</div>
+      <div class="player-name">
+        ${escHtml(p.name)}
+        ${p.isLegend ? '<span class="legend-badge">🤖</span>' : ''}
+      </div>
       <div class="player-stats">${points} pts</div>
       ${upgBadges ? `<div class="player-upg-list">${upgBadges}</div>` : '<div class="player-upg-list no-upg">Sin mejoras asignadas</div>'}
       <div class="player-card-actions">
@@ -503,8 +505,8 @@ function renderStandings() {
     const racePts = completedRaces.map(r => {
       const res = r.results.find(x => x.playerId === s.player.id);
       if (!res) return '<td style="text-align:center"><span style="color:var(--text-dim)">—</span></td>';
-      const p = getPoints(res.position, res.dnf);
-      return `<td><span class="race-pts-cell">${res.dnf ? '<span style="font-size:10px;color:var(--heat-red)">DNF</span>' : p}</span></td>`;
+      const p = getPoints(res.position);
+      return `<td><span class="race-pts-cell">${p}</span></td>`;
     }).join('');
 
     return `<tr>
@@ -679,12 +681,14 @@ function openPlayerModal(playerId = null) {
     document.getElementById('modal-player-title').textContent = 'Editar piloto';
     nameInput.value       = p.name;
     iconInput.value       = p.icon || '';
+    document.getElementById('player-is-legend').checked = p.isLegend || false;
     selectedPlayerColor   = p.color;
     currentUpgrades       = p.upgrades || [];
   } else {
     document.getElementById('modal-player-title').textContent = 'Añadir piloto';
     nameInput.value = '';
     iconInput.value = '';
+    document.getElementById('player-is-legend').checked = false;
     selectedPlayerColor = '#e63b2e';
   }
 
@@ -715,13 +719,14 @@ document.getElementById('btn-save-player').addEventListener('click', () => {
 
   const upgrades = [...document.querySelectorAll('#player-upgrades-container .upgrade-chip.selected')]
     .map(el => el.dataset.upgradeId);
+  const isLegend = document.getElementById('player-is-legend').checked;
 
   if (editingPlayerId) {
     const idx = state.players.findIndex(p => p.id === editingPlayerId);
-    state.players[idx] = { ...state.players[idx], name, color: selectedPlayerColor, icon, upgrades };
+    state.players[idx] = { ...state.players[idx], name, color: selectedPlayerColor, icon, upgrades, isLegend };
     showToast('Piloto actualizado ✓', 'success');
   } else {
-    state.players.push({ id: uid(), name, color: selectedPlayerColor, icon, upgrades });
+    state.players.push({ id: uid(), name, color: selectedPlayerColor, icon, upgrades, isLegend });
     showToast(`${name} añadido ✓`, 'success');
   }
 
@@ -904,11 +909,10 @@ document.getElementById('btn-save-cal-race').addEventListener('click', () => {
   renderView('dashboard');
 });
 
-// ============================================================
 //  ENTER RACE RESULTS
 // ============================================================
 let resultsRaceId    = null;
-let resultsOrder     = []; // [{playerId, dnf}]
+let resultsOrder     = []; // [{playerId}]
 let resultsDragSrcIdx = null;
 
 function openResultsModal(raceId) {
@@ -922,16 +926,16 @@ function openResultsModal(raceId) {
 
   // Build starting order: if already has results, use them; else standings order
   if (race.status === 'completed' && race.results.length > 0) {
-    resultsOrder = race.results.map(r => ({ playerId: r.playerId, dnf: r.dnf }));
+    resultsOrder = race.results.map(r => ({ playerId: r.playerId }));
     // add any enrolled players not in results
     enrolledPlayers().forEach(p => {
-      if (!resultsOrder.find(r => r.playerId === p.id)) resultsOrder.push({ playerId: p.id, dnf: false });
+      if (!resultsOrder.find(r => r.playerId === p.id)) resultsOrder.push({ playerId: p.id });
     });
   } else {
     const standing = getStandings();
     const ep = enrolledPlayers();
     // prefer standings order, fallback to enrolled order
-    resultsOrder = ep.map(p => ({ playerId: p.id, dnf: false }));
+    resultsOrder = ep.map(p => ({ playerId: p.id }));
   }
 
   renderResultsSortable();
@@ -946,15 +950,12 @@ function renderResultsSortable() {
     const player = getPlayerById(entry.playerId);
     if (!player) return '';
     const pos   = i + 1;
-    const earnedPts = entry.dnf ? 0 : (pts[i] ?? 0);
+    const earnedPts = pts[i] ?? 0;
     return `<div class="result-row" draggable="true" data-player-id="${entry.playerId}" data-idx="${i}">
       <div class="result-pos pos-${pos <= 3 ? pos : ''}">${pos}º</div>
       <div class="result-avatar" style="background:${player.color}">${escHtml(player.icon || initials(player.name))}</div>
       <div class="result-name">${escHtml(player.name)}</div>
-      <label class="result-dnf-toggle">
-        <input type="checkbox" class="dnf-check" data-idx="${i}" ${entry.dnf ? 'checked' : ''} /> DNF
-      </label>
-      <div class="result-pts-preview" id="rpts-${i}">${entry.dnf ? '—' : earnedPts + ' pts'}</div>
+      <div class="result-pts-preview" id="rpts-${i}">${earnedPts + ' pts'}</div>
       <div class="result-move-btns">
         <button class="result-move-btn" data-move="up" data-idx="${i}">▲</button>
         <button class="result-move-btn" data-move="down" data-idx="${i}">▼</button>
@@ -964,14 +965,7 @@ function renderResultsSortable() {
 
   setupResultsDragDrop('results-sortable-list', resultsOrder, () => renderResultsSortable());
 
-  list.querySelectorAll('.dnf-check').forEach(input => {
-    input.addEventListener('change', e => {
-      const idx = parseInt(e.target.dataset.idx);
-      resultsOrder[idx].dnf = e.target.checked;
-      const ptsEl = document.getElementById(`rpts-${idx}`);
-      if (ptsEl) ptsEl.textContent = e.target.checked ? '—' : (pts[idx] ?? 0) + ' pts';
-    });
-  });
+
 
   list.querySelectorAll('.result-move-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1010,8 +1004,7 @@ document.getElementById('btn-save-results').addEventListener('click', () => {
 
   race.results = resultsOrder.map((entry, i) => ({
     playerId: entry.playerId,
-    position: i + 1,
-    dnf:      entry.dnf
+    position: i + 1
   }));
   race.status = 'completed';
 
@@ -1066,12 +1059,12 @@ function openRaceDetailModal(raceId) {
     ? race.results.sort((a, b) => a.position - b.position).map(r => {
         const player     = getPlayerById(r.playerId);
         if (!player) return '';
-        const earnedPts  = getPoints(r.position, r.dnf);
+        const earnedPts  = getPoints(r.position);
         return `<div class="detail-result-row">
           <div class="detail-result-pos pos-${r.position <= 3 ? r.position : ''}">${r.position <= 3 ? ['🥇','🥈','🥉'][r.position-1] : r.position + 'º'}</div>
           <div class="detail-result-avatar" style="background:${player.color}">${escHtml(player.icon || initials(player.name))}</div>
           <div class="detail-result-name">${escHtml(player.name)}</div>
-          ${r.dnf ? '<span class="detail-result-dnf">DNF</span>' : `<div class="detail-result-pts">${earnedPts} pts</div>`}
+          <div class="detail-result-pts">${earnedPts} pts</div>
         </div>`;
       }).join('')
     : '<div style="color:var(--text-dim);font-size:13px;padding:12px">Carrera aún no disputada.</div>';

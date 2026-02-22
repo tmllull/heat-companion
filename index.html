@@ -229,6 +229,9 @@
       <!-- Basic info -->
       <label class="form-label">Nombre del piloto</label>
       <input class="form-input" id="player-name-input" type="text" placeholder="Ej: Carlos Sainz" maxlength="30" />
+      <div style="margin: 4px 0 16px">
+        <label class="checkbox-label"><input type="checkbox" id="player-is-legend" /> Piloto Leyenda (Bot)</label>
+      </div>
 
       <label class="form-label">Color del coche</label>
       <div class="color-picker" id="player-color-picker">
@@ -323,7 +326,7 @@
     </div>
     <div class="modal-body">
       <p class="form-hint" style="margin-bottom:18px">
-        Ordena los pilotos según la posición final. Usa los botones ▲▼ o arrastra. Marca DNF si corresponde.
+        Ordena los pilotos según la posición final. Usa los botones ▲▼ o arrastra.
       </p>
       <div id="results-sortable-list" class="results-sortable"></div>
     </div>
