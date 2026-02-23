@@ -260,7 +260,7 @@ function renderDashboard() {
 
   // Recent / upcoming races (show last 2 completed + next 2 pending)
   const recentEl = document.getElementById('dash-recent-races');
-  const shown = [...completed.slice(-2).reverse(), ...pending.slice(0, 2)];
+  const shown = [...completed.slice(-3).reverse(), ...pending.slice(0, 3)];
   if (shown.length === 0) {
     recentEl.innerHTML = '<div style="color:var(--text-dim);font-size:13px;text-align:center;padding:16px">No hay carreras en el calendario</div>';
   } else {
@@ -816,18 +816,19 @@ function openAddRaceModal(raceId = null) {
   document.getElementById('add-race-mod-press').checked = hasPress;
   
   document.getElementById('add-race-weather-section').style.display = hasWeather ? 'block' : 'none';
-  document.getElementById('add-race-sponsors-section').style.display = 'none';
-  document.getElementById('add-race-press-section').style.display = 'none';
-  document.getElementById('add-race-setup-section').style.display = hasSponsors ? 'block' : 'none';
+  document.getElementById('add-race-sponsors-section').style.display = hasSponsors ? 'block' : 'none';
+  document.getElementById('add-race-press-section').style.display = hasPress ? 'block' : 'none';
 
-  // Setup configuration (only when sponsors module is active)
+  // Setup configuration
   if (hasSponsors) {
     const setupSponsors = race ? (race.setup?.sponsors || 1) : 1;
-    const setupPress = race ? (race.setup?.press || '') : '';
-    document.querySelectorAll('#add-race-setup-sponsors-grid .number-chip').forEach(c => {
+    document.querySelectorAll('#add-race-sponsors-grid .number-chip').forEach(c => {
       c.classList.toggle('selected', parseInt(c.dataset.val) === setupSponsors);
     });
-    document.getElementById('add-race-setup-press-input').value = setupPress;
+  }
+  if (hasPress) {
+    const setupPress = race ? (race.setup?.press || '') : '';
+    document.getElementById('add-race-press-input').value = setupPress;
   }
 
   // render circuits
@@ -837,13 +838,12 @@ function openAddRaceModal(raceId = null) {
       <div class="circuit-flag">${c.flag}</div>
       <div class="circuit-name">${c.name || c.country}</div>
       <div class="circuit-info-stats">
+        <span>🏁 ${c.laps} vueltas</span>
         <span>⤵ ${c.curves} curvas</span>
         <span>📏 ${c.spaces} casillas</span>
-        <span>🏁 ${c.laps} vueltas</span>
       </div>
       <div class="circuit-info-footer">
-        <span class="diff-badge ${c.difficulty.toLowerCase()}">${c.difficulty}</span>
-        <span class="expansion-label">${c.expansion}</span>
+        <span class="diff-badge ${c.expansion ? c.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-') : ''}">${c.expansion}</span>
       </div>
     </div>`).join('');
 
@@ -867,7 +867,7 @@ document.getElementById('add-race-mod-weather').addEventListener('change', e => 
 });
 
 document.getElementById('add-race-mod-sponsors').addEventListener('change', e => {
-  document.getElementById('add-race-setup-section').style.display = e.target.checked ? 'block' : 'none';
+  document.getElementById('add-race-sponsors-section').style.display = e.target.checked ? 'block' : 'none';
 });
 
 document.getElementById('add-race-mod-press').addEventListener('change', e => {
@@ -882,11 +882,11 @@ document.getElementById('add-race-weather-grid').addEventListener('click', e => 
   card.classList.add('selected');
 });
 
-document.getElementById('add-race-setup-sponsors-grid').addEventListener('click', e => {
+document.getElementById('add-race-sponsors-grid').addEventListener('click', e => {
   const chip = e.target.closest('.number-chip');
   if (!chip) return;
   const val = parseInt(chip.dataset.val);
-  document.querySelectorAll('#add-race-setup-sponsors-grid .number-chip').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('#add-race-sponsors-grid .number-chip').forEach(c => c.classList.remove('selected'));
   chip.classList.add('selected');
 });
 
@@ -929,10 +929,10 @@ document.getElementById('btn-save-cal-race').addEventListener('click', () => {
     weatherType: isWeatherActive ? addRaceSelectedWeather : 'sun',
     sponsorCards: 0,
     press: '',
-    setup: isSponsorsActive ? {
-      sponsors: parseInt(document.querySelector('#add-race-setup-sponsors-grid .number-chip.selected')?.dataset.val || '1'),
-      press: document.getElementById('add-race-setup-press-input').value.trim()
-    } : { sponsors: 0, press: '' }
+    setup: {
+      sponsors: isSponsorsActive ? parseInt(document.querySelector('#add-race-sponsors-grid .number-chip.selected')?.dataset.val || '1') : 0,
+      press: isPressActive ? document.getElementById('add-race-press-input').value.trim() : ''
+    }
   };
 
   if (editingRaceId) {
@@ -1168,11 +1168,11 @@ function openRaceDetailModal(raceId) {
         <div style="flex:1">
           <div class="detail-circuit-name">${getCircuitName(circuit)}</div>
           <div class="detail-circuit-meta-row">
-            <span>${circuit?.country || ''} · ${circuit?.expansion || ''}</span>
-            <span class="diff-badge ${circuit?.difficulty?.toLowerCase() || ''}">${circuit?.difficulty || ''}</span>
+            <span>${circuit?.country || ''}</span>
+            <span class="diff-badge ${circuit?.expansion ? circuit.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-') : ''}">${circuit?.expansion || ''}</span>
           </div>
           <div class="detail-circuit-stats-row">
-            <span>⤵ ${circuit?.curves || 0} curvas · 📏 ${circuit?.spaces || 0} casillas · 🏁 ${race.laps || circuit?.laps || 3} vueltas</span>
+            <span>🏁 ${race.laps || circuit?.laps || 3} vueltas · ⤵ ${circuit?.curves || 0} curvas · 📏 ${circuit?.spaces || 0} casillas</span>
           </div>
         </div>
       </div>
@@ -1435,7 +1435,7 @@ function importData(file) {
 function openChampTemplatesModal() {
   const grid = document.getElementById('templates-grid');
   grid.innerHTML = window.CHAMPIONSHIP_TEMPLATES.map(t => {
-    const raceNames = t.races.map(r => getCircuitById(r.circuitId)?.name || 'Carrera').join(' · ');
+    const raceNames = t.races.map(r => getCircuitName(getCircuitById(r.circuitId)) || 'Carrera').join(' · ');
     return `<div class="template-card" data-template-id="${t.id}">
       <h3>${t.name}</h3>
       <div class="template-race-mini-list">${t.races.length} carreras: ${raceNames}</div>
@@ -1498,6 +1498,10 @@ function resetChampionship() {
 //  INIT
 // ============================================================
 function init() {
+  if (window.APP_META && window.APP_META.version) {
+    const versionEl = document.getElementById('sidebar-version-label');
+    if (versionEl) versionEl.textContent = 'v' + window.APP_META.version;
+  }
   renderSidebarChamp();
   navigateTo('dashboard');
 
@@ -1532,10 +1536,10 @@ function toggleTheme() {
 function applyTheme(theme) {
   if (theme === 'light') {
     document.body.classList.add('light-theme');
-    document.getElementById('btn-theme-toggle').innerHTML = '☀️ Modo';
+    document.getElementById('btn-theme-toggle').innerHTML = '☀️';
   } else {
     document.body.classList.remove('light-theme');
-    document.getElementById('btn-theme-toggle').innerHTML = '🌙 Modo';
+    document.getElementById('btn-theme-toggle').innerHTML = '🌙';
   }
   localStorage.setItem('heat-theme', theme);
 }

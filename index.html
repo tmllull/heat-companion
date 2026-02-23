@@ -50,13 +50,14 @@
     </div>
 
     <div class="sidebar-data-actions">
-      <button class="btn-data-action" id="btn-theme-toggle" title="Cambiar tema">🌙 Modo</button>
+      <button class="btn-data-action" id="btn-theme-toggle" title="Cambiar tema">🌙</button>
       <button class="btn-data-action" id="btn-export" title="Exportar">⬇ Exportar</button>
       <button class="btn-data-action btn-data-import" id="btn-import" title="Importar">⬆ Importar</button>
     </div>
     <div class="sidebar-data-actions" style="padding-top:0">
       <button class="btn-data-action btn-data-reset" id="btn-open-reset">⚠ Resetear...</button>
     </div>
+    <div class="sidebar-version" id="sidebar-version-label">v0.1</div>
   </nav>
 
   <!-- ========== MAIN CONTENT ========== -->
@@ -280,17 +281,13 @@
 
       <div class="form-section">
         <h3 class="form-section-title">2. Evento</h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Nombre del evento</label>
-            <input class="form-input" id="add-race-event-input" type="text" placeholder="Ej: Gran Premio de España, Carrera Nocturna..." />
-          </div>
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label class="form-label">Nombre del evento</label>
+          <input class="form-input" id="add-race-event-input" type="text" placeholder="Ej: Gran Premio de España, Carrera Nocturna..." />
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Reglas especiales</label>
-            <textarea class="form-input" id="add-race-rules-input" rows="3" placeholder="Reglas específicas de esta carrera..."></textarea>
-          </div>
+        <div class="form-group">
+          <label class="form-label">Reglas especiales</label>
+          <textarea class="form-input" id="add-race-rules-input" rows="3" placeholder="Reglas específicas de esta carrera..."></textarea>
         </div>
       </div>
 
@@ -299,7 +296,7 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Número de vueltas</label>
-            <input class="form-input" id="add-race-laps-input" type="number" min="1" max="10" value="3" />
+            <input class="form-input" id="add-race-laps-input" type="number" min="1" max="10" value="3" style="width: 80px;" />
           </div>
         </div>
       </div>
@@ -334,25 +331,10 @@
         </div>
 
         <div id="add-race-press-section" style="display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--border)">
-          <label class="form-label">Ubicación de Cámaras de Prensa</label>
-          <input class="form-input" id="add-race-press-input" type="text" placeholder="Ej: Curva A, Curvas B y D..." />
+          <label class="form-label">Ubicación de la Prensa (Curvas)</label>
+          <input class="form-input" id="add-race-press-input" type="text" placeholder="Ej: A, B y D..." />
         </div>
 
-        <div id="add-race-setup-section" style="display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--border)">
-          <div class="form-group">
-            <label class="form-label">Cartas de patrocinio al inicio</label>
-            <div class="number-selector-grid" id="add-race-setup-sponsors-grid">
-              <div class="number-chip" data-val="0">0</div>
-              <div class="number-chip selected" data-val="1">1</div>
-              <div class="number-chip" data-val="2">2</div>
-              <div class="number-chip" data-val="3">3</div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Ubicación de Cámaras de Prensa</label>
-            <input class="form-input" id="add-race-setup-press-input" type="text" placeholder="Ej: Curva A, Curvas B y D..." />
-          </div>
-        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -491,6 +473,7 @@
 
 </div> <!-- #app -->
 
+<script src="data/meta.js"></script>
 <script src="data/circuits.js"></script>
 <script src="data/weather.js"></script>
 <script src="data/game-basics.js"></script>

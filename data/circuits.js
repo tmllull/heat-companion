@@ -11,7 +11,6 @@ window.CIRCUITS = [
     flag: "🇺🇸",
     curves: 4,
     spaces: 69,
-    difficulty: "Fácil",
     expansion: "Base",
     laps: 2
   },
@@ -22,7 +21,6 @@ window.CIRCUITS = [
     flag: "🇬🇧",
     curves: 5,
     spaces: 63,
-    difficulty: "Media",
     expansion: "Base",
     laps: 2
   },
@@ -33,7 +31,6 @@ window.CIRCUITS = [
     flag: "🇮🇹",
     curves: 3,
     spaces: 54,
-    difficulty: "Media",
     expansion: "Base",
     laps: 3
   },
@@ -44,7 +41,6 @@ window.CIRCUITS = [
     flag: "🇫🇷",
     curves: 5,
     spaces: 60,
-    difficulty: "Media",
     expansion: "Base",
     laps: 2
   },
@@ -56,7 +52,6 @@ window.CIRCUITS = [
     flag: "🇯🇵",
     curves: 5,
     spaces: 60,
-    difficulty: "Difícil",
     expansion: "Lluvia Torrencial",
     laps: 2
   },
@@ -67,7 +62,6 @@ window.CIRCUITS = [
     flag: "🇲🇽",
     curves: 6,
     spaces: 60,
-    difficulty: "Media",
     expansion: "Lluvia Torrencial",
     laps: 3
   },
@@ -79,7 +73,6 @@ window.CIRCUITS = [
     flag: "🇪🇸",
     curves: 11,
     spaces: 109,
-    difficulty: "Difícil",
     expansion: "Visión de Túnel",
     laps: 1
   },
@@ -90,7 +83,6 @@ window.CIRCUITS = [
     flag: "🇳🇱",
     curves: 5,
     spaces: 55,
-    difficulty: "Media",
     expansion: "Visión de Túnel",
     laps: 3
   }
