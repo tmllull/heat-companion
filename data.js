@@ -195,21 +195,21 @@ const CHAMPIONSHIP_TEMPLATES = [
         event: "Inauguración de la Tribuna",
         rules: "Los 3 primeros en cruzar la meta en la vuelta 1 ganan 1 carta de patrocinio.",
         setup: "Sponsors: 1, Prensa: Curva C",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       },
       {
         circuitId: "usa",
         event: "Nuevo Récord de Velocidad",
         rules: "Al alcanzar velocidad 15+, gana inmediatamente 1 carta de patrocinio.",
         setup: "Sponsors: 1, Prensa: Curva A",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       },
       {
         circuitId: "italy",
         event: "Huelga de Pilotos",
         rules: "La carrera es 1 vuelta más corta. El ganador obtiene +2 puntos extra.",
         setup: "Sponsors: 1, Prensa: Curva B",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       }
     ]
   },
@@ -224,21 +224,21 @@ const CHAMPIONSHIP_TEMPLATES = [
         event: "Récord de Asistencia",
         rules: "Carrera +1 vuelta. Tamaño de mano sube a 8 cartas.",
         setup: "Sponsors: 1, Prensa: Curvas C y E",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       },
       {
         circuitId: "gb",
         event: "Corrupción en la Comisión",
         rules: "Los 3 primeros obtienen +1 punto adicional en el campeonato.",
         setup: "Sponsors: 1, Prensa: Curva D",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       },
       {
         circuitId: "france",
         event: "Nuevo Patrocinador Principal",
         rules: "Bonus de patrocinio mejorado para el podio.",
         setup: "Sponsors: 2, Prensa: Curva A",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       }
     ]
   },
@@ -253,28 +253,28 @@ const CHAMPIONSHIP_TEMPLATES = [
         event: "Primera Carrera TV en Vivo",
         rules: "Adelantar 3 coches en un turno otorga 1 carta de patrocinio.",
         setup: "Sponsors: 1, Prensa: Curvas B y D",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       },
       {
         circuitId: "gb",
         event: "Nuevas Reglas de Seguridad",
         rules: "Todos empiezan con -2 Heat y -1 Stress. Tamaño de mano baja a 6.",
         setup: "Sponsors: 1, Prensa: Curva D",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       },
       {
         circuitId: "france",
         event: "Retirada de Patrocinadores",
         rules: "Todos empiezan con +1 Stress. Un spin-off supone descalificación (0 pts).",
         setup: "Sponsors: 0, Prensa: Curva D",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       },
       {
         circuitId: "italy",
         event: "Incertidumbre en el Futuro",
         rules: "Todos empiezan con +1 Stress extra en el mazo.",
         setup: "Sponsors: 0, Prensa: Curvas C y E",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       }
     ]
   },
@@ -289,7 +289,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         event: "Impresiona a la Prensa",
         rules: "Gana 2 patrocinadores si impresionas a la prensa (rebufo o +2 vel en curva).",
         setup: "Sponsors: 1, Prensa: Curvas B y F",
-        mods: { weather: true, sponsors: true },
+        mods: { weather: true, sponsors: true, press: true },
         weatherType: "rain"
       },
       {
@@ -297,7 +297,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         event: "Vientos Turbulentos",
         rules: "Ráfagas que afectan al movimiento en rectas largas.",
         setup: "Sponsors: 1, Prensa: Curva E",
-        mods: { weather: true, sponsors: true },
+        mods: { weather: true, sponsors: true, press: true },
         weatherType: "clouds"
       },
       {
@@ -305,14 +305,14 @@ const CHAMPIONSHIP_TEMPLATES = [
         event: "Chicanes de Seguridad",
         rules: "Penalización doble por exceso de velocidad en chicanes.",
         setup: "Sponsors: 1, Prensa: Curva D",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       },
       {
         circuitId: "japan",
         event: "Lluvia Torrencial Repentina",
         rules: "Casillas inundadas. Bajar marcha cuesta +1 Heat si empiezas en agua.",
         setup: "Sponsors: 1, Prensa: Curvas G y I",
-        mods: { weather: true, sponsors: true },
+        mods: { weather: true, sponsors: true, press: true },
         weatherType: "storm"
       }
     ]
@@ -328,28 +328,28 @@ const CHAMPIONSHIP_TEMPLATES = [
         event: "Saluda a la Cámara",
         rules: "En curvas de prensa, solo ganas patrocinio si vas por debajo del límite.",
         setup: "Sponsors: 0, Prensa: Curva C",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       },
       {
         circuitId: "usa",
         event: "Visión de Túnel",
         rules: "Puedes descartar cartas de Stress en el paso 8.",
         setup: "Sponsors: 0, Prensa: Curvas A y C",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       },
       {
         circuitId: "spain",
         event: "Olla a Presión",
         rules: "Carrera +1 vuelta. Al completar vuelta, elimina 1 carta de Heat del juego.",
         setup: "Sponsors: 1, Prensa: Curva B",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       },
       {
         circuitId: "netherlands",
         event: "Trampa de Arena",
         rules: "Las salidas de pista en chicanes son especialmente castigadas.",
         setup: "Sponsors: 1, Prensa: Curva D",
-        mods: { weather: true, sponsors: true }
+        mods: { weather: true, sponsors: true, press: true }
       }
     ]
   }
