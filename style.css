@@ -530,6 +530,12 @@ ul {
   margin-bottom: 18px;
 }
 
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .section-header h2 {
   font-family: "Rajdhani", sans-serif;
   font-size: 18px;
@@ -1532,7 +1538,7 @@ ul {
 /* Manual / Reference */
 .manual-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: 1fr;
   gap: 20px;
   align-items: start;
 }
@@ -2042,6 +2048,9 @@ ul {
 .number-chip:hover { border-color: var(--border-bright); background: var(--surface-4); }
 .number-chip.selected { border-color: var(--heat-orange); color: var(--heat-orange); background: rgba(249,115,22,0.1); }
 
+.race-status-badge {
+  border-radius: var(--radius-sm);
+}
 .race-status-badge.pending {
   background: rgba(251,191,36,0.1);
   color: var(--heat-gold);

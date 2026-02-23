@@ -44,8 +44,8 @@
     </ul>
 
     <div class="sidebar-championship">
-      <div class="championship-label">Campeonato</div>
-      <div class="championship-name" id="sidebar-champ-name">Sin nombre</div>
+      <!-- <div class="championship-label">Campeonato</div> -->
+      <!-- <div class="championship-name" id="sidebar-champ-name">Sin nombre</div> -->
       <button class="btn-edit-champ" id="btn-edit-champ">✎ Configurar</button>
     </div>
 
@@ -99,7 +99,7 @@
           <h1 id="champ-view-name">Campeonato</h1>
           <p id="champ-view-sub">Gestiona el calendario, los pilotos y los resultados</p>
         </div>
-        <button class="btn-secondary" id="btn-champ-settings-inline">✎ Configurar</button>
+        <!-- <button class="btn-secondary" id="btn-champ-settings-inline">✎ Configurar</button> -->
       </div>
 
       <!-- Enrolled players -->
@@ -311,7 +311,7 @@
             <label class="form-label">Módulos activos</label>
             <div class="checkbox-group">
               <label class="checkbox-label"><input type="checkbox" id="add-race-mod-weather" /> 🌧 Clima</label>
-              <label class="checkbox-label"><input type="checkbox" id="add-race-mod-sponsors" /> 💰 Patrocinadores</label>
+              <label class="checkbox-label"><input type="checkbox" id="add-race-mod-sponsors" /> 💰 Patrocinios</label>
               <label class="checkbox-label"><input type="checkbox" id="add-race-mod-press" /> 📷 Prensa</label>
             </div>
           </div>
@@ -337,11 +337,8 @@
           <label class="form-label">Ubicación de Cámaras de Prensa</label>
           <input class="form-input" id="add-race-press-input" type="text" placeholder="Ej: Curva A, Curvas B y D..." />
         </div>
-      </div>
 
-      <div class="form-section" id="add-race-setup-section" style="display:none">
-        <h3 class="form-section-title">5. Configuración del Setup</h3>
-        <div class="form-row">
+        <div id="add-race-setup-section" style="display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--border)">
           <div class="form-group">
             <label class="form-label">Cartas de patrocinio al inicio</label>
             <div class="number-selector-grid" id="add-race-setup-sponsors-grid">
@@ -351,8 +348,6 @@
               <div class="number-chip" data-val="3">3</div>
             </div>
           </div>
-        </div>
-        <div class="form-row">
           <div class="form-group">
             <label class="form-label">Ubicación de Cámaras de Prensa</label>
             <input class="form-input" id="add-race-setup-press-input" type="text" placeholder="Ej: Curva A, Curvas B y D..." />
@@ -496,7 +491,14 @@
 
 </div> <!-- #app -->
 
-<script src="data.js"></script>
+<script src="data/circuits.js"></script>
+<script src="data/weather.js"></script>
+<script src="data/game-basics.js"></script>
+<script src="data/upgrades.js"></script>
+<script src="data/sponsors.js"></script>
+<script src="data/points.js"></script>
+<script src="data/championships.js"></script>
+<script src="data-validation.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
