@@ -2185,152 +2185,11 @@ ul {
   border-radius: 999px;
 }
 
-/* ============================================
-   RESPONSIVE — mobile adjustments for new components
-   ============================================ */
-@media (max-width: 640px) {
-  .cal-race-actions { flex-direction: column; align-items: flex-end; gap: 4px; }
-  .cal-podium { display: none; }
-  .enrolled-players-list { gap: 8px; }
-}
 
 /* ============================================
    RESPONSIVE
    ============================================ */
 
-/* ---- TABLET (820px): icon-only sidebar ---- */
-@media (max-width: 820px) {
-  :root { --sidebar-w: 64px; }
-  .sidebar-logo { padding: 16px 0; justify-content: center; }
-  .logo-text, .championship-name, .championship-label,
-  .btn-edit-champ, .sidebar-data-actions { display: none; }
-  .nav-links { padding: 12px 6px; }
-  .nav-link span:not(.nav-icon) { display: none; }
-  .nav-link { justify-content: center; padding: 14px; }
-  .nav-link::after { display: none; }
-  .sidebar-championship { padding: 10px 0; align-items: center; }
-  .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
-  .view { padding: 24px 20px; }
-}
-
-/* ---- MOBILE (640px): bottom nav, full-screen modals ---- */
-@media (max-width: 640px) {
-  /* Sidebar as a drawer */
-  #sidebar { 
-    display: flex;
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    width: 280px;
-    z-index: 300;
-    transform: translateX(-100%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 20px 0 50px rgba(0,0,0,0.5);
-    border-right: 1px solid var(--border-bright);
-    background: var(--surface-1);
-  }
-  #sidebar.open {
-    transform: translateX(0);
-  }
-  /* Override tablet hides for the drawer */
-  #sidebar .logo-text, 
-  #sidebar .championship-name, 
-  #sidebar .championship-label,
-  #sidebar .btn-edit-champ, 
-  #sidebar .sidebar-data-actions,
-  #sidebar .nav-link span:not(.nav-icon) { 
-    display: flex !important; 
-  }
-  #sidebar .sidebar-logo { padding: 20px; justify-content: flex-start; }
-  #sidebar .nav-links { padding: 16px 12px; }
-  #sidebar .nav-link { justify-content: flex-start; }
-  
-  #sidebar .sidebar-close {
-    display: flex;
-    position: absolute;
-    top: 16px; right: 16px;
-    width: 32px; height: 32px;
-    background: var(--surface-3);
-    border-radius: 50%;
-    align-items: center; justify-content: center;
-    color: var(--text-muted);
-    font-size: 16px;
-    z-index: 5;
-  }
-  #main-content { width: 100%; }
-  .view {
-    padding: 20px 16px;
-    height: calc(100vh - 64px);
-    padding-bottom: 20px;
-  }
-
-  /* Show mobile nav */
-  #mobile-nav { display: flex; }
-
-  /* View header stacks */
-  .view-header {
-    flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
-    margin-bottom: 20px;
-  }
-  .view-header h1 { font-size: 24px; }
-  .view-header .btn-primary { width: 100%; text-align: center; }
-
-  /* Dashboard */
-  .dashboard-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
-  .stat-card { padding: 14px 10px; }
-  .stat-value { font-size: 24px; }
-  .stat-icon { font-size: 18px; margin-bottom: 6px; }
-  .section-card { padding: 16px; }
-
-  /* Players */
-  .players-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .player-card { padding: 16px 12px; }
-  .player-avatar { width: 48px; height: 48px; font-size: 20px; }
-  .player-name { font-size: 15px; }
-
-  /* Races */
-  .race-item-podium { display: none; }
-  .race-item-body { gap: 10px; padding: 12px 14px; }
-  .race-item-num { width: 40px; font-size: 18px; }
-
-  /* Modals: slide up from bottom */
-  .modal-overlay { align-items: flex-end; }
-  .modal, .modal-wide {
-    max-width: 100%;
-    width: 100%;
-    max-height: 92vh;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  }
-  .modal-body { padding: 16px; }
-  .modal-header { padding: 16px 16px 12px; }
-  .modal-footer { padding: 12px 16px; }
-
-  /* Forms */
-  .form-row { grid-template-columns: 1fr; gap: 0; }
-  .circuits-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .circuit-card { padding: 10px 8px; }
-  .circuit-name { font-size: 12px; }
-
-  /* Backdrop */
-  .sidebar-backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px);
-    z-index: 290;
-    animation: fadeIn 0.3s ease;
-  }
-  .sidebar-backdrop.active {
-    display: block;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-}
 
 @keyframes slideDrawer {
   from { transform: translateX(-100%); }
@@ -2491,4 +2350,132 @@ ul {
 
 .light-theme .bg-glow-overlay {
   background: radial-gradient(circle, rgba(230, 59, 46, 0.03) 0%, transparent 70%);
+}
+
+/* ============================================
+   RESPONSIVE — (Everything <= 820px)
+   ============================================ */
+@media (max-width: 820px) {
+  /* Sidebar as a drawer */
+  #sidebar { 
+    display: flex;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 280px;
+    z-index: 300;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+    border-right: 1px solid var(--border-bright);
+    background: var(--surface-1);
+    min-width: unset;
+  }
+  #sidebar.open {
+    transform: translateX(0);
+  }
+  
+  /* Shared overrides for the drawer to show full content */
+  #sidebar .logo-text, 
+  #sidebar .championship-name, 
+  #sidebar .championship-label,
+  #sidebar .btn-edit-champ, 
+  #sidebar .sidebar-data-actions,
+  #sidebar .nav-link span:not(.nav-icon) { 
+    display: flex !important; 
+  }
+  #sidebar .sidebar-logo { padding: 20px; justify-content: flex-start; }
+  #sidebar .nav-links { padding: 16px 12px; }
+  #sidebar .nav-link { justify-content: flex-start; padding: 10px 14px; }
+  #sidebar .nav-link::after { display: block; } /* Restore indicators in drawer */
+  
+  #sidebar .sidebar-close {
+    display: flex;
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 32px; height: 32px;
+    background: var(--surface-3);
+    border-radius: 50%;
+    align-items: center; justify-content: center;
+    color: var(--text-muted);
+    font-size: 16px;
+    z-index: 5;
+  }
+
+  #main-content { width: 100%; flex: 1; }
+  .view {
+    padding: 20px 16px;
+    height: calc(100vh - 64px);
+    padding-bottom: 20px;
+  }
+
+  /* Show mobile nav */
+  #mobile-nav { display: flex; }
+
+  /* View header stacks */
+  .view-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  .view-header h1 { font-size: 24px; }
+  .view-header .btn-primary { width: 100%; text-align: center; }
+
+  /* Grid adjustments */
+  .dashboard-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+  .stat-card { padding: 14px 10px; }
+  .stat-value { font-size: 24px; }
+  .stat-icon { font-size: 18px; margin-bottom: 6px; }
+  .section-card { padding: 16px; }
+
+  /* Players */
+  .players-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .player-card { padding: 16px 12px; }
+  .player-avatar { width: 48px; height: 48px; font-size: 20px; }
+  .player-name { font-size: 15px; }
+
+  /* Races */
+  .cal-race-actions { flex-direction: column; align-items: flex-end; gap: 4px; }
+  .cal-podium { display: none; }
+  .enrolled-players-list { gap: 8px; }
+  .race-item-podium { display: none; }
+  .race-item-body { gap: 10px; padding: 12px 14px; }
+  .race-item-num { width: 40px; font-size: 18px; }
+
+  /* Modals: slide up from bottom */
+  .modal-overlay { align-items: flex-end; }
+  .modal, .modal-wide {
+    max-width: 100%;
+    width: 100%;
+    max-height: 92vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+  .modal-body { padding: 16px; }
+  .modal-header { padding: 16px 16px 12px; }
+  .modal-footer { padding: 12px 16px; }
+
+  /* Forms */
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+  .circuits-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .circuit-card { padding: 10px 8px; }
+  .circuit-name { font-size: 12px; }
+
+  /* Backdrop */
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 290;
+    animation: fadeIn 0.3s ease;
+  }
+  .sidebar-backdrop.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 }
