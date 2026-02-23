@@ -13,7 +13,9 @@
 <div id="app">
 
   <!-- ========== SIDEBAR ========== -->
+  <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
   <nav id="sidebar">
+    <button id="btn-close-sidebar" class="sidebar-close">✕</button>
     <div class="sidebar-logo">
       <div class="logo-icon">🏎</div>
       <div class="logo-text">
@@ -420,23 +422,12 @@
   <a href="#" class="mobile-nav-item" data-view="standings" id="mnav-standings">
     <span class="mnav-icon">📊</span><span class="mnav-label">Tabla</span>
   </a>
-  <button class="mobile-nav-item" id="mnav-more">
-    <span class="mnav-icon">⚙️</span><span class="mnav-label">Más</span>
+  <button class="mobile-nav-item" id="mnav-menu-btn">
+    <span class="mnav-icon">☰</span><span class="mnav-label">Menú</span>
   </button>
 </nav>
 
-<!-- MOBILE MORE SHEET -->
-<div id="mobile-more-sheet">
-  <div class="mobile-sheet-backdrop" id="mobile-sheet-backdrop"></div>
-  <div class="mobile-sheet">
-    <div class="mobile-sheet-handle"></div>
-    <button class="mobile-sheet-btn" id="mobile-btn-champ">✎ &nbsp;Configurar campeonato</button>
-    <button class="mobile-sheet-btn" id="mobile-btn-theme">🌙 &nbsp;Modo claro/oscuro</button>
-    <button class="mobile-sheet-btn" id="mobile-btn-export">⬇ &nbsp;Exportar a JSON</button>
-    <button class="mobile-sheet-btn import-btn" id="mobile-btn-import">⬆ &nbsp;Importar JSON</button>
-    <button class="mobile-sheet-btn" id="mobile-btn-reset" style="color:var(--heat-red);border-color:rgba(230,59,46,0.25)">⚠ &nbsp;Resetear datos...</button>
-  </div>
-</div>
+<!-- MOBILE MORE SHEET is now replaced by the Sidebar Drawer -->
 
 <!-- Historic championships list -->
 <div id="modal-champ-templates" class="modal-overlay" style="display:none">

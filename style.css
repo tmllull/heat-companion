@@ -110,6 +110,9 @@ ul {
   position: relative;
   z-index: 10;
 }
+.sidebar-close {
+  display: none;
+}
 
 /* Decorative top bar */
 #sidebar::before {
@@ -2212,8 +2215,47 @@ ul {
 
 /* ---- MOBILE (640px): bottom nav, full-screen modals ---- */
 @media (max-width: 640px) {
-  /* Hide desktop sidebar entirely */
-  #sidebar { display: none; }
+  /* Sidebar as a drawer */
+  #sidebar { 
+    display: flex;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 280px;
+    z-index: 300;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+    border-right: 1px solid var(--border-bright);
+    background: var(--surface-1);
+  }
+  #sidebar.open {
+    transform: translateX(0);
+  }
+  /* Override tablet hides for the drawer */
+  #sidebar .logo-text, 
+  #sidebar .championship-name, 
+  #sidebar .championship-label,
+  #sidebar .btn-edit-champ, 
+  #sidebar .sidebar-data-actions,
+  #sidebar .nav-link span:not(.nav-icon) { 
+    display: flex !important; 
+  }
+  #sidebar .sidebar-logo { padding: 20px; justify-content: flex-start; }
+  #sidebar .nav-links { padding: 16px 12px; }
+  #sidebar .nav-link { justify-content: flex-start; }
+  
+  #sidebar .sidebar-close {
+    display: flex;
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 32px; height: 32px;
+    background: var(--surface-3);
+    border-radius: 50%;
+    align-items: center; justify-content: center;
+    color: var(--text-muted);
+    font-size: 16px;
+    z-index: 5;
+  }
   #main-content { width: 100%; }
   .view {
     padding: 20px 16px;
@@ -2270,9 +2312,29 @@ ul {
   .circuit-card { padding: 10px 8px; }
   .circuit-name { font-size: 12px; }
 
-  /* Results */
-  .result-row { gap: 8px; padding: 10px; }
-  .result-pts-preview { display: none; }
+  /* Backdrop */
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 290;
+    animation: fadeIn 0.3s ease;
+  }
+  .sidebar-backdrop.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+@keyframes slideDrawer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
 }
 
 /* ============================================

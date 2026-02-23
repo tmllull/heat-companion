@@ -151,6 +151,9 @@ function navigateTo(viewName) {
   if (link)  link.classList.add('active');
   if (mlink) mlink.classList.add('active');
 
+  // Close mobile sidebar if open
+  closeMobileSidebar();
+
   renderView(viewName);
 }
 
@@ -197,9 +200,15 @@ function renderManual() {
   `).join('');
 }
 
-// ---- MOBILE MORE SHEET ----
-function openMoreSheet()  { document.getElementById('mobile-more-sheet').style.display = 'block'; }
-function closeMoreSheet() { document.getElementById('mobile-more-sheet').style.display = 'none'; }
+// ---- MOBILE SIDEBAR DRAWER ----
+function openMobileSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-backdrop').classList.add('active');
+}
+function closeMobileSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-backdrop').classList.remove('active');
+}
 
 // ============================================================
 //  RENDER: DASHBOARD
@@ -1268,9 +1277,9 @@ document.addEventListener('click', e => {
   const recentRow = e.target.closest('.recent-race-row');
   if (recentRow) { openRaceDetailModal(recentRow.dataset.calRaceId); return; }
 
-  // Mobile more sheet
-  if (e.target.closest('#mnav-more')) { openMoreSheet(); return; }
-  if (e.target.closest('#mobile-sheet-backdrop')) { closeMoreSheet(); return; }
+  // Mobile sidebar
+  if (e.target.closest('#mnav-menu-btn')) { openMobileSidebar(); return; }
+  if (e.target.closest('#sidebar-backdrop') || e.target.closest('#btn-close-sidebar')) { closeMobileSidebar(); return; }
 });
 
 // Keyboard shortcuts
@@ -1429,14 +1438,10 @@ function init() {
   document.getElementById('btn-show-champ-templates').addEventListener('click', openChampTemplatesModal);
   document.getElementById('btn-reset-championship').addEventListener('click', resetChampionship);
 
-  // Mobile more sheet buttons
-  document.getElementById('mnav-more').addEventListener('click', openMoreSheet);
-  document.getElementById('mobile-sheet-backdrop').addEventListener('click', closeMoreSheet);
-  document.getElementById('mobile-btn-champ').addEventListener('click',  () => { closeMoreSheet(); openChampModal(); });
-  document.getElementById('mobile-btn-theme').addEventListener('click',  () => { toggleTheme(); closeMoreSheet(); });
-  document.getElementById('mobile-btn-export').addEventListener('click', () => { closeMoreSheet(); exportData(); });
-  document.getElementById('mobile-btn-import').addEventListener('click', () => { closeMoreSheet(); document.getElementById('import-file-input').click(); });
-  document.getElementById('mobile-btn-reset').addEventListener('click',  () => { closeMoreSheet(); openModal('modal-reset'); });
+  // Mobile sidebar controls
+  document.getElementById('mnav-menu-btn').addEventListener('click', openMobileSidebar);
+  document.getElementById('sidebar-backdrop').addEventListener('click', closeMobileSidebar);
+  document.getElementById('btn-close-sidebar').addEventListener('click', closeMobileSidebar);
 
   // Theme support
   document.getElementById('btn-theme-toggle').addEventListener('click', toggleTheme);
@@ -1458,11 +1463,9 @@ function applyTheme(theme) {
   if (theme === 'light') {
     document.body.classList.add('light-theme');
     document.getElementById('btn-theme-toggle').innerHTML = '☀️ Modo';
-    document.getElementById('mobile-btn-theme').innerHTML = '<span>☀️</span> Modo claro/oscuro';
   } else {
     document.body.classList.remove('light-theme');
     document.getElementById('btn-theme-toggle').innerHTML = '🌙 Modo';
-    document.getElementById('mobile-btn-theme').innerHTML = '<span>🌙</span> Modo claro/oscuro';
   }
   localStorage.setItem('heat-theme', theme);
 }
