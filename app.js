@@ -52,7 +52,7 @@ function loadState() {
         mods: r.mods || { garage: true, weather: false, sponsors: false },
         status: r.results?.length ? 'completed' : 'scheduled',
         results: (r.results || []).map(res => ({
-          playerId: res.playerId, position: res.position
+          playerId: res.playerId, position: res.position, dnf: res.dnf || false
         }))
       }));
       return migrated;
@@ -82,6 +82,10 @@ function getPoints(position) {
 
 function getPlayerById(id)  { return state.players.find(p => p.id === id); }
 function getCircuitById(id) { return CIRCUITS.find(c => c.id === id); }
+function getCircuitName(circuit) {
+  if (!circuit) return '—';
+  return circuit.name || circuit.country || '—';
+}
 function getUpgradeById(id) { 
   return UPGRADES.find(u => u.id === id) || SPONSORS.find(s => s.id === id); 
 }
@@ -195,7 +199,10 @@ function renderManual() {
         <span class="manual-item-icon">${w.emoji}</span>
         <span class="manual-item-name">${w.name}</span>
       </div>
-      <div class="manual-item-effect-pill">${w.effect}</div>
+      <div class="manual-item-effect">
+        <div class="weather-prep"><strong>Preparación:</strong> ${w.effect.preparation}</div>
+        <div class="weather-track"><strong>Pista:</strong> ${w.effect.trackEffect}</div>
+      </div>
     </div>
   `).join('');
 }
@@ -262,8 +269,11 @@ function renderDashboard() {
       return `<div class="recent-race-row" data-cal-race-id="${race.id}">
         <div class="race-flag">${circuit?.flag || '🏁'}</div>
         <div class="race-info">
-          <div class="race-info-name">${escHtml(circuit?.name || '?')}</div>
-          <div class="race-info-date">${formatDate(race.date)}</div>
+          <div class="race-info-name">${escHtml(getCircuitName(circuit))}</div>
+          <div class="race-info-meta">
+            <span class="race-info-date">${formatDate(race.date)}</span>
+            <span class="race-info-laps">🏁 ${race.laps || 3} vueltas</span>
+          </div>
         </div>
         ${isPending
           ? `<span class="race-status-badge pending">Pendiente</span>`
@@ -319,14 +329,7 @@ function renderChampionship() {
       const mods      = [];
       if (race.mods?.weather) {
         const wOpt = WEATHER_OPTIONS.find(w => w.id === race.weatherType);
-        mods.push(wOpt?.emoji || '🌧');
-      }
-      if (race.mods?.sponsors) {
-        const count = race.sponsorCards || 1;
-        mods.push(`💰${count}`);
-      }
-      if (race.mods?.press) {
-        mods.push('📷');
+        mods.push(`${wOpt?.emoji || '🌧'} ${wOpt?.name || 'Clima'}`);
       }
 
       let podiumHtml = '';
@@ -352,8 +355,11 @@ function renderChampionship() {
         </div>
         <div class="cal-race-flag">${circuit?.flag || '🏁'}</div>
         <div class="cal-race-info">
-          <div class="cal-race-name">${escHtml(circuit?.name || 'Circuito desconocido')}</div>
+          <div class="cal-race-name">${escHtml(race.event || getCircuitName(circuit))}</div>
           <div class="cal-race-meta">
+            <span>🏁 Vueltas: ${race.laps || 3}</span>
+            ${race.setup?.sponsors !== undefined ? `<span>📋 Patrocinios: ${race.setup.sponsors}</span>` : ''}
+            ${race.setup?.press ? `<span>🎥 Prensa: ${race.setup.press}</span>` : ''}
             ${mods.length ? `<span class="cal-mods">${mods.join(' ')}</span>` : '<span style="color:var(--text-dim)">Sin módulos</span>'}
           </div>
           ${podiumHtml}
@@ -780,6 +786,7 @@ function toggleEnrollPlayer(playerId) {
 let addRaceSelectedCircuit = null;
 let addRaceSelectedWeather = 'sun';
 let addRaceSelectedSponsors = 1;
+let addRaceSelectedLaps = 3;
 let editingRaceId = null;
 
 function openAddRaceModal(raceId = null) {
@@ -789,8 +796,12 @@ function openAddRaceModal(raceId = null) {
   addRaceSelectedCircuit = race ? race.circuitId : null;
   addRaceSelectedWeather = race ? (race.weatherType || 'sun') : 'sun';
   addRaceSelectedSponsors = race ? (race.sponsorCards || 0) : 1;
+  addRaceSelectedLaps = race ? (race.laps || 3) : 3;
   
   document.getElementById('modal-add-race-title').textContent = raceId ? 'Editar carrera' : 'Añadir carrera al calendario';
+  document.getElementById('add-race-laps-input').value = addRaceSelectedLaps;
+  document.getElementById('add-race-event-input').value = race ? (race.event || '') : '';
+  document.getElementById('add-race-rules-input').value = race ? (race.rules || '') : '';
   
   const hasWeather = race ? !!race.mods?.weather : false;
   const hasSponsors = race ? !!race.mods?.sponsors : false;
@@ -803,22 +814,29 @@ function openAddRaceModal(raceId = null) {
   document.getElementById('add-race-weather-section').style.display = hasWeather ? 'block' : 'none';
   document.getElementById('add-race-sponsors-section').style.display = hasSponsors ? 'block' : 'none';
   document.getElementById('add-race-press-section').style.display = hasPress ? 'block' : 'none';
+  document.getElementById('add-race-setup-section').style.display = hasSponsors ? 'block' : 'none';
   document.getElementById('add-race-press-input').value = race ? (race.press || '') : '';
 
-  // Reset chips
-  document.querySelectorAll('#add-race-sponsors-grid .number-chip').forEach(c => {
-    c.classList.toggle('selected', parseInt(c.dataset.val) === 1);
-  });
+  // Setup configuration (only when sponsors module is active)
+  if (hasSponsors) {
+    const setupSponsors = race ? (race.setup?.sponsors || 0) : 1;
+    const setupPress = race ? (race.setup?.press || '') : '';
+    document.querySelectorAll('#add-race-setup-sponsors-grid .number-chip').forEach(c => {
+      c.classList.toggle('selected', parseInt(c.dataset.val) === setupSponsors);
+    });
+    document.getElementById('add-race-setup-press-input').value = setupPress;
+  }
 
   // render circuits
   const grid = document.getElementById('add-race-circuits-grid');
   grid.innerHTML = CIRCUITS.map(c => `
     <div class="circuit-card ${c.id === addRaceSelectedCircuit ? 'selected' : ''}" data-circuit="${c.id}">
       <div class="circuit-flag">${c.flag}</div>
-      <div class="circuit-name">${c.name}</div>
+      <div class="circuit-name">${c.name || c.country}</div>
       <div class="circuit-info-stats">
         <span>⤵ ${c.curves} curvas</span>
         <span>📏 ${c.spaces} casillas</span>
+        <span>🏁 ${c.laps} vueltas</span>
       </div>
       <div class="circuit-info-footer">
         <span class="diff-badge ${c.difficulty.toLowerCase()}">${c.difficulty}</span>
@@ -832,7 +850,10 @@ function openAddRaceModal(raceId = null) {
     <div class="weather-card ${w.id === addRaceSelectedWeather ? 'selected' : ''}" data-weather="${w.id}">
       <div class="weather-card-emoji">${w.emoji}</div>
       <div class="weather-card-name">${w.name}</div>
-      <div class="weather-card-effect">${w.effect}</div>
+      <div class="weather-card-effect">
+        <div><strong>Prep:</strong> ${w.effect.preparation}</div>
+        <div><strong>Pista:</strong> ${w.effect.trackEffect}</div>
+      </div>
     </div>`).join('');
 
   openModal('modal-add-race');
@@ -844,6 +865,7 @@ document.getElementById('add-race-mod-weather').addEventListener('change', e => 
 
 document.getElementById('add-race-mod-sponsors').addEventListener('change', e => {
   document.getElementById('add-race-sponsors-section').style.display = e.target.checked ? 'block' : 'none';
+  document.getElementById('add-race-setup-section').style.display = e.target.checked ? 'block' : 'none';
 });
 
 document.getElementById('add-race-mod-press').addEventListener('change', e => {
@@ -866,12 +888,30 @@ document.getElementById('add-race-sponsors-grid').addEventListener('click', e =>
   chip.classList.add('selected');
 });
 
+document.getElementById('add-race-setup-sponsors-grid').addEventListener('click', e => {
+  const chip = e.target.closest('.number-chip');
+  if (!chip) return;
+  const val = parseInt(chip.dataset.val);
+  document.querySelectorAll('#add-race-setup-sponsors-grid .number-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+});
+
 document.getElementById('add-race-circuits-grid').addEventListener('click', e => {
   const card = e.target.closest('.circuit-card');
   if (!card) return;
   addRaceSelectedCircuit = card.dataset.circuit;
+  // Auto-fill laps from circuit data
+  const circuit = getCircuitById(card.dataset.circuit);
+  if (circuit) {
+    addRaceSelectedLaps = circuit.laps;
+    document.getElementById('add-race-laps-input').value = circuit.laps;
+  }
   document.querySelectorAll('#add-race-circuits-grid .circuit-card').forEach(c => c.classList.remove('selected'));
   card.classList.add('selected');
+});
+
+document.getElementById('add-race-laps-input').addEventListener('change', e => {
+  addRaceSelectedLaps = parseInt(e.target.value) || 3;
 });
 
 document.getElementById('btn-save-cal-race').addEventListener('click', () => {
@@ -883,6 +923,9 @@ document.getElementById('btn-save-cal-race').addEventListener('click', () => {
   
   const raceData = {
     circuitId: addRaceSelectedCircuit,
+    laps: addRaceSelectedLaps,
+    event: document.getElementById('add-race-event-input').value.trim(),
+    rules: document.getElementById('add-race-rules-input').value.trim(),
     mods: {
       garage:   true, 
       weather:  isWeatherActive,
@@ -891,7 +934,11 @@ document.getElementById('btn-save-cal-race').addEventListener('click', () => {
     },
     weatherType: isWeatherActive ? addRaceSelectedWeather : 'sun',
     sponsorCards: isSponsorsActive ? addRaceSelectedSponsors : 0,
-    press: isPressActive ? document.getElementById('add-race-press-input').value.trim() : ''
+    press: isPressActive ? document.getElementById('add-race-press-input').value.trim() : '',
+    setup: isSponsorsActive ? {
+      sponsors: parseInt(document.querySelector('#add-race-setup-sponsors-grid .number-chip.selected')?.dataset.val || '1'),
+      press: document.getElementById('add-race-setup-press-input').value.trim()
+    } : { sponsors: 0, press: '' }
   };
 
   if (editingRaceId) {
@@ -931,7 +978,7 @@ function openResultsModal(raceId) {
 
   const circuit = getCircuitById(race.circuitId);
   document.getElementById('modal-results-title').textContent =
-    `Registrar resultado — ${circuit?.flag || ''} ${circuit?.name || 'Carrera'}`;
+    `Registrar resultado — ${circuit?.flag || ''} ${getCircuitName(circuit)}`;
 
   // Build starting order: if already has results, use them; else standings order
   if (race.status === 'completed' && race.results.length > 0) {
@@ -1033,7 +1080,7 @@ function openRaceDetailModal(raceId) {
 
   const circuit = getCircuitById(race.circuitId);
   document.getElementById('detail-race-title').textContent =
-    `${circuit?.flag || '🏁'} ${circuit?.name || 'Carrera'}`;
+    `${circuit?.flag || '🏁'} ${getCircuitName(circuit)}`;
 
   const activeMods = [];
   if (race.mods?.weather) {
@@ -1044,8 +1091,8 @@ function openRaceDetailModal(raceId) {
     const count = race.sponsorCards || 1;
     activeMods.push(`💰 Patrocinadores (${count})`);
   }
-  if (race.mods?.press) {
-    activeMods.push(`📷 Prensa (${race.press || 'Instalada'})`);
+  if (race.mods?.press && race.setup?.press) {
+    activeMods.push(`📷 Prensa (${race.setup.press})`);
   }
 
   // Build upgrades section for enrolled players
@@ -1079,14 +1126,28 @@ function openRaceDetailModal(raceId) {
     : '<div style="color:var(--text-dim);font-size:13px;padding:12px">Carrera aún no disputada.</div>';
 
   const wOpt = race.mods?.weather ? WEATHER_OPTIONS.find(w => w.id === race.weatherType) : null;
-  const weatherBanner = wOpt ? `
-    <div style="margin-top:8px; padding:8px 12px; background:rgba(249,115,22,0.05); border:1px solid rgba(249,115,22,0.2); border-radius:var(--radius-sm); display:flex; align-items:center; gap:10px">
-      <span style="font-size:20px">${wOpt.emoji}</span>
-      <div>
-        <div style="font-size:13px; font-weight:600">Clima: ${wOpt.name}</div>
-        <div style="font-size:11px; color:var(--text-muted)">Efecto: ${wOpt.effect}</div>
-      </div>
-    </div>` : '';
+  
+  let moduleBannerHtml = '';
+  if (wOpt || race.setup?.sponsors !== undefined || race.setup?.press) {
+    let bannerContent = '';
+    if (wOpt) {
+      bannerContent += `
+        <div style="margin-bottom:8px">
+          <div style="font-size:13px; font-weight:600"><span style="font-size:16px">${wOpt.emoji}</span> Clima: ${wOpt.name}</div>
+          <div style="font-size:11px; color:var(--text-muted); margin-left:24px">Efecto: ${wOpt.effect}</div>
+        </div>`;
+    }
+    if (race.setup?.sponsors !== undefined) {
+      bannerContent += `<div style="font-size:13px"><span style="font-weight:600">📋 Patrocinios:</span> ${race.setup.sponsors}</div>`;
+    }
+    if (race.setup?.press) {
+      bannerContent += `<div style="font-size:13px"><span style="font-weight:600">🎥 Prensa:</span> ${race.setup.press}</div>`;
+    }
+    moduleBannerHtml = `
+    <div style="margin-top:8px; padding:8px 12px; background:rgba(139,92,246,0.05); border:1px solid rgba(139,92,246,0.2); border-radius:var(--radius-sm)">
+      ${bannerContent}
+    </div>`;
+  }
 
   const historicHtml = race.event ? `
     <div class="detail-section">
@@ -1094,7 +1155,10 @@ function openRaceDetailModal(raceId) {
       <div class="historic-event-card">
         <div class="historic-event-title">${race.event}</div>
         <div class="historic-event-rules"><strong>Reglas</strong><br>${race.rules}</div>
-        <div class="historic-event-setup"><strong>Setup</strong><br>${race.setup}</div>
+        <div class="historic-event-setup"><strong>Setup</strong><br>
+          📋 Patrocinadores: ${race.setup.sponsors}<br>
+          🎥 Prensa: ${race.setup.press}
+        </div>
       </div>
     </div>` : '';
 
@@ -1105,22 +1169,18 @@ function openRaceDetailModal(raceId) {
       <div class="detail-circuit-card">
         <div class="detail-circuit-flag">${circuit?.flag || '🏁'}</div>
         <div style="flex:1">
-          <div class="detail-circuit-name">${circuit?.name || '—'}</div>
+          <div class="detail-circuit-name">${getCircuitName(circuit)}</div>
           <div class="detail-circuit-meta-row">
             <span>${circuit?.country || ''} · ${circuit?.expansion || ''}</span>
             <span class="diff-badge ${circuit?.difficulty?.toLowerCase() || ''}">${circuit?.difficulty || ''}</span>
           </div>
           <div class="detail-circuit-stats-row">
-            <span>⤵ ${circuit?.curves || 0} curvas · 📏 ${circuit?.spaces || 0} casillas</span>
+            <span>⤵ ${circuit?.curves || 0} curvas · 📏 ${circuit?.spaces || 0} casillas · 🏁 ${race.laps || circuit?.laps || 3} vueltas</span>
           </div>
         </div>
       </div>
-      ${weatherBanner}
+      ${moduleBannerHtml}
     </div>
-    ${activeMods.length ? `<div class="detail-section">
-      <h3>Módulos activos</h3>
-      <div class="modules-list">${activeMods.map(m => `<span class="module-badge">${m}</span>`).join('')}</div>
-    </div>` : ''}
     ${upgradesHtml ? `<div class="detail-section">
       <h3>Mejoras de pilotos</h3>
       <div class="detail-upgrades-grid">${upgradesHtml}</div>
@@ -1140,7 +1200,7 @@ document.getElementById('btn-delete-race').addEventListener('click', function ()
   const raceId = this.dataset.raceId;
   const race   = state.championship.calendar.find(r => r.id === raceId);
   const circuit = getCircuitById(race?.circuitId);
-  if (!confirm(`¿Eliminar la carrera en ${circuit?.name || 'este circuito'}?`)) return;
+  if (!confirm(`¿Eliminar la carrera en ${getCircuitName(circuit)}?`)) return;
   state.championship.calendar = state.championship.calendar.filter(r => r.id !== raceId);
   saveState();
   closeModal('modal-race-detail');
@@ -1212,7 +1272,7 @@ document.addEventListener('click', e => {
     const raceId  = delRaceBtn.dataset.deleteCalRace;
     const race    = state.championship.calendar.find(r => r.id === raceId);
     const circuit = getCircuitById(race?.circuitId);
-    if (!confirm(`¿Eliminar la carrera en ${circuit?.name || 'este circuito'}?`)) return;
+    if (!confirm(`¿Eliminar la carrera en ${getCircuitName(circuit)}?`)) return;
     state.championship.calendar = state.championship.calendar.filter(r => r.id !== raceId);
     saveState();
     renderView('championship');
@@ -1400,11 +1460,11 @@ function loadChampTemplate(tid) {
     id: uid(),
     circuitId: r.circuitId,
     date: new Date().toISOString().slice(0, 10),
-    mods: r.mods || { weather: false, sponsors: false },
+    mods: r.mods || { weather: false, sponsors: false, press: false },
     weatherType: r.weatherType || 'sun',
     event: r.event || '',
     rules: r.rules || '',
-    setup: r.setup || '',
+    setup: r.setup || { sponsors: 0, press: '' },
     status: 'scheduled',
     results: []
   }));

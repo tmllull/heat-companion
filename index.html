@@ -279,7 +279,33 @@
       </div>
 
       <div class="form-section">
-        <h3 class="form-section-title">2. Opciones</h3>
+        <h3 class="form-section-title">2. Evento</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nombre del evento</label>
+            <input class="form-input" id="add-race-event-input" type="text" placeholder="Ej: Gran Premio de España, Carrera Nocturna..." />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Reglas especiales</label>
+            <textarea class="form-input" id="add-race-rules-input" rows="3" placeholder="Reglas específicas de esta carrera..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3 class="form-section-title">3. Vueltas</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Número de vueltas</label>
+            <input class="form-input" id="add-race-laps-input" type="number" min="1" max="10" value="3" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3 class="form-section-title">4. Opciones</h3>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Módulos activos</label>
@@ -310,6 +336,27 @@
         <div id="add-race-press-section" style="display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--border)">
           <label class="form-label">Ubicación de Cámaras de Prensa</label>
           <input class="form-input" id="add-race-press-input" type="text" placeholder="Ej: Curva A, Curvas B y D..." />
+        </div>
+      </div>
+
+      <div class="form-section" id="add-race-setup-section" style="display:none">
+        <h3 class="form-section-title">5. Configuración del Setup</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Cartas de patrocinio al inicio</label>
+            <div class="number-selector-grid" id="add-race-setup-sponsors-grid">
+              <div class="number-chip" data-val="0">0</div>
+              <div class="number-chip selected" data-val="1">1</div>
+              <div class="number-chip" data-val="2">2</div>
+              <div class="number-chip" data-val="3">3</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Ubicación de Cámaras de Prensa</label>
+            <input class="form-input" id="add-race-setup-press-input" type="text" placeholder="Ej: Curva A, Curvas B y D..." />
+          </div>
         </div>
       </div>
     </div>
