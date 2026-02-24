@@ -121,10 +121,10 @@ function getStandings() {
       const races = state.championship.calendar.filter(r => r.status === 'completed');
       const points = races.reduce((sum, r) => {
         const res = r.results.find(x => x.playerId === p.id);
-        return sum + (res ? getPoints(res.position) : 0);
+        return sum + (res ? (res.dnf ? 0 : getPoints(res.position)) : 0);
       }, 0);
-      const wins   = races.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position === 1; }).length;
-      const podiums = races.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position <= 3; }).length;
+      const wins   = races.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position === 1 && !res.dnf; }).length;
+      const podiums = races.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position <= 3 && !res.dnf; }).length;
       const raceCount = races.filter(r => r.results.some(x => x.playerId === p.id)).length;
       return { player: p, points, wins, podiums, races: raceCount };
     })
@@ -468,7 +468,7 @@ function renderPlayers() {
   grid.innerHTML = state.players.map(p => {
     const points  = state.championship.calendar
       .filter(r => r.status === 'completed')
-      .reduce((sum, r) => { const res = r.results.find(x => x.playerId === p.id); return sum + (res ? getPoints(res.position) : 0); }, 0);
+      .reduce((sum, r) => { const res = r.results.find(x => x.playerId === p.id); return sum + (res ? (res.dnf ? 0 : getPoints(res.position)) : 0); }, 0);
     const enrolled = state.championship.playerIds.includes(p.id);
 
     const upgBadges = (p.upgrades || []).map(uid => {
@@ -524,8 +524,10 @@ function renderStandings() {
     const racePts = completedRaces.map(r => {
       const res = r.results.find(x => x.playerId === s.player.id);
       if (!res) return '<td style="text-align:center"><span style="color:var(--text-dim)">—</span></td>';
-      const p = getPoints(res.position);
-      return `<td><span class="race-pts-cell">${p}</span></td>`;
+      const p = res.dnf ? 0 : getPoints(res.position);
+      const display = res.dnf ? 'DNF' : p.toString();
+      const style = res.dnf ? 'color:var(--text-dim);font-style:italic' : '';
+      return `<td><span class="race-pts-cell" style="${style}">${display}</span></td>`;
     }).join('');
 
     return `<tr>
@@ -976,16 +978,16 @@ function openResultsModal(raceId) {
 
   // Build starting order: if already has results, use them; else standings order
   if (race.status === 'completed' && race.results.length > 0) {
-    resultsOrder = race.results.map(r => ({ playerId: r.playerId }));
+    resultsOrder = race.results.map(r => ({ playerId: r.playerId, dnf: r.dnf || false }));
     // add any enrolled players not in results
     enrolledPlayers().forEach(p => {
-      if (!resultsOrder.find(r => r.playerId === p.id)) resultsOrder.push({ playerId: p.id });
+      if (!resultsOrder.find(r => r.playerId === p.id)) resultsOrder.push({ playerId: p.id, dnf: false });
     });
   } else {
     const standing = getStandings();
     const ep = enrolledPlayers();
     // prefer standings order, fallback to enrolled order
-    resultsOrder = ep.map(p => ({ playerId: p.id }));
+    resultsOrder = ep.map(p => ({ playerId: p.id, dnf: false }));
   }
 
   renderResultsSortable();
@@ -1000,12 +1002,18 @@ function renderResultsSortable() {
     const player = getPlayerById(entry.playerId);
     if (!player) return '';
     const pos   = i + 1;
-    const earnedPts = pts[i] ?? 0;
+    const earnedPts = entry.dnf ? 0 : (pts[i] ?? 0);
     return `<div class="result-row" draggable="true" data-player-id="${entry.playerId}" data-idx="${i}">
       <div class="result-pos pos-${pos <= 3 ? pos : ''}">${pos}º</div>
       <div class="result-avatar" style="background:${player.color}">${escHtml(player.icon || initials(player.name))}</div>
       <div class="result-name">${escHtml(player.name)}</div>
       <div class="result-pts-preview" id="rpts-${i}">${earnedPts + ' pts'}</div>
+      <div class="result-dnf-container">
+        <label class="checkbox-label">
+          <input type="checkbox" class="result-dnf-checkbox" data-idx="${i}" ${entry.dnf ? 'checked' : ''}>
+          DNF
+        </label>
+      </div>
       <div class="result-move-btns">
         <button class="result-move-btn" data-move="up" data-idx="${i}">▲</button>
         <button class="result-move-btn" data-move="down" data-idx="${i}">▼</button>
@@ -1015,7 +1023,18 @@ function renderResultsSortable() {
 
   setupResultsDragDrop('results-sortable-list', resultsOrder, () => renderResultsSortable());
 
-
+  // Add DNF checkbox event listeners
+  list.querySelectorAll('.result-dnf-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      const idx = parseInt(checkbox.dataset.idx);
+      resultsOrder[idx].dnf = checkbox.checked;
+      // Update points preview
+      const ptsPreview = document.getElementById(`rpts-${idx}`);
+      const earnedPts = checkbox.checked ? 0 : (getPointsArray()[idx] ?? 0);
+      ptsPreview.textContent = earnedPts + ' pts';
+      ptsPreview.style.color = checkbox.checked ? 'var(--text-dim)' : '';
+    });
+  });
 
   list.querySelectorAll('.result-move-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1054,7 +1073,8 @@ document.getElementById('btn-save-results').addEventListener('click', () => {
 
   race.results = resultsOrder.map((entry, i) => ({
     playerId: entry.playerId,
-    position: i + 1
+    position: i + 1,
+    dnf: entry.dnf || false
   }));
   race.status = 'completed';
 
