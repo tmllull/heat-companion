@@ -73,6 +73,8 @@ function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
+let themeToggleTimeout = null;
+
 // Helper function to get event data by ID
 function getEventById(eventId) {
   if (!eventId || !window.RACE_EVENTS) return null;
@@ -109,7 +111,9 @@ function getRaceEventData(race) {
 function bindGlobalButtons() {
   const themeBtn = document.getElementById('btn-theme-toggle');
   if (themeBtn) {
-    themeBtn.addEventListener('click', () => {
+    themeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       toggleTheme();
       showToast('Tema cambiado');
     });
@@ -1606,6 +1610,11 @@ function init() {
     const versionEl = document.getElementById('sidebar-version-label');
     if (versionEl) versionEl.textContent = 'v' + window.APP_META.version;
   }
+  
+  // Apply saved theme on init
+  const savedTheme = localStorage.getItem('heat-theme');
+  applyTheme(savedTheme || 'dark');
+  
   renderSidebarChamp();
   navigateTo('dashboard');
 
@@ -1630,9 +1639,17 @@ function init() {
 }
 
 function toggleTheme() {
-  const current = document.body.classList.contains('light-theme') ? 'light' : 'dark';
-  const target = current === 'dark' ? 'light' : 'dark';
-  applyTheme(target);
+  // Clear existing timeout
+  if (themeToggleTimeout) {
+    clearTimeout(themeToggleTimeout);
+  }
+  
+  // Throttle to prevent multiple rapid executions
+  themeToggleTimeout = setTimeout(() => {
+    const current = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+    const target = current === 'dark' ? 'light' : 'dark';
+    applyTheme(target);
+  }, 50); // 50ms delay
 }
 
 function applyTheme(theme) {
