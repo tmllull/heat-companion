@@ -170,6 +170,10 @@
         <div>
           <h1>Manual de Referencia</h1>
           <p>Consulta las reglas rápidas de Clima, Motor Forzado y Estrés</p>
+          <div class="manual-downloads">
+            <a href="data/Rules-ES.pdf" download class="btn btn-secondary" target="_blank">📄 Descargar Manual Básico</a>
+            <a href="data/RulesAdvanced-ES.pdf" download class="btn btn-secondary" target="_blank">📄 Descargar Manual Avanzado</a>
+          </div>
         </div>
       </div>
 
@@ -205,9 +209,7 @@
       <input class="form-input" id="champ-name-input" type="text" placeholder="Ej: Gran Premio Anual 2025" maxlength="60" />
       <label class="form-label">Sistema de puntos</label>
       <select class="form-select" id="champ-points-select">
-        <option value="f1">F1 moderno (25-18-15-12-10-8-6-4-2-1)</option>
-        <option value="f1old">F1 clásico (10-6-4-3-2-1)</option>
-        <option value="simple">Simple (6-5-4-3-2-1)</option>
+        <option value="classic" selected="selected">Clásico (9-6-4-3-2-1)</option>
         <option value="podium">Solo podio (3-2-1)</option>
         <option value="custom">Personalizado</option>
       </select>
@@ -480,6 +482,7 @@
 <script src="data/upgrades.js"></script>
 <script src="data/sponsors.js"></script>
 <script src="data/points.js"></script>
+<script src="data/events.js"></script>
 <script src="data/championships.js"></script>
 <script src="data-validation.js"></script>
 <script src="app.js"></script>

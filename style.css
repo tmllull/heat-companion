@@ -1668,6 +1668,38 @@ ul {
   background: rgba(249, 115, 22, 0.1);
 }
 
+/* Basic button styles for download links */
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  margin: 4px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition);
+  border: 1px solid transparent;
+  text-align: center;
+}
+
+.btn-secondary {
+  background-color: var(--surface-3);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+.btn-secondary:hover {
+  background-color: var(--surface-4);
+  border-color: var(--border-bright);
+}
+
+/* Manual downloads container */
+.manual-downloads {
+  margin-top: 16px;
+  display: block;
+}
+
 /* Championship Templates */
 .templates-grid {
   display: grid;
@@ -1763,6 +1795,7 @@ ul {
 .manual-item-rules li {
   margin-bottom: 4px;
   line-height: 1.4;
+  white-space: pre; /* preserve leading spaces in rule text */
 }
 .manual-item-effect-pill {
   display: inline-block;

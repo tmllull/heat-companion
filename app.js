@@ -16,7 +16,7 @@ function defaultState() {
   return {
     championship: {
       name: 'Mi Campeonato Heat',
-      pointsSystem: 'f1',
+      pointsSystem: 'classic',
       customPoints: [],
       playerIds: [],   // IDs of enrolled players
       calendar: []     // CalendarRace[]
@@ -73,13 +73,94 @@ function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
-function getPointsArray() {
-  if (state.championship.pointsSystem === 'custom') return state.championship.customPoints;
-  return window.POINTS_SYSTEMS[state.championship.pointsSystem] || window.POINTS_SYSTEMS.f1;
+// Helper function to get event data by ID
+function getEventById(eventId) {
+  if (!eventId || !window.RACE_EVENTS) return null;
+  return window.RACE_EVENTS[eventId] || null;
 }
 
-function getPoints(position) {
-  const arr = getPointsArray();
+// Helper function to get event data for a race (with fallback to legacy format)
+function getRaceEventData(race) {
+  if (race.eventId) {
+    // New format: use eventId to get event data
+    const event = getEventById(race.eventId);
+    if (event) {
+      return {
+        name: event.name,
+        description: event.description,
+        pointsOverride: event.pointsOverride
+      };
+    }
+  }
+  
+  // Legacy fallback: use event and rules directly from race
+  return {
+    name: race.event || 'Carrera',
+    description: race.rules || '',
+    pointsOverride: null
+  };
+}
+
+// ============================================================
+//  GLOBAL BUTTON BINDING
+//  these buttons are independent of data loading and should
+//  be wired even if the initialization sequence stalls.
+// ============================================================
+function bindGlobalButtons() {
+  const themeBtn = document.getElementById('btn-theme-toggle');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      toggleTheme();
+      showToast('Tema cambiado');
+    });
+  } else console.warn('Theme toggle button not found during bindGlobalButtons');
+
+  const exportBtn = document.getElementById('btn-export');
+  if (exportBtn) exportBtn.addEventListener('click', exportData);
+  else console.warn('Export button not found during bindGlobalButtons');
+
+  const importBtn = document.getElementById('btn-import');
+  if (importBtn) {
+    importBtn.addEventListener('click', () => {
+      document.getElementById('import-file-input')?.click();
+    });
+  } else console.warn('Import button not found during bindGlobalButtons');
+
+  const importInput = document.getElementById('import-file-input');
+  if (importInput) importInput.addEventListener('change', e => importData(e.target.files[0]));
+  else console.warn('Import file input not found during bindGlobalButtons');
+}
+
+document.addEventListener('DOMContentLoaded', bindGlobalButtons);
+
+
+function getPointsArray(raceId = null) {
+  let basePoints;
+  if (state.championship.pointsSystem === 'custom') {
+    basePoints = state.championship.customPoints;
+  } else {
+    basePoints = window.POINTS_SYSTEMS[state.championship.pointsSystem] || window.POINTS_SYSTEMS.classic;
+  }
+  
+  // If no raceId provided, return base points
+  if (!raceId) return basePoints;
+  
+  // Find the race and apply event modifiers if any
+  const race = state.championship.calendar.find(r => r.id === raceId);
+  if (!race) return basePoints;
+  
+  const eventData = getRaceEventData(race);
+  if (!eventData.pointsOverride) return basePoints;
+  
+  // Apply modifiers to base points
+  return basePoints.map((points, index) => {
+    const modifier = eventData.pointsOverride[index] || 0;
+    return Math.max(0, points + modifier); // Ensure no negative points
+  });
+}
+
+function getPoints(position, raceId = null) {
+  const arr = getPointsArray(raceId);
   return arr[position - 1] ?? 0;
 }
 
@@ -115,20 +196,19 @@ function escHtml(str) {
 
 // ---- STANDINGS ----
 function getStandings() {
-  const pts = getPointsArray();
   return enrolledPlayers()
     .map(p => {
       const races = state.championship.calendar.filter(r => r.status === 'completed');
       const points = races.reduce((sum, r) => {
         const res = r.results.find(x => x.playerId === p.id);
-        return sum + (res ? (res.dnf ? 0 : getPoints(res.position)) : 0);
+        return sum + (res ? (res.dnf ? 0 : getPoints(res.position, r.id)) : 0);
       }, 0);
       const wins   = races.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position === 1 && !res.dnf; }).length;
       const podiums = races.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position <= 3 && !res.dnf; }).length;
-      const raceCount = races.filter(r => r.results.some(x => x.playerId === p.id)).length;
-      return { player: p, points, wins, podiums, races: raceCount };
+      return { player: p, points, wins, podiums };
     })
-    .sort((a, b) => b.points - a.points || b.wins - a.wins || b.podiums - a.podiums);
+    .filter(s => s.points > 0)
+    .sort((a, b) => b.points - a.points);
 }
 
 // ---- TOAST ----
@@ -468,7 +548,7 @@ function renderPlayers() {
   grid.innerHTML = state.players.map(p => {
     const points  = state.championship.calendar
       .filter(r => r.status === 'completed')
-      .reduce((sum, r) => { const res = r.results.find(x => x.playerId === p.id); return sum + (res ? (res.dnf ? 0 : getPoints(res.position)) : 0); }, 0);
+      .reduce((sum, r) => { const res = r.results.find(x => x.playerId === p.id); return sum + (res ? (res.dnf ? 0 : getPoints(res.position, r.id)) : 0); }, 0);
     const enrolled = state.championship.playerIds.includes(p.id);
 
     const upgBadges = (p.upgrades || []).map(uid => {
@@ -524,7 +604,7 @@ function renderStandings() {
     const racePts = completedRaces.map(r => {
       const res = r.results.find(x => x.playerId === s.player.id);
       if (!res) return '<td style="text-align:center"><span style="color:var(--text-dim)">—</span></td>';
-      const p = res.dnf ? 0 : getPoints(res.position);
+      const p = res.dnf ? 0 : getPoints(res.position, r.id);
       const display = res.dnf ? 'DNF' : p.toString();
       const style = res.dnf ? 'color:var(--text-dim);font-style:italic' : '';
       return `<td><span class="race-pts-cell" style="${style}">${display}</span></td>`;
@@ -996,7 +1076,7 @@ function openResultsModal(raceId) {
 
 function renderResultsSortable() {
   const list = document.getElementById('results-sortable-list');
-  const pts  = getPointsArray();
+  const pts  = getPointsArray(resultsRaceId);
 
   list.innerHTML = resultsOrder.map((entry, i) => {
     const player = getPlayerById(entry.playerId);
@@ -1030,7 +1110,7 @@ function renderResultsSortable() {
       resultsOrder[idx].dnf = checkbox.checked;
       // Update points preview
       const ptsPreview = document.getElementById(`rpts-${idx}`);
-      const earnedPts = checkbox.checked ? 0 : (getPointsArray()[idx] ?? 0);
+      const earnedPts = checkbox.checked ? 0 : (getPointsArray(resultsRaceId)[idx] ?? 0);
       ptsPreview.textContent = earnedPts + ' pts';
       ptsPreview.style.color = checkbox.checked ? 'var(--text-dim)' : '';
     });
@@ -1129,7 +1209,7 @@ function openRaceDetailModal(raceId) {
     ? race.results.sort((a, b) => a.position - b.position).map(r => {
         const player     = getPlayerById(r.playerId);
         if (!player) return '';
-        const earnedPts  = getPoints(r.position);
+        const earnedPts  = getPoints(r.position, race.id);
         return `<div class="detail-result-row">
           <div class="detail-result-pos pos-${r.position <= 3 ? r.position : ''}">${r.position <= 3 ? ['🥇','🥈','🥉'][r.position-1] : r.position + 'º'}</div>
           <div class="detail-result-avatar" style="background:${player.color}">${escHtml(player.icon || initials(player.name))}</div>
@@ -1455,7 +1535,10 @@ function importData(file) {
 function openChampTemplatesModal() {
   const grid = document.getElementById('templates-grid');
   grid.innerHTML = window.CHAMPIONSHIP_TEMPLATES.map(t => {
-    const raceNames = t.races.map(r => getCircuitName(getCircuitById(r.circuitId)) || 'Carrera').join(' · ');
+    const raceNames = t.races.map(r => {
+      const eventData = getRaceEventData(r);
+      return eventData.name;
+    }).join(' · ');
     return `<div class="template-card" data-template-id="${t.id}">
       <h3>${t.name}</h3>
       <div class="template-race-mini-list">${t.races.length} carreras: ${raceNames}</div>
@@ -1481,7 +1564,7 @@ function loadChampTemplate(tid) {
   }
 
   state.championship.name = t.name;
-  state.championship.pointsSystem = t.pointsSystem || 'f1old';
+  state.championship.pointsSystem = t.pointsSystem || 'classic';
   state.championship.calendar = t.races.map(r => {
     const circuit = getCircuitById(r.circuitId);
     return {
@@ -1489,15 +1572,16 @@ function loadChampTemplate(tid) {
       circuitId: r.circuitId,
       laps: circuit ? circuit.laps : 3,
       date: new Date().toISOString().slice(0, 10),
-    mods: r.mods || { weather: false, sponsors: false, press: false },
-    weatherType: r.weatherType || 'sun',
-    event: r.event || '',
-    rules: r.rules || '',
-    setup: r.setup || { sponsors: 0, press: '' },
-    status: 'scheduled',
-    results: []
-  };
-});
+      mods: r.mods || { weather: false, sponsors: false, press: false },
+      weatherType: r.weatherType || 'sun',
+      eventId: r.eventId || null, // New format: store eventId
+      event: r.event || '', // Legacy fallback
+      rules: r.rules || '', // Legacy fallback
+      setup: r.setup || { sponsors: 0, press: '' },
+      status: 'scheduled',
+      results: []
+    };
+  });
 
   saveState();
   closeModal('modal-champ-templates');
@@ -1525,9 +1609,8 @@ function init() {
   renderSidebarChamp();
   navigateTo('dashboard');
 
-  document.getElementById('btn-export').addEventListener('click', exportData);
-  document.getElementById('btn-import').addEventListener('click', () => document.getElementById('import-file-input').click());
-  document.getElementById('import-file-input').addEventListener('change', e => importData(e.target.files[0]));
+  // bind core UI buttons (also bound on DOMContentLoaded for safety)
+  bindGlobalButtons();
 
   document.getElementById('btn-show-champ-templates').addEventListener('click', openChampTemplatesModal);
   document.getElementById('btn-reset-championship').addEventListener('click', resetChampionship);
@@ -1537,8 +1620,7 @@ function init() {
   document.getElementById('sidebar-backdrop').addEventListener('click', closeMobileSidebar);
   document.getElementById('btn-close-sidebar').addEventListener('click', closeMobileSidebar);
 
-  // Theme support
-  document.getElementById('btn-theme-toggle').addEventListener('click', toggleTheme);
+  // Theme support (already bound above but apply on init)
   applyTheme(localStorage.getItem('heat-theme') || 'dark');
 
   // Background decoration
@@ -1572,6 +1654,7 @@ function waitForDataAndInit() {
       typeof window.UPGRADES !== 'undefined' &&
       typeof window.SPONSORS !== 'undefined' &&
       typeof window.POINTS_SYSTEMS !== 'undefined' &&
+      typeof window.RACE_EVENTS !== 'undefined' &&
       typeof window.CHAMPIONSHIP_TEMPLATES !== 'undefined') {
     init();
   } else {
