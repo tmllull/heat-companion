@@ -385,6 +385,53 @@ ul {
 }
 
 /* ============================================
+   REFERENCE MANUAL
+   ============================================ */
+.section-card {
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.section-card.collapsible .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background-color var(--transition);
+  user-select: none;
+}
+.section-card.collapsible .section-header:hover {
+  background: var(--surface-3);
+}
+.section-card.collapsible .section-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.section-card.collapsible .section-toggle {
+  font-size: 14px;
+  color: var(--text-dim);
+  transition: transform var(--transition);
+}
+.section-card.collapsible .section-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+}
+.section-card.collapsible:not(.collapsed) .section-content {
+  max-height: 2000px;
+  padding: 0 20px 20px;
+  transition: max-height 0.3s ease-in, padding 0.3s ease-in;
+}
+.section-card.collapsible:not(.collapsed) .section-toggle {
+  transform: rotate(180deg);
+}
+
+/* ============================================
    RESET MODAL
    ============================================ */
 .reset-intro {
@@ -600,22 +647,6 @@ ul {
 }
 
 /* Section cards */
-.section-card {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: var(--shadow-sm);
-  position: relative;
-}
-
-.light-theme .section-card {
-  background-image: 
-    linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    linear-gradient(45deg, rgba(139, 69, 19, 0.02) 0%, transparent 50%);
-}
-
 .section-header {
   display: flex;
   align-items: center;

@@ -171,20 +171,26 @@
           <h1>Manual de Referencia</h1>
           <p>Consulta las reglas rápidas de Clima, Motor Forzado y Estrés</p>
           <div class="manual-downloads">
-            <a href="data/Rules-ES.pdf" download class="btn btn-secondary" target="_blank">📄 Descargar Manual Básico</a>
-            <a href="data/RulesAdvanced-ES.pdf" download class="btn btn-secondary" target="_blank">📄 Descargar Manual Avanzado</a>
+            <a href="files/Rules-ES.pdf" download class="btn btn-secondary" target="_blank">📄 Descargar Manual Básico</a>
+            <a href="files/RulesAdvanced-ES.pdf" download class="btn btn-secondary" target="_blank">📄 Descargar Manual Avanzado</a>
           </div>
         </div>
       </div>
 
       <div class="manual-grid">
-        <div class="section-card">
-          <h2>🔥 Mecánicas Básicas</h2>
-          <div id="manual-basics-list" class="manual-list"></div>
+        <div class="section-card collapsible collapsed">
+          <div class="section-header" onclick="toggleSection(this)">
+            <h2>🔥 Mecánicas Básicas</h2>
+            <span class="section-toggle">▼</span>
+          </div>
+          <div id="manual-basics-list" class="manual-list section-content"></div>
         </div>
-        <div class="section-card">
-          <h2>🌤️ Efectos de Clima</h2>
-          <div id="manual-weather-list" class="manual-list"></div>
+        <div class="section-card collapsible collapsed">
+          <div class="section-header" onclick="toggleSection(this)">
+            <h2>🌤️ Efectos de Clima</h2>
+            <span class="section-toggle">▼</span>
+          </div>
+          <div id="manual-weather-list" class="manual-list section-content"></div>
         </div>
       </div>
     </div>

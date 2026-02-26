@@ -306,6 +306,20 @@ function closeMobileSidebar() {
   document.body.classList.remove('sidebar-open');
 }
 
+// ---- MANUAL SECTIONS TOGGLE ----
+function toggleSection(header) {
+  const sectionCard = header.parentElement;
+  const isCollapsed = sectionCard.classList.contains('collapsed');
+  
+  if (isCollapsed) {
+    sectionCard.classList.remove('collapsed');
+    header.querySelector('.section-toggle').textContent = '▲';
+  } else {
+    sectionCard.classList.add('collapsed');
+    header.querySelector('.section-toggle').textContent = '▼';
+  }
+}
+
 // ============================================================
 //  RENDER: DASHBOARD
 // ============================================================
