@@ -298,10 +298,12 @@ function renderManual() {
 function openMobileSidebar() {
   document.getElementById('sidebar').classList.add('open');
   document.getElementById('sidebar-backdrop').classList.add('active');
+  document.body.classList.add('sidebar-open');
 }
 function closeMobileSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebar-backdrop').classList.remove('active');
+  document.body.classList.remove('sidebar-open');
 }
 
 // ============================================================
