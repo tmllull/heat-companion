@@ -390,18 +390,24 @@ ul {
 .section-card {
   background: var(--surface-2);
   border-radius: var(--radius-lg);
-  padding: 0;
+  padding: 20px;
   border: 1px solid var(--border);
   overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.section-card.collapsible {
+  padding: 0;
 }
 .section-card.collapsible .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 20px;
   cursor: pointer;
   transition: background-color var(--transition);
   user-select: none;
+  margin: 0;
 }
 .section-card.collapsible .section-header:hover {
   background: var(--surface-3);
@@ -651,7 +657,9 @@ ul {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
 }
 
 .header-actions {
@@ -685,6 +693,7 @@ ul {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding: 4px 0;
 }
 
 .mini-standing-row {
@@ -745,11 +754,31 @@ ul {
   color: var(--text-muted);
 }
 
+/* Empty states */
+.empty-state {
+  text-align: center;
+  padding: 32px 20px;
+  color: var(--text-dim);
+}
+
+.empty-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.empty-state p {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
 /* Recent races */
 .recent-races-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding: 4px 0;
 }
 
 .recent-race-row {
@@ -783,9 +812,6 @@ ul {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-}
-.race-info-date {
-  color: var(--text-muted);
 }
 .race-info-laps {
   color: var(--text-muted);
@@ -964,10 +990,6 @@ ul {
   font-family: "Rajdhani", sans-serif;
   font-size: 18px;
   font-weight: 600;
-}
-.race-item-date {
-  font-size: 12px;
-  color: var(--text-muted);
 }
 
 .race-item-podium {
@@ -1185,6 +1207,22 @@ ul {
   font-size: 12px;
   color: var(--text-muted);
   margin-bottom: 14px;
+}
+
+.form-warning {
+  font-size: 12px;
+  color: var(--heat-red);
+  background: rgba(230, 59, 46, 0.08);
+  border: 1px solid rgba(230, 59, 46, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.form-warning strong {
+  color: var(--heat-red);
+  font-weight: 600;
 }
 
 .form-row {
@@ -2961,6 +2999,13 @@ ul {
   }
   .section-card {
     padding: 16px;
+  }
+  .empty-state {
+    padding: 24px 16px;
+  }
+  .empty-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
   }
 
   /* Players */

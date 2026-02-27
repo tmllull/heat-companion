@@ -26,7 +26,7 @@ function defaultState() {
 }
 
 // CalendarRace shape:
-// { id, circuitId, date, mods:{garage,weather,sponsors}, status:'scheduled'|'completed', results:[{playerId,position,dnf}] }
+// { id, circuitId, mods:{garage,weather,sponsors}, status:'scheduled'|'completed', results:[{playerId,position,dnf}] }
 
 // Player shape:
 // { id, name, color, icon, upgrades:string[] }
@@ -51,7 +51,6 @@ function loadState() {
       migrated.championship.calendar = (old.races || []).map(r => ({
         id: r.id,
         circuitId: r.circuitId || null,
-        date: r.date || '',
         mods: r.mods || { garage: true, weather: false, sponsors: false },
         status: r.results?.length ? 'completed' : 'scheduled',
         results: (r.results || []).map(res => ({
@@ -70,7 +69,7 @@ function saveState() {
 
 // ---- HELPERS ----
 function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  return Math.random().toString(36).slice(2, 6) + Math.random().toString(36).slice(2, 6);
 }
 
 let themeToggleTimeout = null;
@@ -188,10 +187,6 @@ function initials(name) {
   return (name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 }
 
-function formatDate(d) {
-  if (!d) return '—';
-  return new Date(d + 'T12:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
-}
 
 function escHtml(str) {
   return String(str || '')
@@ -209,7 +204,8 @@ function getStandings() {
       }, 0);
       const wins   = races.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position === 1 && !res.dnf; }).length;
       const podiums = races.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position <= 3 && !res.dnf; }).length;
-      return { player: p, points, wins, podiums };
+      const racesParticipated = races.filter(r => r.results.some(x => x.playerId === p.id)).length;
+      return { player: p, points, wins, podiums, races: racesParticipated };
     })
     .filter(s => s.points > 0)
     .sort((a, b) => b.points - a.points);
@@ -374,7 +370,6 @@ function renderDashboard() {
         <div class="race-info">
           <div class="race-info-name">${escHtml(getCircuitName(circuit))}</div>
           <div class="race-info-meta">
-            <span class="race-info-date">${formatDate(race.date)}</span>
             <span class="race-info-laps">🏁 ${race.laps || 3} vueltas</span>
           </div>
         </div>
@@ -459,7 +454,7 @@ function renderChampionship() {
         <div class="cal-race-flag">${circuit?.flag || '🏁'}</div>
         <div class="cal-race-info">
           <div class="cal-race-name">${escHtml(circuit?.country || getCircuitName(circuit))}</div>
-          <div class="cal-race-event" style="font-size: smaller">${escHtml(race.event || '')}</div>
+          <div class="cal-race-event" style="font-size: smaller">${escHtml(getRaceEventData(race).name)}</div>
           <div class="cal-race-meta">
             <span>🏁 Vueltas: ${race.laps || 3}</span>
             ${race.setup?.sponsors !== undefined ? `<span>📋 Patrocinios: ${race.setup.sponsors}</span>` : ''}
@@ -659,8 +654,40 @@ function renderStandings() {
 //  CHAMPIONSHIP MODAL
 // ============================================================
 function openChampModal() {
-  document.getElementById('champ-name-input').value       = state.championship.name;
-  document.getElementById('champ-points-select').value    = state.championship.pointsSystem;
+  const completedRaces = state.championship.calendar.filter(r => r.status === 'completed');
+  const hasCompletedRaces = completedRaces.length > 0;
+  
+  document.getElementById('champ-name-input').value = state.championship.name;
+  document.getElementById('champ-points-select').value = state.championship.pointsSystem;
+  
+  // Bloquear sistema de puntos si hay carreras completadas
+  const pointsSelect = document.getElementById('champ-points-select');
+  const pointsCustom = document.getElementById('champ-points-custom');
+  
+  if (hasCompletedRaces) {
+    pointsSelect.disabled = true;
+    pointsCustom.disabled = true;
+    
+    // Mostrar mensaje de bloqueo
+    let warningMsg = document.getElementById('points-system-warning');
+    if (!warningMsg) {
+      warningMsg = document.createElement('div');
+      warningMsg.id = 'points-system-warning';
+      warningMsg.className = 'form-warning';
+      warningMsg.innerHTML = `⚠️ <strong>Sistema de puntos bloqueado</strong><br>No se puede cambiar el sistema de puntuación después de disputar la primera carrera.`;
+      pointsSelect.parentNode.insertBefore(warningMsg, pointsSelect.nextSibling);
+    }
+  } else {
+    pointsSelect.disabled = false;
+    pointsCustom.disabled = false;
+    
+    // Ocultar mensaje de bloqueo si existe
+    const warningMsg = document.getElementById('points-system-warning');
+    if (warningMsg) {
+      warningMsg.remove();
+    }
+  }
+  
   toggleCustomPoints(state.championship.pointsSystem);
   openModal('modal-champ');
 }
@@ -672,9 +699,19 @@ function toggleCustomPoints(val) {
 document.getElementById('champ-points-select').addEventListener('change', e => toggleCustomPoints(e.target.value));
 
 document.getElementById('btn-save-champ').addEventListener('click', () => {
+  const completedRaces = state.championship.calendar.filter(r => r.status === 'completed');
+  const hasCompletedRaces = completedRaces.length > 0;
+  
   const name = document.getElementById('champ-name-input').value.trim();
   const pts  = document.getElementById('champ-points-select').value;
+  
   if (!name) { showToast('Introduce un nombre para el campeonato', 'error'); return; }
+  
+  // Si hay carreras completadas, no permitir cambiar el sistema de puntos
+  if (hasCompletedRaces && pts !== state.championship.pointsSystem) {
+    showToast('No se puede cambiar el sistema de puntos después de disputar carreras', 'error');
+    return;
+  }
 
   state.championship.name         = name;
   state.championship.pointsSystem = pts;
@@ -688,7 +725,7 @@ document.getElementById('btn-save-champ').addEventListener('click', () => {
   saveState();
   renderSidebarChamp();
   closeModal('modal-champ');
-  showToast('Campeonato guardado ✓', 'success');
+  showToast('Configuración guardada', 'success');
   renderView('dashboard');
   renderView('championship');
 });
@@ -1266,12 +1303,13 @@ function openRaceDetailModal(raceId) {
     </div>`;
   }
 
-  const historicHtml = race.event ? `
+  const eventData = getRaceEventData(race);
+  const historicHtml = eventData.name && eventData.name !== 'Carrera' ? `
     <div class="detail-section">
       <h3>📜 Evento Histórico</h3>
       <div class="historic-event-card">
-        <div class="historic-event-title">${race.event}</div>
-        <div class="historic-event-rules"><strong>Reglas</strong><br>${race.rules}</div>
+        <div class="historic-event-title">${eventData.name}</div>
+        ${eventData.description ? `<div class="historic-event-rules"><strong>Reglas</strong><br>${eventData.description}</div>` : ''}
         <div class="historic-event-setup"><strong>Setup</strong><br>
           📋 Patrocinios: ${race.setup.sponsors}<br>
           🎥 Prensa: ${race.setup.press}
@@ -1517,11 +1555,11 @@ function exportData() {
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const champSlug = (state.championship.name || 'campeonato').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '').slice(0, 40);
-  const filename = `heat-${champSlug}-${new Date().toISOString().slice(0, 10)}.json`;
+  const filename = `heat-${champSlug}.json`;
   const a = document.createElement('a');
   a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
-  showToast(`Exportado como "${filename}" ✓`, 'success');
+  showToast('Datos exportados correctamente', 'success');
 }
 
 function importData(file) {
@@ -1591,7 +1629,6 @@ function loadChampTemplate(tid) {
       id: uid(),
       circuitId: r.circuitId,
       laps: circuit ? circuit.laps : 3,
-      date: new Date().toISOString().slice(0, 10),
       mods: r.mods || { weather: false, sponsors: false, press: false },
       weatherType: r.weatherType || 'sun',
       eventId: r.eventId || null, // New format: store eventId
