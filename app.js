@@ -1593,13 +1593,13 @@ function importData(file) {
 function openChampTemplatesModal() {
   const grid = document.getElementById('templates-grid');
   grid.innerHTML = window.CHAMPIONSHIP_TEMPLATES.map(t => {
-    const raceNames = t.races.map(r => {
-      const eventData = getRaceEventData(r);
-      return eventData.name;
+    const circuitNames = t.races.map(r => {
+      const circuit = getCircuitById(r.circuitId);
+      return circuit ? circuit.name || circuit.country : 'Circuito desconocido';
     }).join(' · ');
     return `<div class="template-card" data-template-id="${t.id}">
       <h3>${t.name}</h3>
-      <div class="template-race-mini-list">${t.races.length} carreras: ${raceNames}</div>
+      <div class="template-race-mini-list">${t.races.length} carreras: ${circuitNames}</div>
       <div class="template-card-footer">Cargar campeonato →</div>
     </div>`;
   }).join('');
