@@ -2,7 +2,7 @@
 //  HEAT: PEDAL TO THE METAL — CHAMPIONSHIP TEMPLATES DATA
 // ============================================================
 
-window.CHAMPIONSHIP_TEMPLATES = [
+const CHAMPIONSHIP_TEMPLATES = [
   {
     id: "1961",
     name: "Campeonato Histórico 1961",

@@ -7,8 +7,7 @@ window.CIRCUITS = [
   {
     id: "usa",
     name: "",
-    country: "USA",
-    flag: "🇺🇸",
+    countryId: "usa",
     curves: 4,
     spaces: 69,
     expansion: "Base",
@@ -17,8 +16,7 @@ window.CIRCUITS = [
   {
     id: "gb",
     name: "",
-    country: "Gran Bretaña",
-    flag: "🇬🇧",
+    countryId: "gb",
     curves: 5,
     spaces: 63,
     expansion: "Base",
@@ -27,8 +25,7 @@ window.CIRCUITS = [
   {
     id: "italy",
     name: "",
-    country: "Italia",
-    flag: "🇮🇹",
+    countryId: "italy",
     curves: 3,
     spaces: 54,
     expansion: "Base",
@@ -37,8 +34,7 @@ window.CIRCUITS = [
   {
     id: "france",
     name: "",
-    country: "Francia",
-    flag: "🇫🇷",
+    countryId: "france",
     curves: 5,
     spaces: 60,
     expansion: "Base",
@@ -48,8 +44,7 @@ window.CIRCUITS = [
   {
     id: "japan",
     name: "",
-    country: "Japón",
-    flag: "🇯🇵",
+    countryId: "japan",
     curves: 5,
     spaces: 60,
     expansion: "Lluvia Torrencial",
@@ -58,8 +53,7 @@ window.CIRCUITS = [
   {
     id: "mexico",
     name: "",
-    country: "México",
-    flag: "🇲🇽",
+    countryId: "mexico",
     curves: 6,
     spaces: 60,
     expansion: "Lluvia Torrencial",
@@ -69,8 +63,7 @@ window.CIRCUITS = [
   {
     id: "spain",
     name: "",
-    country: "España",
-    flag: "🇪🇸",
+    countryId: "spain",
     curves: 11,
     spaces: 109,
     expansion: "Visión de Túnel",
@@ -79,8 +72,7 @@ window.CIRCUITS = [
   {
     id: "netherlands",
     name: "",
-    country: "Países Bajos",
-    flag: "🇳🇱",
+    countryId: "netherlands",
     curves: 5,
     spaces: 55,
     expansion: "Visión de Túnel",

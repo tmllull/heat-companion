@@ -9,6 +9,11 @@
 // Data will be loaded asynchronously into window globals
 // We'll use window.CIRCUITS, window.WEATHER_OPTIONS, etc.
 
+// Make CHAMPIONSHIP_TEMPLATES globally accessible
+if (typeof CHAMPIONSHIP_TEMPLATES !== 'undefined') {
+  window.CHAMPIONSHIP_TEMPLATES = CHAMPIONSHIP_TEMPLATES;
+}
+
 // ---- STATE ----
 let state = loadState();
 
@@ -119,15 +124,12 @@ function bindGlobalButtons() {
   } else console.warn('Theme toggle button not found during bindGlobalButtons');
 
   const exportBtn = document.getElementById('btn-export');
-  if (exportBtn) exportBtn.addEventListener('click', exportData);
+  if (exportBtn) exportBtn.addEventListener('click', () => openModal('modal-export'));
   else console.warn('Export button not found during bindGlobalButtons');
 
   const importBtn = document.getElementById('btn-import');
-  if (importBtn) {
-    importBtn.addEventListener('click', () => {
-      document.getElementById('import-file-input')?.click();
-    });
-  } else console.warn('Import button not found during bindGlobalButtons');
+  if (importBtn) importBtn.addEventListener('click', () => openModal('modal-import'));
+  else console.warn('Import button not found during bindGlobalButtons');
 
   const importInput = document.getElementById('import-file-input');
   if (importInput) importInput.addEventListener('change', e => importData(e.target.files[0]));
@@ -167,20 +169,34 @@ function getPoints(position, raceId = null) {
   return arr[position - 1] ?? 0;
 }
 
-function getPlayerById(id)  { return state.players.find(p => p.id === id); }
-function getCircuitById(id) { return window.CIRCUITS.find(c => c.id === id); }
+function getPlayerById(id) { return state.players.find(p => p.id === id); }
+function getCircuitById(id) { 
+  if (!window.CIRCUITS || !Array.isArray(window.CIRCUITS)) {
+    console.warn('CIRCUITS not available:', window.CIRCUITS);
+    return null;
+  }
+  return window.CIRCUITS.find(c => c.id === id); 
+}
+function getCountryById(countryId) { 
+  const country = COUNTRIES.find(c => c.id === countryId);
+  console.log('getCountryById called with:', countryId, 'result:', country);
+  return country;
+}
 function getCircuitName(circuit) {
   if (!circuit) return '—';
-  return circuit.name || circuit.country || '—';
+  const country = getCountryById(circuit.countryId);
+  return country ? country.name : '—';
 }
 function getUpgradeById(id) { 
   return window.UPGRADES.find(u => u.id === id) || window.SPONSORS.find(s => s.id === id); 
 }
 
 function enrolledPlayers() {
-  return state.championship.playerIds
-    .map(id => getPlayerById(id))
-    .filter(Boolean);
+  // CAMBIO: Ahora todos los pilotos existentes participan automáticamente en el campeonato
+  // return state.championship.playerIds
+  //   .map(id => getPlayerById(id))
+  //   .filter(Boolean);
+  return state.players;
 }
 
 function initials(name) {
@@ -195,20 +211,30 @@ function escHtml(str) {
 
 // ---- STANDINGS ----
 function getStandings() {
+  const completedRaces = state.championship.calendar.filter(r => r.status === 'completed');
+  const hasCompletedRaces = completedRaces.length > 0;
+  
   return enrolledPlayers()
     .map(p => {
-      const races = state.championship.calendar.filter(r => r.status === 'completed');
-      const points = races.reduce((sum, r) => {
+      const points = completedRaces.reduce((sum, r) => {
         const res = r.results.find(x => x.playerId === p.id);
         return sum + (res ? (res.dnf ? 0 : getPoints(res.position, r.id)) : 0);
       }, 0);
-      const wins   = races.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position === 1 && !res.dnf; }).length;
-      const podiums = races.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position <= 3 && !res.dnf; }).length;
-      const racesParticipated = races.filter(r => r.results.some(x => x.playerId === p.id)).length;
+      const wins   = completedRaces.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position === 1 && !res.dnf; }).length;
+      const podiums = completedRaces.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position <= 3 && !res.dnf; }).length;
+      const racesParticipated = completedRaces.filter(r => r.results.some(x => x.playerId === p.id)).length;
       return { player: p, points, wins, podiums, races: racesParticipated };
     })
-    .filter(s => s.points > 0)
-    .sort((a, b) => b.points - a.points);
+    .filter(s => hasCompletedRaces ? s.points > 0 : true) // Si no hay carreras, mostrar todos; si hay, solo los con puntos
+    .sort((a, b) => {
+      if (hasCompletedRaces) {
+        // Ordenar por puntos (descendente) si hay carreras disputadas
+        return b.points - a.points;
+      } else {
+        // Ordenar alfabéticamente si no hay carreras disputadas
+        return a.player.name.localeCompare(b.player.name);
+      }
+    });
 }
 
 // ---- TOAST ----
@@ -248,6 +274,7 @@ function renderView(name) {
   switch (name) {
     case 'dashboard':    renderDashboard();    break;
     case 'championship': renderChampionship(); break;
+    case 'circuits':     renderCircuits();     break;
     case 'players':      renderPlayers();      break;
     case 'standings':    renderStandings();    break;
     case 'manual':       renderManual();       break;
@@ -366,11 +393,14 @@ function renderDashboard() {
       const winnerP = winner ? getPlayerById(winner.playerId) : null;
       const isPending = race.status === 'scheduled';
       return `<div class="recent-race-row" data-cal-race-id="${race.id}">
-        <div class="race-flag">${circuit?.flag || '🏁'}</div>
+        <div class="race-flag">${circuit ? (getCountryById(circuit.countryId)?.flag || '🏁') : '🏁'}</div>
         <div class="race-info">
           <div class="race-info-name">${escHtml(getCircuitName(circuit))}</div>
           <div class="race-info-meta">
             <span class="race-info-laps">🏁 ${race.laps || 3} vueltas</span>
+            ${circuit ? `<span class="race-info-spaces">📏 ${circuit.spaces || 0} casillas</span>` : ''}
+            ${circuit ? `<span class="race-info-curves">⤵ ${circuit.curves || 0} curvas</span>` : ''}
+            ${race.mods?.weather ? `<span class="race-info-weather">${window.WEATHER_OPTIONS.find(w => w.id === race.weatherType)?.emoji || '🌧'} ${window.WEATHER_OPTIONS.find(w => w.id === race.weatherType)?.name || 'Clima'}</span>` : ''}
           </div>
         </div>
         ${isPending
@@ -391,26 +421,7 @@ function renderChampionship() {
   const champ = state.championship;
   document.getElementById('champ-view-name').textContent = champ.name;
   document.getElementById('champ-view-sub').textContent  =
-    `${enrolledPlayers().length} piloto(s) · ${champ.calendar.length} carrera(s) en calendario`;
-
-  // --- Enrolled players ---
-  const enrolledEl  = document.getElementById('champ-enrolled-players');
-  const noPlayersEl = document.getElementById('champ-no-players');
-
-  if (state.players.length === 0) {
-    enrolledEl.innerHTML = '';
-    noPlayersEl.style.display = 'block';
-  } else {
-    noPlayersEl.style.display = 'none';
-    enrolledEl.innerHTML = state.players.map(p => {
-      const enrolled = champ.playerIds.includes(p.id);
-      return `<div class="enrolled-player-chip ${enrolled ? 'enrolled' : ''}" data-toggle-player="${p.id}">
-        <div class="enrolled-avatar" style="background:${p.color}">${escHtml(p.icon || initials(p.name))}</div>
-        <span class="enrolled-name">${escHtml(p.name)} ${p.isLegend ? '🤖' : ''}</span>
-        <span class="enrolled-check">${enrolled ? '✓' : '+'}</span>
-      </div>`;
-    }).join('');
-  }
+    `${champ.calendar.length} carrera(s) en calendario`;
 
   // --- Calendar ---
   const listEl  = document.getElementById('calendar-list');
@@ -451,7 +462,7 @@ function renderChampionship() {
             <button class="btn-order" data-move-down="${race.id}" ${i === champ.calendar.length - 1 ? 'disabled' : ''}>▼</button>
           </div>` : ''}
         </div>
-        <div class="cal-race-flag">${circuit?.flag || '🏁'}</div>
+        <div class="cal-race-flag">${circuit ? (getCountryById(circuit.countryId)?.flag || '🏁') : '🏁'}</div>
         <div class="cal-race-info">
           <div class="cal-race-name">${escHtml(circuit?.country || getCircuitName(circuit))}</div>
           <div class="cal-race-event" style="font-size: smaller">${escHtml(getRaceEventData(race).name)}</div>
@@ -566,10 +577,11 @@ function renderPlayers() {
       .reduce((sum, r) => { const res = r.results.find(x => x.playerId === p.id); return sum + (res ? (res.dnf ? 0 : getPoints(res.position, r.id)) : 0); }, 0);
     const enrolled = state.championship.playerIds.includes(p.id);
 
-    const upgBadges = (p.upgrades || []).map(uid => {
-      const u = getUpgradeById(uid);
-      return u ? `<span class="player-upg-badge ${u.category === 'Patrocinio' ? 'sponsor' : ''}" title="${u.description}">${u.emoji} ${u.name}</span>` : '';
-    }).join('');
+    // DESHABILITADO TEMPORALMENTE: Visualización de mejoras
+    // const upgBadges = (p.upgrades || []).map(uid => {
+    //   const u = getUpgradeById(uid);
+    //   return u ? `<span class="player-upg-badge ${u.category === 'Patrocinio' ? 'sponsor' : ''}" title="${u.description}">${u.emoji} ${u.name}</span>` : '';
+    // }).join('');
 
     return `<div class="player-card" style="--player-color:${p.color}">
       ${enrolled ? '<div class="player-enrolled-dot" title="Inscrito en el campeonato"></div>' : ''}
@@ -579,7 +591,7 @@ function renderPlayers() {
         ${p.isLegend ? '<span class="legend-badge">🤖</span>' : ''}
       </div>
       <div class="player-stats">${points} pts</div>
-      ${upgBadges ? `<div class="player-upg-list">${upgBadges}</div>` : '<div class="player-upg-list no-upg">Sin mejoras asignadas</div>'}
+      <!-- DESHABILITADO TEMPORALMENTE: Visualización de mejoras -->
       <div class="player-card-actions">
         <button class="btn-icon btn-icon-edit" data-edit-player="${p.id}">✎ Editar</button>
         <button class="btn-icon btn-icon-del" data-del-player="${p.id}">🗑</button>
@@ -598,8 +610,8 @@ function renderStandings() {
 
   const ep = enrolledPlayers();
   if (ep.length === 0) {
-    wrap.innerHTML = '';
-    empty.style.display = 'block';
+    wrap.innerHTML = '<table class="standings-table"><thead><tr><th>Pos</th><th>Piloto</th><th>Pts</th><th>Gap</th><th>Carreras</th></tr></thead><tbody><tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:20px">No hay pilotos creados. Ve a la sección "Pilotos" para añadirlos.</td></tr></tbody></table>';
+    empty.style.display = 'none';
     return;
   }
 
@@ -615,7 +627,7 @@ function renderStandings() {
 
   const rows = standings.map((s, i) => {
     const pos = i + 1;
-    const gap = pos === 1 ? '' : `−${leader.points - s.points}`;
+    const gap = pos === 1 || !completedRaces.length ? '' : `−${leader.points - s.points}`;
     const racePts = completedRaces.map(r => {
       const res = r.results.find(x => x.playerId === s.player.id);
       if (!res) return '<td style="text-align:center"><span style="color:var(--text-dim)">—</span></td>';
@@ -731,102 +743,229 @@ document.getElementById('btn-save-champ').addEventListener('click', () => {
 });
 
 // ============================================================
+//  RENDER: CIRCUITS
+// ============================================================
+function renderCircuits() {
+  const grid = document.getElementById('circuits-grid');
+  const empty = document.getElementById('circuits-empty');
+
+  if (window.CIRCUITS.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+
+  empty.style.display = 'none';
+  grid.innerHTML = window.CIRCUITS.map(c => {
+    console.log('Rendering circuit:', c);
+    const country = getCountryById(c.countryId);
+    console.log('Country found:', country);
+    return `<div class="circuit-card" data-circuit-id="${c.id}">
+      <div class="circuit-flag">${country ? country.flag : '🏁'}</div>
+      <div class="circuit-country">${country ? escHtml(country.name) : ''}</div>
+      <div class="circuit-name">${escHtml(c.name) || '---'}</div>
+      ${c.expansion ? `<div class="diff-badge ${c.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-')}">${escHtml(c.expansion)}</div>` : ''}
+      <div class="circuit-details">
+        ${c.spaces ? `<div>🎯 ${c.spaces} espacios</div>` : ''}
+        ${c.curves ? `<div>🔄 ${c.curves} curvas</div>` : ''}
+        ${c.laps ? `<div>🏁 ${c.laps} vueltas</div>` : ''}
+      </div>
+      <div class="circuit-card-actions">
+        <button class="btn-icon btn-icon-edit" data-edit-circuit="${c.id}">✎ Editar</button>
+        <button class="btn-icon btn-icon-del" data-del-circuit="${c.id}">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+//  CIRCUIT MODAL
+// ============================================================
+function openCircuitModal(circuitId = null) {
+  editingCircuitId = circuitId;
+  const nameInput = document.getElementById('circuit-name-input');
+  const countrySelect = document.getElementById('circuit-country-select');
+  const descriptionInput = document.getElementById('circuit-description-input');
+  const spacesInput = document.getElementById('circuit-spaces-input');
+  const curvesInput = document.getElementById('circuit-curves-input');
+  const lapsInput = document.getElementById('circuit-laps-input');
+
+  // Populate country options
+  countrySelect.innerHTML = '<option value="">Selecciona un país...</option>' + 
+    COUNTRIES.map(c => `<option value="${c.id}">${c.flag} ${c.name}</option>`).join('');
+
+  if (circuitId) {
+    const circuit = window.CIRCUITS.find(c => c.id === circuitId);
+    const country = getCountryById(circuit.countryId);
+    document.getElementById('modal-circuit-title').textContent = 'Editar circuito';
+    nameInput.value = circuit.name || '';
+    countrySelect.value = circuit.countryId || '';
+    descriptionInput.value = circuit.description || '';
+    spacesInput.value = circuit.spaces || '';
+    curvesInput.value = circuit.curves || '';
+    lapsInput.value = circuit.laps || '';
+  } else {
+    document.getElementById('modal-circuit-title').textContent = 'Añadir circuito';
+    nameInput.value = '';
+    countrySelect.value = '';
+    descriptionInput.value = '';
+    spacesInput.value = '';
+    curvesInput.value = '';
+    lapsInput.value = '';
+  }
+
+  openModal('modal-circuit');
+  setTimeout(() => nameInput.focus(), 100);
+}
+
+function saveCircuit() {
+  const name = document.getElementById('circuit-name-input').value.trim();
+  const countryId = document.getElementById('circuit-country-select').value;
+  const flag = document.getElementById('circuit-flag-input').value.trim();
+  const description = document.getElementById('circuit-description-input').value.trim();
+  const spaces = parseInt(document.getElementById('circuit-spaces-input').value) || null;
+  const curves = parseInt(document.getElementById('circuit-curves-input').value) || null;
+  const laps = parseInt(document.getElementById('circuit-laps-input').value) || null;
+
+  if (!name) { showToast('Introduce un nombre para el circuito', 'error'); return; }
+  if (!countryId) { showToast('Selecciona un país para el circuito', 'error'); return; }
+
+  const circuitData = {
+    id: editingCircuitId || uid(),
+    name,
+    countryId,
+    flag: flag || '',
+    description,
+    spaces,
+    curves,
+    laps
+  };
+
+  if (editingCircuitId) {
+    const idx = window.CIRCUITS.findIndex(c => c.id === editingCircuitId);
+    window.CIRCUITS[idx] = circuitData;
+    showToast('Circuito actualizado ✓', 'success');
+  } else {
+    window.CIRCUITS.push(circuitData);
+    showToast(`${name} añadido ✓`, 'success');
+  }
+
+  closeModal('modal-circuit');
+  renderCircuits();
+}
+
+function deleteCircuit(circuitId) {
+  const circuit = window.CIRCUITS.find(c => c.id === circuitId);
+  if (!confirm(`¿Eliminar ${circuit.name}?\n\nEsta acción no se puede deshacer.`)) return;
+  
+  window.CIRCUITS = window.CIRCUITS.filter(c => c.id !== circuitId);
+  showToast('Circuito eliminado', 'info');
+  renderCircuits();
+}
+
+// ============================================================
 //  PLAYER MODAL (with upgrades)
 // ============================================================
 let editingPlayerId    = null;
 let selectedPlayerColor = '#e63b2e';
+let editingCircuitId   = null;
 
-function buildPlayerUpgradesUI(selectedUpgrades = []) {
-  const container = document.getElementById('player-upgrades-container');
-  
-  const techCategories = ["Velocidad", "Refrigeración", "Manejo", "Táctica"];
+// DESHABILITADO TEMPORALMENTE: Gestión de mejoras
+// function buildPlayerUpgradesUI(selectedUpgrades = []) {
+//   const container = document.getElementById('player-upgrades-container');
+//   
+//   const techCategories = ["Velocidad", "Refrigeración", "Manejo", "Táctica"];
 
-  function renderGroup(title, items, icon, isSponsor = false) {
-    if (items.length === 0) return '';
+//   function renderGroup(title, items, icon, isSponsor = false) {
+//     if (items.length === 0) return '';
     
-    // Group items by category if it's Technical, otherwise it's just one list for Sponsors
-    let content = '';
-    if (!isSponsor) {
-      content = techCategories.map(cat => {
-        const catUpgrades = items.filter(u => u.category === cat);
-        if (catUpgrades.length === 0) return '';
-        return `<div style="margin-bottom:12px">
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:6px">${cat}</div>
-          <div class="upgrades-grid-small">
-            ${catUpgrades.map(u => `
-              <div class="upgrade-chip ${selectedUpgrades.includes(u.id) ? 'selected' : ''}"
-                data-upgrade-id="${u.id}" title="${u.description}">
-                ${u.emoji} ${u.name}
-              </div>`).join('')}
-          </div>
-        </div>`;
-      }).join('');
-    } else {
-      content = `<div class="upgrades-grid-small">
-        ${items.map(u => `
-          <div class="upgrade-chip sponsor ${selectedUpgrades.includes(u.id) ? 'selected' : ''}"
-            data-upgrade-id="${u.id}" title="${u.description}">
-            ${u.emoji} ${u.name}
-          </div>`).join('')}
-      </div>`;
-    }
+//     // Group items by category if it's Technical, otherwise it's just one list for Sponsors
+//     let content = '';
+//     if (!isSponsor) {
+//       content = techCategories.map(cat => {
+//         const catUpgrades = items.filter(u => u.category === cat);
+//         if (catUpgrades.length === 0) return '';
+//         return `<div style="margin-bottom:12px">
+//           <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:6px">${cat}</div>
+//           <div class="upgrades-grid-small">
+//             ${catUpgrades.map(u => `
+//               <div class="upgrade-chip ${selectedUpgrades.includes(u.id) ? 'selected' : ''}"
+//                 data-upgrade-id="${u.id}" title="${u.description}">
+//                 ${u.emoji} ${u.name}
+//               </div>`).join('')}
+//           </div>
+//         </div>`;
+//       }).join('');
+//     } else {
+//       content = `<div class="upgrades-grid-small">
+//         ${items.map(u => `
+//           <div class="upgrade-chip sponsor ${selectedUpgrades.includes(u.id) ? 'selected' : ''}"
+//             data-upgrade-id="${u.id}" title="${u.description}">
+//             ${u.emoji} ${u.name}
+//           </div>`).join('')}
+//       </div>`;
+//     }
 
-    return `
-      <div class="upgrade-modal-group collapsed" data-group-type="${isSponsor ? 'sponsor' : 'tech'}">
-        <div class="upgrade-modal-group-title" onclick="this.parentElement.classList.toggle('collapsed')">
-          ${icon} ${title}
-          <span class="upgrade-count-badge" id="count-${isSponsor ? 'sponsor' : 'tech'}">0 / ${isSponsor ? 5 : 3}</span>
-          <span class="collapse-icon">▼</span>
-        </div>
-        <div class="upgrade-modal-group-content">
-          ${content}
-        </div>
-      </div>`;
-  }
+//     return `
+//       <div class="upgrade-modal-group collapsed" data-group-type="${isSponsor ? 'sponsor' : 'tech'}">
+//         <div class="upgrade-modal-group-title" onclick="this.parentElement.classList.toggle('collapsed')">
+//           ${icon} ${title}
+//           <span class="upgrade-count-badge" id="count-${isSponsor ? 'sponsor' : 'tech'}">0 / ${isSponsor ? 5 : 3}</span>
+//           <span class="collapse-icon">▼</span>
+//         </div>
+//         <div class="upgrade-modal-group-content">
+//           ${content}
+//         </div>
+//       </div>`;
+//   }
 
-  container.innerHTML = 
-    renderGroup('Mejoras de Garaje (Boxes)', window.UPGRADES, '🔧') +
-    renderGroup('Patrocinios Permanentes', window.SPONSORS, '💰', true);
+//   container.innerHTML = 
+//     renderGroup('Mejoras de Garaje (Boxes)', window.UPGRADES, '🔧') +
+//     renderGroup('Patrocinios Permanentes', window.SPONSORS, '💰', true);
 
-  updateUpgradeCount();
-}
+//   // updateUpgradeCount();
+// }
 
-function updateUpgradeCount() {
-  const techCount = document.querySelectorAll('#player-upgrades-container [data-group-type="tech"] .upgrade-chip.selected').length;
-  const sponsorCount = document.querySelectorAll('#player-upgrades-container [data-group-type="sponsor"] .upgrade-chip.selected').length;
+// DESHABILITADO TEMPORALMENTE: Gestión de mejoras
+// function updateUpgradeCount() {
+//   const techCount = document.querySelectorAll('#player-upgrades-container [data-group-type="tech"] .upgrade-chip.selected').length;
+//   const sponsorCount = document.querySelectorAll('#player-upgrades-container [data-group-type="sponsor"] .upgrade-chip.selected').length;
 
-  const techBadge = document.getElementById('count-tech');
-  const sponsorBadge = document.getElementById('count-sponsor');
+//   const techBadge = document.getElementById('count-tech');
+//   const sponsorBadge = document.getElementById('count-sponsor');
 
-  if (techBadge) {
-    techBadge.textContent = `${techCount} / 3`;
-    techBadge.style.color = techCount >= 3 ? 'var(--heat-orange)' : 'var(--text-muted)';
-  }
-  if (sponsorBadge) {
-    sponsorBadge.textContent = `${sponsorCount} / 5`;
-    sponsorBadge.style.color = sponsorCount >= 5 ? 'var(--heat-gold)' : 'var(--text-muted)';
-  }
-}
+//   if (techBadge) {
+//     techBadge.textContent = `${techCount} / 3`;
+//     techBadge.style.color = techCount >= 3 ? 'var(--success)' : 'var(--text-dim)';
+//   }
+//   if (sponsorBadge) {
+//     sponsorBadge.textContent = `${sponsorCount} / 5`;
+//     sponsorBadge.style.color = sponsorCount >= 5 ? 'var(--success)' : 'var(--text-dim)';
+//   }
+// }
 
-document.getElementById('player-upgrades-container').addEventListener('click', e => {
-  const chip = e.target.closest('.upgrade-chip');
-  if (!chip) return;
-  const group = chip.closest('.upgrade-modal-group');
-  const groupType = group.dataset.groupType;
-  const isSelected = chip.classList.contains('selected');
-
-  if (!isSelected) {
-    const currentCount = group.querySelectorAll('.upgrade-chip.selected').length;
-    const limit = groupType === 'tech' ? 3 : 5;
-    if (currentCount >= limit) {
-      showToast(`Máximo ${limit} ${groupType === 'tech' ? 'mejoras' : 'patrocinios'} permitidos`, 'error');
-      return;
-    }
-  }
-
-  chip.classList.toggle('selected', !isSelected);
-  updateUpgradeCount();
-});
+// DESHABILITADO TEMPORALMENTE: Event listener de mejoras
+// document.getElementById('player-upgrades-container').addEventListener('click', e => {
+//   const chip = e.target.closest('.upgrade-chip');
+//   if (!chip) return;
+//   const group = chip.closest('.upgrade-modal-group');
+//   const groupType = group.dataset.groupType;
+//   const maxItems = groupType === 'sponsor' ? 5 : 3;
+//   const currentlySelected = group.querySelectorAll('.upgrade-chip.selected').length;
+  
+//   if (chip.classList.contains('selected')) {
+//     chip.classList.remove('selected');
+//   } else {
+//     if (currentlySelected >= maxItems) {
+//       const typeName = groupType === 'sponsor' ? 'patrocinios' : 'mejoras técnicas';
+//       showToast(`Máximo ${maxItems} ${typeName} permitidos`, 'error');
+//       return;
+//     }
+//     chip.classList.add('selected');
+//   }
+  
+//   // updateUpgradeCount();
+// });
 
 function openPlayerModal(playerId = null) {
   editingPlayerId = playerId;
@@ -854,29 +993,127 @@ function openPlayerModal(playerId = null) {
     el.classList.toggle('selected', el.dataset.color === selectedPlayerColor)
   );
 
-  buildPlayerUpgradesUI(currentUpgrades);
+  // Actualizar opciones de color para mostrar los usados
+  updateColorOptions();
+
+  // Agregar validación en tiempo real para el icono
+  const playerIconInput = document.getElementById('player-icon-input');
+  playerIconInput.addEventListener('input', updateIconValidation);
+  updateIconValidation(); // Validar estado inicial
+
+  // DESHABILITADO TEMPORALMENTE: Construir UI de mejoras
+  // buildPlayerUpgradesUI(currentUpgrades);
   openModal('modal-player');
   setTimeout(() => nameInput.focus(), 100);
 }
 
+function updateColorOptions() {
+  const usedColors = state.players
+    .filter(p => p.id !== editingPlayerId) // Excluir el piloto que se está editando
+    .map(p => p.color);
+  
+  document.querySelectorAll('.color-option').forEach(el => {
+    const color = el.dataset.color;
+    const isUsed = usedColors.includes(color);
+    
+    // Quitar o añadir clases según el estado
+    el.classList.toggle('color-used', isUsed);
+    el.classList.toggle('color-disabled', isUsed && editingPlayerId === null); // Solo deshabilitar al crear nuevo
+    
+    // Si el color está en uso y no es el piloto actual, no permitir selección
+    if (isUsed && !usedColors.includes(selectedPlayerColor)) {
+      el.style.opacity = '0.3';
+      el.style.cursor = 'not-allowed';
+      el.title = `Color ya usado por ${state.players.find(p => p.color === color)?.name}`;
+    } else {
+      el.style.opacity = '';
+      el.style.cursor = '';
+      el.title = el.title.replace(/Color ya usado por .*/, '') || el.getAttribute('title') || '';
+    }
+  });
+}
+
+function updateIconValidation() {
+  const usedIcons = state.players
+    .filter(p => p.id !== editingPlayerId) // Excluir el piloto que se está editando
+    .map(p => p.icon);
+  
+  const iconInput = document.getElementById('player-icon-input');
+  const currentIcon = iconInput.value.trim();
+  const isUsed = usedIcons.includes(currentIcon);
+  
+  // Actualizar estilo del input según si está en uso
+  if (isUsed && currentIcon) {
+    iconInput.style.borderColor = 'var(--error)';
+    iconInput.title = `Número/icono ya usado por ${state.players.find(p => p.icon === currentIcon)?.name}`;
+  } else {
+    iconInput.style.borderColor = '';
+    iconInput.title = '';
+  }
+}
+
 document.querySelectorAll('.color-option').forEach(el => {
   el.addEventListener('click', () => {
-    selectedPlayerColor = el.dataset.color;
+    const color = el.dataset.color;
+    const colorConflict = state.players.find(p => p.color === color && p.id !== editingPlayerId);
+    
+    if (colorConflict) {
+      showToast(`El color ya lo usa ${colorConflict.name}`, 'error');
+      return; // No permitir seleccionar el color
+    }
+    
+    selectedPlayerColor = color;
     document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
   });
+});
+
+document.getElementById('btn-save-circuit').addEventListener('click', saveCircuit);
+
+// Country change listener
+document.getElementById('circuit-country-select').addEventListener('change', () => {
+  const countryId = document.getElementById('circuit-country-select').value;
+  const country = getCountryById(countryId);
+  const flagInput = document.getElementById('circuit-flag-input');
+  if (flagInput) {
+    flagInput.value = country ? country.flag : '🏁';
+  }
 });
 
 document.getElementById('btn-save-player').addEventListener('click', () => {
   const name = document.getElementById('player-name-input').value.trim();
   const icon = document.getElementById('player-icon-input').value.trim();
   if (!name) { showToast('Introduce un nombre para el piloto', 'error'); return; }
+  if (!icon) { showToast('Introduce un número para el piloto', 'error'); return; }
 
   const colorConflict = state.players.find(p => p.color === selectedPlayerColor && p.id !== editingPlayerId);
   if (colorConflict) { showToast(`El color ya lo usa ${colorConflict.name}`, 'error'); return; }
 
-  const upgrades = [...document.querySelectorAll('#player-upgrades-container .upgrade-chip.selected')]
-    .map(el => el.dataset.upgradeId);
+  // Validar que el número no se repita y que sea solo números
+  const iconConflict = state.players.find(p => p.icon === icon && p.id !== editingPlayerId);
+  if (iconConflict) { showToast(`El número ya lo usa ${iconConflict.name}`, 'error'); return; }
+  
+  // Validar que solo sean números
+  if (!/^\d+$/.test(icon)) {
+    showToast('El número solo puede contener dígitos (0-9)', 'error'); return;
+  }
+
+  // DESHABILITADO TEMPORALMENTE: Guardar mejoras
+  // const upgrades = [...document.querySelectorAll('#player-upgrades-container .upgrade-chip.selected')]
+  //   .map(el => el.dataset.upgradeId);
+  // const upgrades = []; // Mantener vacío para no perder datos existentes
+  
+  // PRESERVAR MEJORAS EXISTENTES: No modificar el array de mejoras al guardar
+  let upgrades = [];
+  if (editingPlayerId) {
+    // Si editamos, mantener las mejoras existentes
+    const existingPlayer = state.players.find(p => p.id === editingPlayerId);
+    upgrades = existingPlayer?.upgrades || [];
+  } else {
+    // Si es nuevo, empezar sin mejoras
+    upgrades = [];
+  }
+  
   const isLegend = document.getElementById('player-is-legend').checked;
 
   if (editingPlayerId) {
@@ -905,23 +1142,24 @@ function deletePlayer(playerId) {
   showToast('Piloto eliminado', 'info');
 }
 
-// ============================================================
-//  ENROLL / UN-ENROLL PLAYER
-// ============================================================
-function toggleEnrollPlayer(playerId) {
-  const ids = state.championship.playerIds;
-  const idx = ids.indexOf(playerId);
-  if (idx === -1) {
-    ids.push(playerId);
-    showToast(`${getPlayerById(playerId)?.name} inscrito en el campeonato ✓`, 'success');
-  } else {
-    ids.splice(idx, 1);
-    showToast(`${getPlayerById(playerId)?.name} retirado del campeonato`, 'info');
-  }
-  saveState();
-  renderView('championship');
-  renderView('dashboard');
-}
+// DESHABILITADO: Ya no se necesita inscripción manual, todos los pilotos participan automáticamente
+// // ============================================================
+// //  ENROLL / UN-ENROLL PLAYER
+// // ============================================================
+// function toggleEnrollPlayer(playerId) {
+//   const ids = state.championship.playerIds;
+//   const idx = ids.indexOf(playerId);
+//   if (idx === -1) {
+//     ids.push(playerId);
+//     showToast(`${getPlayerById(playerId)?.name} inscrito en el campeonato ✓`, 'success');
+//   } else {
+//     ids.splice(idx, 1);
+//     showToast(`${getPlayerById(playerId)?.name} retirado del campeonato`, 'info');
+//   }
+//   saveState();
+//   renderView('championship');
+//   renderView('dashboard');
+// }
 
 // ============================================================
 //  ADD RACE TO CALENDAR
@@ -972,19 +1210,18 @@ function openAddRaceModal(raceId = null) {
 
   // render circuits
   const grid = document.getElementById('add-race-circuits-grid');
-  grid.innerHTML = window.CIRCUITS.map(c => `
-    <div class="circuit-card ${c.id === addRaceSelectedCircuit ? 'selected' : ''}" data-circuit="${c.id}">
-      <div class="circuit-flag">${c.flag}</div>
-      <div class="circuit-name">${c.name || c.country}</div>
+  grid.innerHTML = window.CIRCUITS.map(c => {
+    const country = getCountryById(c.countryId);
+    return `<div class="circuit-card ${c.id === addRaceSelectedCircuit ? 'selected' : ''}" data-circuit="${c.id}">
+      <div class="circuit-flag">${country ? country.flag : '🏁'}</div>
+      <div class="circuit-name">${c.name || (country ? country.name : '')}</div>
+      ${c.expansion ? `<div class="diff-badge ${c.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-')}">${escHtml(c.expansion)}</div>` : ''}
       <div class="circuit-info-stats">
         <span>🏁 ${c.laps} vueltas</span>
         <span>⤵ ${c.curves} curvas</span>
-        <span>📏 ${c.spaces} casillas</span>
       </div>
-      <div class="circuit-info-footer">
-        <span class="diff-badge ${c.expansion ? c.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-') : ''}">${c.expansion}</span>
-      </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   // render weather options
   const wGrid = document.getElementById('add-race-weather-grid');
@@ -1231,7 +1468,7 @@ function openRaceDetailModal(raceId) {
 
   const circuit = getCircuitById(race.circuitId);
   document.getElementById('detail-race-title').textContent =
-    `${circuit?.flag || '🏁'} ${getCircuitName(circuit)}`;
+    `${circuit ? (getCountryById(circuit.countryId)?.flag || '🏁') : '🏁'} ${getCircuitName(circuit)}`;
 
   const activeMods = [];
   if (race.mods?.weather) {
@@ -1246,21 +1483,22 @@ function openRaceDetailModal(raceId) {
     activeMods.push(`📷 Prensa (${race.setup.press})`);
   }
 
+  // DESHABILITADO TEMPORALMENTE: Visualización de mejoras en campeonato
   // Build upgrades section for enrolled players
-  const enrolledIds = state.championship.playerIds;
-  const upgradesHtml = enrolledIds.map(pid => {
-    const p = getPlayerById(pid);
-    if (!p || !(p.upgrades?.length)) return null;
-    return `<div class="detail-upgrade-player">
-      <div style="display:flex;align-items:center;gap:8px;min-width:110px">
-        <div class="detail-result-avatar" style="background:${p.color};width:26px;height:26px;font-size:11px">${escHtml(p.icon || initials(p.name))}</div>
-        <span class="detail-upgrade-player-name">${escHtml(p.name)}</span>
-      </div>
-      <div class="detail-upgrade-tags">
-        ${p.upgrades.map(uid => { const u = getUpgradeById(uid); return u ? `<span class="detail-upgrade-tag">${u.emoji} ${u.name}</span>` : ''; }).join('')}
-      </div>
-    </div>`;
-  }).filter(Boolean).join('');
+  // const enrolledIds = state.championship.playerIds;
+  // const upgradesHtml = enrolledIds.map(pid => {
+  //   const p = getPlayerById(pid);
+  //   if (!p || !(p.upgrades?.length)) return null;
+  //   return `<div class="detail-upgrade-player">
+  //     <div style="display:flex;align-items:center;gap:8px;min-width:110px">
+  //       <div class="detail-result-avatar" style="background:${p.color};width:26px;height:26px;font-size:11px">${escHtml(p.icon || initials(p.name))}</div>
+  //       <span class="detail-upgrade-player-name">${escHtml(p.name)}</span>
+  //     </div>
+  //     <div class="detail-upgrade-tags">
+  //       ${p.upgrades.map(uid => { const u = getUpgradeById(uid); return u ? `<span class="detail-upgrade-tag">${u.emoji} ${u.name}</span>` : ''; }).join('')}
+  //     </div>
+  //   </div>`;
+  // }).filter(Boolean).join('');
 
   const resultsHtml = race.status === 'completed'
     ? race.results.sort((a, b) => a.position - b.position).map(r => {
@@ -1322,7 +1560,7 @@ function openRaceDetailModal(raceId) {
     <div class="detail-section">
       <h3>Circuito</h3>
       <div class="detail-circuit-card">
-        <div class="detail-circuit-flag">${circuit?.flag || '🏁'}</div>
+        <div class="detail-circuit-flag">${circuit ? (getCountryById(circuit.countryId)?.flag || '🏁') : '🏁'}</div>
         <div style="flex:1">
           <div class="detail-circuit-name">${getCircuitName(circuit)}</div>
           <div class="detail-circuit-meta-row">
@@ -1336,10 +1574,6 @@ function openRaceDetailModal(raceId) {
       </div>
       ${moduleBannerHtml}
     </div>
-    ${upgradesHtml ? `<div class="detail-section">
-      <h3>Mejoras de pilotos</h3>
-      <div class="detail-upgrades-grid">${upgradesHtml}</div>
-    </div>` : ''}
     <div class="detail-section">
       <h3>Resultado</h3>
       <div class="detail-results-list">${resultsHtml}</div>
@@ -1405,6 +1639,26 @@ document.addEventListener('click', e => {
   const resetBtn = e.target.closest('.btn-reset-section');
   if (resetBtn) { resetSection(resetBtn.dataset.section); return; }
 
+  // Export section buttons
+  const exportBtn = e.target.closest('.btn-export-section');
+  if (exportBtn) { 
+    exportData(exportBtn.dataset.section); 
+    return; 
+  }
+
+  // Import section buttons
+  const importBtn = e.target.closest('.btn-import-section');
+  if (importBtn) { 
+    const section = importBtn.dataset.section;
+    // Crear un input file temporal para esta sección
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => importData(e.target.files[0], section);
+    input.click();
+    return; 
+  }
+
   // Add player
   if (e.target.closest('#btn-add-player')) { openPlayerModal(); return; }
 
@@ -1416,9 +1670,29 @@ document.addEventListener('click', e => {
   const delBtn = e.target.closest('[data-del-player]');
   if (delBtn) { deletePlayer(delBtn.dataset.delPlayer); return; }
 
-  // Toggle enroll player
-  const toggleBtn = e.target.closest('[data-toggle-player]');
-  if (toggleBtn) { toggleEnrollPlayer(toggleBtn.dataset.togglePlayer); return; }
+  // DESHABILITADO: Ya no se necesita toggle de inscripción
+  // // Toggle enroll player
+  // const toggleBtn = e.target.closest('[data-toggle-player]');
+  // if (toggleBtn) { toggleEnrollPlayer(toggleBtn.dataset.togglePlayer); return; }
+
+  // Add circuit
+  if (e.target.closest('#btn-add-circuit')) { openCircuitModal(); return; }
+
+  // Edit circuit
+  const editCircuitBtn = e.target.closest('[data-edit-circuit]');
+  if (editCircuitBtn) { 
+    console.log('Edit circuit button clicked:', editCircuitBtn.dataset.editCircuit);
+    openCircuitModal(editCircuitBtn.dataset.editCircuit); 
+    return; 
+  }
+
+  // Delete circuit
+  const delCircuitBtn = e.target.closest('[data-del-circuit]');
+  if (delCircuitBtn) { 
+    console.log('Delete circuit button clicked:', delCircuitBtn.dataset.delCircuit);
+    deleteCircuit(delCircuitBtn.dataset.delCircuit); 
+    return; 
+  }
 
   // Add calendar race
   if (e.target.closest('#btn-add-cal-race')) { openAddRaceModal(); return; }
@@ -1495,7 +1769,11 @@ document.addEventListener('click', e => {
 
   // Cal race row (open detail)
   const calRow = e.target.closest('.cal-race-row');
-  if (calRow && !e.target.closest('button')) { openRaceDetailModal(calRow.dataset.calRaceId); return; }
+  if (calRow && !e.target.closest('button')) { 
+    console.log('Cal race row clicked:', calRow.dataset.calRaceId);
+    openRaceDetailModal(calRow.dataset.calRaceId); 
+    return; 
+  }
 
   // Dashboard recent race row
   const recentRow = e.target.closest('.recent-race-row');
@@ -1550,37 +1828,155 @@ function resetSection(section) {
 // ============================================================
 //  EXPORT / IMPORT
 // ============================================================
-function exportData() {
-  const payload = { _meta: { app: 'heat-companion', version: 2, exportedAt: new Date().toISOString() }, ...state };
+function exportData(section = 'all') {
+  let payload;
+  let filename;
+  
+  if (section === 'all') {
+    // Exportación completa (comportamiento original)
+    payload = { _meta: { app: 'heat-companion', version: 2, exportedAt: new Date().toISOString() }, ...state };
+    const champSlug = (state.championship.name || 'campeonato').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '').slice(0, 40);
+    filename = `heat-${champSlug}-completo.json`;
+  } else {
+    // Exportación por secciones
+    const sectionData = {};
+    
+    switch (section) {
+      case 'players':
+        sectionData.players = state.players;
+        filename = `heat-pilotos.json`;
+        break;
+      case 'races':
+        sectionData.championship = {
+          calendar: state.championship.calendar,
+          playerIds: state.championship.playerIds
+        };
+        filename = `heat-carreras.json`;
+        break;
+      case 'championship':
+        sectionData.championship = {
+          name: state.championship.name,
+          pointsSystem: state.championship.pointsSystem,
+          customPoints: state.championship.customPoints
+        };
+        filename = `heat-campeonato.json`;
+        break;
+      default:
+        showToast('Sección no válida', 'error');
+        return;
+    }
+    
+    payload = { 
+      _meta: { 
+        app: 'heat-companion', 
+        version: 2, 
+        exportedAt: new Date().toISOString(),
+        section: section 
+      }, 
+      ...sectionData 
+    };
+  }
+  
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
-  const champSlug = (state.championship.name || 'campeonato').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '').slice(0, 40);
-  const filename = `heat-${champSlug}.json`;
   const a = document.createElement('a');
   a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
-  showToast('Datos exportados correctamente', 'success');
+  showToast(`Datos ${section === 'all' ? 'completos' : `de ${section}`} exportados correctamente`, 'success');
 }
 
-function importData(file) {
+function importData(file, section = 'all') {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
     let parsed;
     try { parsed = JSON.parse(e.target.result); } catch { showToast('JSON inválido', 'error'); return; }
-    if (!parsed.championship || !Array.isArray(parsed.players)) {
+    
+    // Validar que el archivo sea de HEAT Companion
+    if (!parsed._meta || parsed._meta.app !== 'heat-companion') {
       showToast('El archivo no es un guardado de HEAT Companion', 'error'); return;
     }
-    const champName  = parsed.championship?.name || '?';
-    const numPlayers = parsed.players?.length ?? 0;
-    const numRaces   = parsed.championship?.calendar?.length ?? 0;
-    if (!confirm(`¿Importar campeonato "${champName}"?\n👤 Pilotos: ${numPlayers}\n🏁 Carreras: ${numRaces}\n\n⚠ Reemplazará todos los datos actuales.`)) return;
-    const { _meta, ...importedState } = parsed;
-    state = { ...defaultState(), ...importedState };
+    
+    // Si el archivo tiene una sección específica y no coincide con la solicitada, advertir
+    if (parsed._meta.section && parsed._meta.section !== section) {
+      if (!confirm(`Este archivo contiene datos de "${parsed._meta.section}" pero estás intentando importar en "${section}". ¿Deseas continuar?`)) {
+        return;
+      }
+    }
+    
+    let confirmMsg = '';
+    let importFunction = null;
+    
+    if (section === 'all') {
+      // Importación completa (comportamiento original)
+      if (!parsed.championship || !Array.isArray(parsed.players)) {
+        showToast('El archivo no contiene todos los datos necesarios para importación completa', 'error'); return;
+      }
+      const champName  = parsed.championship?.name || '?';
+      const numPlayers = parsed.players?.length ?? 0;
+      const numRaces   = parsed.championship?.calendar?.length ?? 0;
+      confirmMsg = `¿Importar campeonato "${champName}"?\n👤 Pilotos: ${numPlayers}\n🏁 Carreras: ${numRaces}\n\n⚠ Reemplazará todos los datos actuales.`;
+      importFunction = () => {
+        const { _meta, ...importedState } = parsed;
+        state = { ...defaultState(), ...importedState };
+      };
+    } else {
+      // Importación por secciones
+      switch (section) {
+        case 'players':
+          if (!Array.isArray(parsed.players)) {
+            showToast('El archivo no contiene datos de pilotos', 'error'); return;
+          }
+          confirmMsg = `¿Importar ${parsed.players.length} piloto(s)?\n\n⚠ Esto reemplazará todos los pilotos actuales.`;
+          importFunction = () => {
+            state.players = parsed.players;
+            // Actualizar playerIds para mantener solo los pilotos importados que existían
+            const importedPlayerIds = parsed.players.map(p => p.id);
+            state.championship.playerIds = state.championship.playerIds.filter(id => importedPlayerIds.includes(id));
+          };
+          break;
+          
+        case 'races':
+          if (!parsed.championship?.calendar) {
+            showToast('El archivo no contiene datos de carreras', 'error'); return;
+          }
+          const numRaces = parsed.championship.calendar.length;
+          confirmMsg = `¿Importar ${numRaces} carrera(s)?\n\n⚠ Esto reemplazará el calendario actual.`;
+          importFunction = () => {
+            state.championship.calendar = parsed.championship.calendar;
+            if (parsed.championship.playerIds) {
+              state.championship.playerIds = parsed.championship.playerIds;
+            }
+          };
+          break;
+          
+        case 'championship':
+          if (!parsed.championship) {
+            showToast('El archivo no contiene datos de campeonato', 'error'); return;
+          }
+          const champName = parsed.championship?.name || '?';
+          confirmMsg = `¿Importar configuración del campeonato "${champName}"?\n\n⚠ Esto reemplazará la configuración actual.`;
+          importFunction = () => {
+            state.championship.name = parsed.championship.name || state.championship.name;
+            state.championship.pointsSystem = parsed.championship.pointsSystem || state.championship.pointsSystem;
+            state.championship.customPoints = parsed.championship.customPoints || state.championship.customPoints;
+          };
+          break;
+          
+        default:
+          showToast('Sección no válida', 'error');
+          return;
+      }
+    }
+    
+    if (!confirm(confirmMsg)) return;
+    
+    // Ejecutar la importación
+    importFunction();
     saveState();
     renderSidebarChamp();
     navigateTo('dashboard');
-    showToast(`"${champName}" importado ✓`, 'success');
+    showToast(`Datos de ${section === 'all' ? 'campeonato completo' : section} importados ✓`, 'success');
   };
   reader.onerror = () => showToast('Error al leer el archivo', 'error');
   reader.readAsText(file);
@@ -1595,8 +1991,12 @@ function openChampTemplatesModal() {
   grid.innerHTML = window.CHAMPIONSHIP_TEMPLATES.map(t => {
     const circuitNames = t.races.map(r => {
       const circuit = getCircuitById(r.circuitId);
-      return circuit ? circuit.name || circuit.country : 'Circuito desconocido';
+      const country = getCountryById(circuit?.countryId);
+      const result = country ? country.name : 'Circuito desconocido';
+      console.log('Circuit name result:', result);
+      return result;
     }).join(' · ');
+    console.log('Final circuitNames:', circuitNames);
     return `<div class="template-card" data-template-id="${t.id}">
       <h3>${t.name}</h3>
       <div class="template-race-mini-list">${t.races.length} carreras: ${circuitNames}</div>
