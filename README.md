@@ -39,6 +39,14 @@
 - **Persistencia local**: Tus datos se guardan automáticamente en el navegador.
 - **Importación/Exportación**: Exporta tus campeonatos a JSON para compartirlos o hacer copias de seguridad.
 
+### 📚 Acceso a manuales y reglas básicas
+
+- **Manuales oficiales**: Descarga directa del manual básico y avanzado de HEAT: Pedal to the Metal
+- **Reglas rápidas**: Consulta integrada de mecánicas básicas (Estrés, Motor Forzado, Clima)
+- **Referencia durante la partida**: Sección de manual accesible desde cualquier vista de la aplicación
+- **Efectos de clima**: Guía visual de todos los tipos de clima y sus efectos en la carrera
+
+
 ## 🤝 Colaboración
 
 ¡Toda colaboración es bienvenida!
