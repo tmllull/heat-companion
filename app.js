@@ -197,6 +197,24 @@ function getCountryById(countryId) {
   console.log('getCountryById called with:', countryId, 'result:', country);
   return country;
 }
+
+// ---- META INFO FUNCTIONS ----
+function renderMetaInfo() {
+  const meta = window.APP_META;
+  if (!meta) return;
+  
+  const content = document.getElementById('meta-info-content');
+  if (!content) return;
+  
+  const html = `
+    <div class="meta-info-section">
+      <h3>🏎️ HEAT Companion</h3>
+      <p>${meta.description}</p>
+    </div>
+  `;
+  
+  content.innerHTML = html;
+}
 function getCircuitName(circuit) {
   if (!circuit) return '—';
   const country = getCountryById(circuit.countryId);
@@ -791,6 +809,13 @@ document.addEventListener('click', e => {
 
   // Open reset modal
   if (e.target.closest('#btn-open-reset')) { openModal('modal-reset'); return; }
+
+  // Open meta info modal
+  if (e.target.closest('#btn-meta-info')) { 
+    openModal('modal-meta-info'); 
+    renderMetaInfo(); 
+    return; 
+  }
 
   // System actions (moved to system.js)
   // Reset, Export, Import, Templates handled in system.js

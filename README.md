@@ -4,6 +4,16 @@
 
 ![Licencia](https://img.shields.io/badge/license-MIT-green)
 
+## ⚠️ **Importante: Almacenamiento Local de Datos**
+
+**TODA la información que añadas a esta aplicación web se almacena EXCLUSIVAMENTE en tu propio navegador (localStorage).**
+
+- 📍 **Sin servidores externos**: No existe ninguna persistencia ni registro de datos en servidores
+- 🔒 **Privacidad total**: Tus datos nunca salen de tu dispositivo
+- 💾 **Almacenamiento local**: La información permanece solo en el navegador donde la creaste
+
+---
+
 ## ✨ Características principales
 
 ### 🏆 Gestión de campeonatos
