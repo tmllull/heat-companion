@@ -986,6 +986,19 @@ ul {
   background: rgba(230, 59, 46, 0.2);
 }
 
+.btn-icon-disabled {
+  background: var(--surface-2);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.btn-icon-disabled:hover {
+  background: var(--surface-2);
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
 /* ============================================
    RACES
    ============================================ */
@@ -2435,6 +2448,51 @@ ul {
 .circuit-flag {
   font-size: 28px;
   margin-bottom: 2px;
+  position: relative;
+  z-index: 1;
+}
+
+.circuit-card-actions-left,
+.circuit-card-actions-right {
+  position: absolute;
+  top: 8px;
+  z-index: 2;
+}
+
+.circuit-card-actions-left {
+  left: 8px;
+}
+
+.circuit-card-actions-right {
+  right: 8px;
+}
+
+.circuit-card-actions-left .btn-icon,
+.circuit-card-actions-right .btn-icon {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all var(--transition);
+}
+
+.circuit-card-actions-left .btn-icon:hover {
+  background: var(--surface-3);
+  border-color: var(--primary);
+  transform: scale(1.1);
+}
+
+.circuit-card-actions-right .btn-icon:hover {
+  background: rgba(230, 59, 46, 0.1);
+  border-color: var(--heat-red);
+  transform: scale(1.1);
 }
 .circuit-name {
   font-family: "Rajdhani", sans-serif;
@@ -2487,6 +2545,10 @@ ul {
 .diff-badge.vision-de-tunel {
   background: rgba(168, 85, 247, 0.15);
   color: #a855f7;
+}
+.diff-badge.personalizado {
+  background: rgba(251, 146, 60, 0.15);
+  color: #fb923c;
 }
 
 /* Detail Circuit Styles */
@@ -2647,17 +2709,6 @@ ul {
 /* ============================================
    PLAYER CARD — UPGRADE BADGES
    ============================================ */
-.player-enrolled-dot {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--heat-orange);
-  box-shadow: 0 0 6px var(--heat-orange);
-}
-
 .player-upg-list {
   display: flex;
   flex-wrap: wrap;

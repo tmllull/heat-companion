@@ -26,7 +26,8 @@ function defaultState() {
       playerIds: [],   // IDs of enrolled players
       calendar: []     // CalendarRace[]
     },
-    players: []
+    players: [],
+    circuits: [] // Circuitos personalizados creados por el usuario
   };
 }
 
@@ -39,7 +40,14 @@ function defaultState() {
 function loadState() {
   try {
     const raw = localStorage.getItem('heat-companion-v2');
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const loadedState = JSON.parse(raw);
+      // Asegurar que el campo circuits exista
+      if (!loadedState.circuits) {
+        loadedState.circuits = [];
+      }
+      return loadedState;
+    }
     // migrate from v1 if present
     const v1 = localStorage.getItem('heat-companion-v1');
     if (v1) {
@@ -169,13 +177,20 @@ function getPoints(position, raceId = null) {
   return arr[position - 1] ?? 0;
 }
 
-function getPlayerById(id) { return state.players.find(p => p.id === id); }
+// ---- PLAYER HELPERS ----
+// getPlayerById() moved to players.js
+// enrolledPlayers() moved to players.js
+// initials() moved to players.js
+
+// ---- OTHER HELPERS ----
 function getCircuitById(id) { 
-  if (!window.CIRCUITS || !Array.isArray(window.CIRCUITS)) {
-    console.warn('CIRCUITS not available:', window.CIRCUITS);
+  // Buscar en circuitos oficiales y personalizados
+  const allCircuits = [...(window.CIRCUITS || []), ...(state.circuits || [])];
+  if (!allCircuits || !Array.isArray(allCircuits)) {
+    console.warn('CIRCUITS not available:', allCircuits);
     return null;
   }
-  return window.CIRCUITS.find(c => c.id === id); 
+  return allCircuits.find(c => c.id === id); 
 }
 function getCountryById(countryId) { 
   const country = COUNTRIES.find(c => c.id === countryId);
@@ -191,54 +206,19 @@ function getUpgradeById(id) {
   return window.UPGRADES.find(u => u.id === id) || window.SPONSORS.find(s => s.id === id); 
 }
 
-function enrolledPlayers() {
-  // CAMBIO: Ahora todos los pilotos existentes participan automáticamente en el campeonato
-  // return state.championship.playerIds
-  //   .map(id => getPlayerById(id))
-  //   .filter(Boolean);
-  return state.players;
-}
+// ---- FUNCTIONS NEEDED BY PLAYERS.JS ----
+// These functions are used by players.js and need to be available globally
+let toastTimer = null;
 
-function initials(name) {
-  return (name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+function uid() {
+  return Math.random().toString(36).slice(2, 6) + Math.random().toString(36).slice(2, 6);
 }
-
 
 function escHtml(str) {
   return String(str || '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// ---- STANDINGS ----
-function getStandings() {
-  const completedRaces = state.championship.calendar.filter(r => r.status === 'completed');
-  const hasCompletedRaces = completedRaces.length > 0;
-  
-  return enrolledPlayers()
-    .map(p => {
-      const points = completedRaces.reduce((sum, r) => {
-        const res = r.results.find(x => x.playerId === p.id);
-        return sum + (res ? (res.dnf ? 0 : getPoints(res.position, r.id)) : 0);
-      }, 0);
-      const wins   = completedRaces.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position === 1 && !res.dnf; }).length;
-      const podiums = completedRaces.filter(r => { const res = r.results.find(x => x.playerId === p.id); return res && res.position <= 3 && !res.dnf; }).length;
-      const racesParticipated = completedRaces.filter(r => r.results.some(x => x.playerId === p.id)).length;
-      return { player: p, points, wins, podiums, races: racesParticipated };
-    })
-    .filter(s => hasCompletedRaces ? s.points > 0 : true) // Si no hay carreras, mostrar todos; si hay, solo los con puntos
-    .sort((a, b) => {
-      if (hasCompletedRaces) {
-        // Ordenar por puntos (descendente) si hay carreras disputadas
-        return b.points - a.points;
-      } else {
-        // Ordenar alfabéticamente si no hay carreras disputadas
-        return a.player.name.localeCompare(b.player.name);
-      }
-    });
-}
-
-// ---- TOAST ----
-let toastTimer = null;
 function showToast(msg, type = 'info') {
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -248,9 +228,60 @@ function showToast(msg, type = 'info') {
   toastTimer = setTimeout(() => { el.style.display = 'none'; }, 3200);
 }
 
-// ---- MODAL ----
 function openModal(id)  { document.getElementById(id).style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+function saveState() {
+  localStorage.setItem('heat-companion-v2', JSON.stringify(state));
+}
+
+function getPointsArray(raceId = null) {
+  let basePoints;
+  if (state.championship.pointsSystem === 'custom') {
+    basePoints = state.championship.customPoints;
+  } else {
+    basePoints = window.POINTS_SYSTEMS[state.championship.pointsSystem] || window.POINTS_SYSTEMS.classic;
+  }
+  
+  // If no raceId provided, return base points
+  if (!raceId) return basePoints;
+  
+  // Find the race and apply event modifiers if any
+  const race = state.championship.calendar.find(r => r.id === raceId);
+  if (!race) return basePoints;
+  
+  const eventData = getRaceEventData(race);
+  if (!eventData.pointsOverride) return basePoints;
+  
+  // Apply modifiers to base points
+  return basePoints.map((points, index) => {
+    const modifier = eventData.pointsOverride[index] || 0;
+    return Math.max(0, points + modifier); // Ensure no negative points
+  });
+}
+
+function getPoints(position, raceId = null) {
+  const arr = getPointsArray(raceId);
+  return arr[position - 1] ?? 0;
+}
+
+function renderView(name) {
+  console.log('renderView called with:', name);
+  switch (name) {
+    case 'dashboard':    renderDashboard();    break;
+    case 'championship': renderChampionship(); break;
+    case 'circuits':     renderCircuits();     break;
+    case 'players':      renderPlayers();      break;
+    case 'standings':    renderStandings();    break;
+    case 'manual':       
+      console.log('Calling renderManual()');
+      renderManual();       
+      break;
+  }
+}
+
+// ---- STANDINGS ----
+// getStandings() moved to players.js
 
 // ---- NAVIGATION ----
 function navigateTo(viewName) {
@@ -277,46 +308,11 @@ function renderView(name) {
     case 'circuits':     renderCircuits();     break;
     case 'players':      renderPlayers();      break;
     case 'standings':    renderStandings();    break;
-    case 'manual':       renderManual();       break;
   }
 }
 
 // ============================================================
-//  RENDER: MANUAL / REFERENCE
-// ============================================================
-function renderManual() {
-  const basicsList = document.getElementById('manual-basics-list');
-  const weatherList = document.getElementById('manual-weather-list');
-
-  // Render Basics
-  basicsList.innerHTML = Object.values(window.GAME_BASICS).map(b => `
-    <div class="manual-item">
-      <div class="manual-item-header">
-        <span class="manual-item-icon">${b.emoji}</span>
-        <span class="manual-item-name">${b.name}</span>
-      </div>
-      <p class="manual-item-desc">${b.description}</p>
-      <ul class="manual-item-rules">
-        ${b.effects.map(e => `<li>${e}</li>`).join('')}
-      </ul>
-    </div>
-  `).join('');
-
-  // Render Weather
-  weatherList.innerHTML = window.WEATHER_OPTIONS.map(w => `
-    <div class="manual-item">
-      <div class="manual-item-header">
-        <span class="manual-item-icon">${w.emoji}</span>
-        <span class="manual-item-name">${w.name}</span>
-      </div>
-      <div class="manual-item-effect">
-        <div class="weather-prep"><strong>Preparación:</strong> ${w.effect.preparation}</div>
-        <div class="weather-track"><strong>Efecto de pista:</strong> ${w.effect.trackEffect}</div>
-      </div>
-    </div>
-  `).join('');
-}
-
+//  MOBILE SIDEBAR DRAWER ----
 // ---- MOBILE SIDEBAR DRAWER ----
 function openMobileSidebar() {
   document.getElementById('sidebar').classList.add('open');
@@ -329,276 +325,21 @@ function closeMobileSidebar() {
   document.body.classList.remove('sidebar-open');
 }
 
-// ---- MANUAL SECTIONS TOGGLE ----
-function toggleSection(header) {
-  const sectionCard = header.parentElement;
-  const isCollapsed = sectionCard.classList.contains('collapsed');
-  
-  if (isCollapsed) {
-    sectionCard.classList.remove('collapsed');
-    header.querySelector('.section-toggle').textContent = '▲';
-  } else {
-    sectionCard.classList.add('collapsed');
-    header.querySelector('.section-toggle').textContent = '▼';
-  }
-}
+// ---- MANUAL SECTIONS TOGGLE (moved to manual.js) ----
 
 // ============================================================
-//  RENDER: DASHBOARD
+//  RENDER: DASHBOARD (moved to dashboard.js)
 // ============================================================
-function renderDashboard() {
-  const champ = state.championship;
-  const calendar = champ.calendar;
-  const completed = calendar.filter(r => r.status === 'completed');
-  const pending   = calendar.filter(r => r.status === 'scheduled');
-
-  document.getElementById('dash-title').textContent = champ.name;
-  document.getElementById('dash-subtitle').textContent =
-    enrolledPlayers().length > 0
-      ? `${enrolledPlayers().length} piloto(s) · ${completed.length} carrera(s) disputada(s)`
-      : 'Configura el campeonato para empezar';
-
-  document.getElementById('stat-races-val').textContent   = completed.length;
-  document.getElementById('stat-pending-val').textContent  = pending.length;
-  document.getElementById('stat-players-val').textContent  = enrolledPlayers().length;
-
-  const standings = getStandings();
-  document.getElementById('stat-leader-val').textContent = standings[0]?.player.name || '—';
-
-  // Mini standings (top 5)
-  const miniEl = document.getElementById('dash-standings-list');
-  if (standings.length === 0) {
-    miniEl.innerHTML = '<div style="color:var(--text-dim);font-size:13px;text-align:center;padding:16px">Inscribe pilotos en el campeonato para ver la clasificación</div>';
-  } else {
-    miniEl.innerHTML = standings.slice(0, 5).map((s, i) => {
-      const pos = i + 1;
-      return `<div class="mini-standing-row">
-        <div class="mini-pos pos-${pos <= 3 ? pos : ''}">${pos <= 3 ? ['🥇','🥈','🥉'][pos-1] : pos}</div>
-        <div class="mini-car-dot" style="background:${s.player.color}"></div>
-        <div class="mini-name">${escHtml(s.player.name)}</div>
-        <span class="mini-pts">${s.points}</span><span class="mini-pts-label"> pts</span>
-      </div>`;
-    }).join('');
-  }
-
-  // Recent / upcoming races (show last 2 completed + next 2 pending)
-  const recentEl = document.getElementById('dash-recent-races');
-  const shown = [...completed.slice(-3).reverse(), ...pending.slice(0, 3)];
-  if (shown.length === 0) {
-    recentEl.innerHTML = '<div style="color:var(--text-dim);font-size:13px;text-align:center;padding:16px">No hay carreras en el calendario</div>';
-  } else {
-    recentEl.innerHTML = shown.map(race => {
-      const circuit = getCircuitById(race.circuitId);
-      const winner  = race.results.find(r => r.position === 1);
-      const winnerP = winner ? getPlayerById(winner.playerId) : null;
-      const isPending = race.status === 'scheduled';
-      return `<div class="recent-race-row" data-cal-race-id="${race.id}">
-        <div class="race-flag">${circuit ? (getCountryById(circuit.countryId)?.flag || '🏁') : '🏁'}</div>
-        <div class="race-info">
-          <div class="race-info-name">${escHtml(getCircuitName(circuit))}</div>
-          <div class="race-info-meta">
-            <span class="race-info-laps">🏁 ${race.laps || 3} vueltas</span>
-            ${circuit ? `<span class="race-info-spaces">📏 ${circuit.spaces || 0} casillas</span>` : ''}
-            ${circuit ? `<span class="race-info-curves">⤵ ${circuit.curves || 0} curvas</span>` : ''}
-            ${race.mods?.weather ? `<span class="race-info-weather">${window.WEATHER_OPTIONS.find(w => w.id === race.weatherType)?.emoji || '🌧'} ${window.WEATHER_OPTIONS.find(w => w.id === race.weatherType)?.name || 'Clima'}</span>` : ''}
-          </div>
-        </div>
-        ${isPending
-          ? `<span class="race-status-badge pending">Pendiente</span>`
-          : winnerP
-            ? `<div class="race-winner"><div class="race-winner-dot" style="background:${winnerP.color}"></div>${escHtml(winnerP.name)}</div>`
-            : ''
-        }
-      </div>`;
-    }).join('');
-  }
-}
 
 // ============================================================
-//  RENDER: CHAMPIONSHIP
+//  RENDER: CHAMPIONSHIP (moved to championship.js)
 // ============================================================
-function renderChampionship() {
-  const champ = state.championship;
-  document.getElementById('champ-view-name').textContent = champ.name;
-  document.getElementById('champ-view-sub').textContent  =
-    `${champ.calendar.length} carrera(s) en calendario`;
 
-  // --- Calendar ---
-  const listEl  = document.getElementById('calendar-list');
-  const emptyEl = document.getElementById('calendar-empty');
-
-  if (champ.calendar.length === 0) {
-    listEl.innerHTML = '';
-    emptyEl.style.display = 'block';
-  } else {
-    emptyEl.style.display = 'none';
-    listEl.innerHTML = champ.calendar.map((race, i) => {
-      const circuit   = getCircuitById(race.circuitId);
-      const completed = race.status === 'completed';
-      const mods      = [];
-      if (race.mods?.weather) {
-        const wOpt = window.WEATHER_OPTIONS.find(w => w.id === race.weatherType);
-        mods.push(`${wOpt?.emoji || '🌧'} ${wOpt?.name || 'Clima'}`);
-      }
-
-      let podiumHtml = '';
-      if (completed) {
-        const top3 = race.results.sort((a, b) => a.position - b.position).slice(0, 3);
-        podiumHtml = `<div class="cal-podium">${top3.map((r, j) => {
-          const p = getPlayerById(r.playerId);
-          return p ? `<div class="cal-podium-chip p${j+1}"><div class="podium-chip-dot" style="background:${p.color}"></div>${escHtml(p.name)}</div>` : '';
-        }).join('')}</div>`;
-      }
-
-      return `<div class="cal-race-row ${completed ? 'completed' : ''}" 
-                   data-cal-race-id="${race.id}" 
-                   data-idx="${i}"
-                   draggable="${!completed}">
-        <div class="cal-race-num">
-          <div>${i + 1}</div>
-          ${!completed ? `
-          <div class="cal-order-btns">
-            <button class="btn-order" data-move-up="${race.id}" ${i === 0 ? 'disabled' : ''}>▲</button>
-            <button class="btn-order" data-move-down="${race.id}" ${i === champ.calendar.length - 1 ? 'disabled' : ''}>▼</button>
-          </div>` : ''}
-        </div>
-        <div class="cal-race-flag">${circuit ? (getCountryById(circuit.countryId)?.flag || '🏁') : '🏁'}</div>
-        <div class="cal-race-info">
-          <div class="cal-race-name">${escHtml(circuit?.country || getCircuitName(circuit))}</div>
-          <div class="cal-race-event" style="font-size: smaller">${escHtml(getRaceEventData(race).name)}</div>
-          <div class="cal-race-meta">
-            <span>🏁 Vueltas: ${race.laps || 3}</span>
-            ${race.setup?.sponsors !== undefined ? `<span>📋 Patrocinios: ${race.setup.sponsors}</span>` : ''}
-            ${race.setup?.press ? `<span>🎥 Prensa: ${race.setup.press}</span>` : ''}
-            ${mods.length ? `<span class="cal-mods">${mods.join(' ')}</span>` : '<span style="color:var(--text-dim)">Sin módulos</span>'}
-          </div>
-          ${podiumHtml}
-        </div>
-        <div class="cal-race-actions">
-          ${completed
-            ? `<span class="race-status-badge completed"> Completada </span>
-               <button class="btn-cal-action" data-view-result="${race.id}">Ver</button>`
-            : `<span class="race-status-badge pending"> Pendiente </span>
-               <button class="btn-cal-action" data-edit-cal-race="${race.id}" title="Editar carrera">✎</button>
-               <button class="btn-cal-action primary" data-enter-result="${race.id}">Registrar resultado</button>`
-          }
-          <button class="btn-cal-delete" data-delete-cal-race="${race.id}" title="Eliminar carrera">✕</button>
-        </div>
-      </div>`;
-    }).join('');
-
-    // --- Add Drag & Drop Listeners ---
-    addCalendarDragListeners(listEl);
-  }
-}
-
-
-function addCalendarDragListeners(listEl) {
-  listEl.addEventListener('dragstart', e => {
-    const row = e.target.closest('.cal-race-row');
-    if (!row || row.classList.contains('completed')) { e.preventDefault(); return; }
-    row.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-  });
-
-  listEl.addEventListener('dragover', e => {
-    e.preventDefault();
-    const dragging = listEl.querySelector('.dragging');
-    const afterElement = getDragAfterElement(listEl, e.clientY);
-    
-    if (afterElement == null) {
-      listEl.appendChild(dragging);
-    } else {
-      listEl.insertBefore(dragging, afterElement);
-    }
-  });
-
-  listEl.addEventListener('dragend', e => {
-    const dragging = e.target.closest('.cal-race-row');
-    if (dragging) dragging.classList.remove('dragging');
-    
-    // Save new order
-    const newOrderIds = [...listEl.querySelectorAll('.cal-race-row')].map(el => el.dataset.calRaceId);
-    
-    // Build new calendar array based on IDs
-    const oldCalendar = [...state.championship.calendar];
-    const newCalendar = newOrderIds.map(id => oldCalendar.find(r => r.id === id));
-    
-    // Safety: ensure completed races haven't changed position relative to each other
-    // and are still at the top (or wherever they were)
-    // Actually, just compare if status changed or position of completed changed
-    const completedIndicesOld = oldCalendar.map((r, i) => r.status === 'completed' ? i : -1).filter(i => i !== -1);
-    const completedIndicesNew = newCalendar.map((r, i) => r.status === 'completed' ? i : -1).filter(i => i !== -1);
-    
-    const isOrderSafe = completedIndicesOld.every((val, i) => val === completedIndicesNew[i]);
-    
-    if (isOrderSafe) {
-      state.championship.calendar = newCalendar;
-      saveState();
-    }
-    
-    renderChampionship();
-  });
-}
-
-function getDragAfterElement(container, y) {
-  // Only consider pending races as valid drop targets to simplify
-  const draggableElements = [...container.querySelectorAll('.cal-race-row:not(.dragging):not(.completed)')];
-
-  return draggableElements.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    if (offset < 0 && offset > closest.offset) {
-      return { offset: offset, element: child };
-    } else {
-      return closest;
-    }
-  }, { offset: Number.NEGATIVE_INFINITY }).element;
-}
+// Calendar drag & drop functions moved to championship.js
 
 // ============================================================
-//  RENDER: PLAYERS
+//  RENDER: PLAYERS (moved to players.js)
 // ============================================================
-function renderPlayers() {
-  const grid  = document.getElementById('players-grid');
-  const empty = document.getElementById('players-empty');
-
-  if (state.players.length === 0) {
-    grid.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
-
-  empty.style.display = 'none';
-  const pts = getPointsArray();
-  grid.innerHTML = state.players.map(p => {
-    const points  = state.championship.calendar
-      .filter(r => r.status === 'completed')
-      .reduce((sum, r) => { const res = r.results.find(x => x.playerId === p.id); return sum + (res ? (res.dnf ? 0 : getPoints(res.position, r.id)) : 0); }, 0);
-    const enrolled = state.championship.playerIds.includes(p.id);
-
-    // DESHABILITADO TEMPORALMENTE: Visualización de mejoras
-    // const upgBadges = (p.upgrades || []).map(uid => {
-    //   const u = getUpgradeById(uid);
-    //   return u ? `<span class="player-upg-badge ${u.category === 'Patrocinio' ? 'sponsor' : ''}" title="${u.description}">${u.emoji} ${u.name}</span>` : '';
-    // }).join('');
-
-    return `<div class="player-card" style="--player-color:${p.color}">
-      ${enrolled ? '<div class="player-enrolled-dot" title="Inscrito en el campeonato"></div>' : ''}
-      <div class="player-avatar" style="background:${p.color}">${escHtml(p.icon || initials(p.name))}</div>
-      <div class="player-name">
-        ${escHtml(p.name)}
-        ${p.isLegend ? '<span class="legend-badge">🤖</span>' : ''}
-      </div>
-      <div class="player-stats">${points} pts</div>
-      <!-- DESHABILITADO TEMPORALMENTE: Visualización de mejoras -->
-      <div class="player-card-actions">
-        <button class="btn-icon btn-icon-edit" data-edit-player="${p.id}">✎ Editar</button>
-        <button class="btn-icon btn-icon-del" data-del-player="${p.id}">🗑</button>
-      </div>
-    </div>`;
-  }).join('');
-}
 
 // ============================================================
 //  RENDER: STANDINGS
@@ -663,484 +404,16 @@ function renderStandings() {
 }
 
 // ============================================================
-//  CHAMPIONSHIP MODAL
+//  CHAMPIONSHIP MODAL (moved to championship.js)
 // ============================================================
-function openChampModal() {
-  const completedRaces = state.championship.calendar.filter(r => r.status === 'completed');
-  const hasCompletedRaces = completedRaces.length > 0;
-  
-  document.getElementById('champ-name-input').value = state.championship.name;
-  document.getElementById('champ-points-select').value = state.championship.pointsSystem;
-  
-  // Bloquear sistema de puntos si hay carreras completadas
-  const pointsSelect = document.getElementById('champ-points-select');
-  const pointsCustom = document.getElementById('champ-points-custom');
-  
-  if (hasCompletedRaces) {
-    pointsSelect.disabled = true;
-    pointsCustom.disabled = true;
-    
-    // Mostrar mensaje de bloqueo
-    let warningMsg = document.getElementById('points-system-warning');
-    if (!warningMsg) {
-      warningMsg = document.createElement('div');
-      warningMsg.id = 'points-system-warning';
-      warningMsg.className = 'form-warning';
-      warningMsg.innerHTML = `⚠️ <strong>Sistema de puntos bloqueado</strong><br>No se puede cambiar el sistema de puntuación después de disputar la primera carrera.`;
-      pointsSelect.parentNode.insertBefore(warningMsg, pointsSelect.nextSibling);
-    }
-  } else {
-    pointsSelect.disabled = false;
-    pointsCustom.disabled = false;
-    
-    // Ocultar mensaje de bloqueo si existe
-    const warningMsg = document.getElementById('points-system-warning');
-    if (warningMsg) {
-      warningMsg.remove();
-    }
-  }
-  
-  toggleCustomPoints(state.championship.pointsSystem);
-  openModal('modal-champ');
-}
-
-function toggleCustomPoints(val) {
-  document.getElementById('champ-points-custom').style.display = val === 'custom' ? 'block' : 'none';
-}
-
-document.getElementById('champ-points-select').addEventListener('change', e => toggleCustomPoints(e.target.value));
-
-document.getElementById('btn-save-champ').addEventListener('click', () => {
-  const completedRaces = state.championship.calendar.filter(r => r.status === 'completed');
-  const hasCompletedRaces = completedRaces.length > 0;
-  
-  const name = document.getElementById('champ-name-input').value.trim();
-  const pts  = document.getElementById('champ-points-select').value;
-  
-  if (!name) { showToast('Introduce un nombre para el campeonato', 'error'); return; }
-  
-  // Si hay carreras completadas, no permitir cambiar el sistema de puntos
-  if (hasCompletedRaces && pts !== state.championship.pointsSystem) {
-    showToast('No se puede cambiar el sistema de puntos después de disputar carreras', 'error');
-    return;
-  }
-
-  state.championship.name         = name;
-  state.championship.pointsSystem = pts;
-  if (pts === 'custom') {
-    const arr = document.getElementById('champ-points-custom').value
-      .split(',').map(x => parseInt(x.trim(), 10)).filter(n => !isNaN(n));
-    if (!arr.length) { showToast('Introduce los puntos correctamente', 'error'); return; }
-    state.championship.customPoints = arr;
-  }
-
-  saveState();
-  renderSidebarChamp();
-  closeModal('modal-champ');
-  showToast('Configuración guardada', 'success');
-  renderView('dashboard');
-  renderView('championship');
-});
 
 // ============================================================
-//  RENDER: CIRCUITS
+//  RENDER: CIRCUITS (moved to circuits.js)
 // ============================================================
-function renderCircuits() {
-  const grid = document.getElementById('circuits-grid');
-  const empty = document.getElementById('circuits-empty');
-
-  if (window.CIRCUITS.length === 0) {
-    grid.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
-
-  empty.style.display = 'none';
-  grid.innerHTML = window.CIRCUITS.map(c => {
-    console.log('Rendering circuit:', c);
-    const country = getCountryById(c.countryId);
-    console.log('Country found:', country);
-    return `<div class="circuit-card" data-circuit-id="${c.id}">
-      <div class="circuit-flag">${country ? country.flag : '🏁'}</div>
-      <div class="circuit-country">${country ? escHtml(country.name) : ''}</div>
-      <div class="circuit-name">${escHtml(c.name) || '---'}</div>
-      ${c.expansion ? `<div class="diff-badge ${c.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-')}">${escHtml(c.expansion)}</div>` : ''}
-      <div class="circuit-details">
-        ${c.spaces ? `<div>🎯 ${c.spaces} espacios</div>` : ''}
-        ${c.curves ? `<div>🔄 ${c.curves} curvas</div>` : ''}
-        ${c.laps ? `<div>🏁 ${c.laps} vueltas</div>` : ''}
-      </div>
-      <div class="circuit-card-actions">
-        <button class="btn-icon btn-icon-edit" data-edit-circuit="${c.id}">✎ Editar</button>
-        <button class="btn-icon btn-icon-del" data-del-circuit="${c.id}">🗑</button>
-      </div>
-    </div>`;
-  }).join('');
-}
 
 // ============================================================
-//  CIRCUIT MODAL
+//  CIRCUIT MODAL (moved to circuits.js)
 // ============================================================
-function openCircuitModal(circuitId = null) {
-  editingCircuitId = circuitId;
-  const nameInput = document.getElementById('circuit-name-input');
-  const countrySelect = document.getElementById('circuit-country-select');
-  const descriptionInput = document.getElementById('circuit-description-input');
-  const spacesInput = document.getElementById('circuit-spaces-input');
-  const curvesInput = document.getElementById('circuit-curves-input');
-  const lapsInput = document.getElementById('circuit-laps-input');
-
-  // Populate country options
-  countrySelect.innerHTML = '<option value="">Selecciona un país...</option>' + 
-    COUNTRIES.map(c => `<option value="${c.id}">${c.flag} ${c.name}</option>`).join('');
-
-  if (circuitId) {
-    const circuit = window.CIRCUITS.find(c => c.id === circuitId);
-    const country = getCountryById(circuit.countryId);
-    document.getElementById('modal-circuit-title').textContent = 'Editar circuito';
-    nameInput.value = circuit.name || '';
-    countrySelect.value = circuit.countryId || '';
-    descriptionInput.value = circuit.description || '';
-    spacesInput.value = circuit.spaces || '';
-    curvesInput.value = circuit.curves || '';
-    lapsInput.value = circuit.laps || '';
-  } else {
-    document.getElementById('modal-circuit-title').textContent = 'Añadir circuito';
-    nameInput.value = '';
-    countrySelect.value = '';
-    descriptionInput.value = '';
-    spacesInput.value = '';
-    curvesInput.value = '';
-    lapsInput.value = '';
-  }
-
-  openModal('modal-circuit');
-  setTimeout(() => nameInput.focus(), 100);
-}
-
-function saveCircuit() {
-  const name = document.getElementById('circuit-name-input').value.trim();
-  const countryId = document.getElementById('circuit-country-select').value;
-  const flag = document.getElementById('circuit-flag-input').value.trim();
-  const description = document.getElementById('circuit-description-input').value.trim();
-  const spaces = parseInt(document.getElementById('circuit-spaces-input').value) || null;
-  const curves = parseInt(document.getElementById('circuit-curves-input').value) || null;
-  const laps = parseInt(document.getElementById('circuit-laps-input').value) || null;
-
-  if (!name) { showToast('Introduce un nombre para el circuito', 'error'); return; }
-  if (!countryId) { showToast('Selecciona un país para el circuito', 'error'); return; }
-
-  const circuitData = {
-    id: editingCircuitId || uid(),
-    name,
-    countryId,
-    flag: flag || '',
-    description,
-    spaces,
-    curves,
-    laps
-  };
-
-  if (editingCircuitId) {
-    const idx = window.CIRCUITS.findIndex(c => c.id === editingCircuitId);
-    window.CIRCUITS[idx] = circuitData;
-    showToast('Circuito actualizado ✓', 'success');
-  } else {
-    window.CIRCUITS.push(circuitData);
-    showToast(`${name} añadido ✓`, 'success');
-  }
-
-  closeModal('modal-circuit');
-  renderCircuits();
-}
-
-function deleteCircuit(circuitId) {
-  const circuit = window.CIRCUITS.find(c => c.id === circuitId);
-  if (!confirm(`¿Eliminar ${circuit.name}?\n\nEsta acción no se puede deshacer.`)) return;
-  
-  window.CIRCUITS = window.CIRCUITS.filter(c => c.id !== circuitId);
-  showToast('Circuito eliminado', 'info');
-  renderCircuits();
-}
-
-// ============================================================
-//  PLAYER MODAL (with upgrades)
-// ============================================================
-let editingPlayerId    = null;
-let selectedPlayerColor = '#e63b2e';
-let editingCircuitId   = null;
-
-// DESHABILITADO TEMPORALMENTE: Gestión de mejoras
-// function buildPlayerUpgradesUI(selectedUpgrades = []) {
-//   const container = document.getElementById('player-upgrades-container');
-//   
-//   const techCategories = ["Velocidad", "Refrigeración", "Manejo", "Táctica"];
-
-//   function renderGroup(title, items, icon, isSponsor = false) {
-//     if (items.length === 0) return '';
-    
-//     // Group items by category if it's Technical, otherwise it's just one list for Sponsors
-//     let content = '';
-//     if (!isSponsor) {
-//       content = techCategories.map(cat => {
-//         const catUpgrades = items.filter(u => u.category === cat);
-//         if (catUpgrades.length === 0) return '';
-//         return `<div style="margin-bottom:12px">
-//           <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:6px">${cat}</div>
-//           <div class="upgrades-grid-small">
-//             ${catUpgrades.map(u => `
-//               <div class="upgrade-chip ${selectedUpgrades.includes(u.id) ? 'selected' : ''}"
-//                 data-upgrade-id="${u.id}" title="${u.description}">
-//                 ${u.emoji} ${u.name}
-//               </div>`).join('')}
-//           </div>
-//         </div>`;
-//       }).join('');
-//     } else {
-//       content = `<div class="upgrades-grid-small">
-//         ${items.map(u => `
-//           <div class="upgrade-chip sponsor ${selectedUpgrades.includes(u.id) ? 'selected' : ''}"
-//             data-upgrade-id="${u.id}" title="${u.description}">
-//             ${u.emoji} ${u.name}
-//           </div>`).join('')}
-//       </div>`;
-//     }
-
-//     return `
-//       <div class="upgrade-modal-group collapsed" data-group-type="${isSponsor ? 'sponsor' : 'tech'}">
-//         <div class="upgrade-modal-group-title" onclick="this.parentElement.classList.toggle('collapsed')">
-//           ${icon} ${title}
-//           <span class="upgrade-count-badge" id="count-${isSponsor ? 'sponsor' : 'tech'}">0 / ${isSponsor ? 5 : 3}</span>
-//           <span class="collapse-icon">▼</span>
-//         </div>
-//         <div class="upgrade-modal-group-content">
-//           ${content}
-//         </div>
-//       </div>`;
-//   }
-
-//   container.innerHTML = 
-//     renderGroup('Mejoras de Garaje (Boxes)', window.UPGRADES, '🔧') +
-//     renderGroup('Patrocinios Permanentes', window.SPONSORS, '💰', true);
-
-//   // updateUpgradeCount();
-// }
-
-// DESHABILITADO TEMPORALMENTE: Gestión de mejoras
-// function updateUpgradeCount() {
-//   const techCount = document.querySelectorAll('#player-upgrades-container [data-group-type="tech"] .upgrade-chip.selected').length;
-//   const sponsorCount = document.querySelectorAll('#player-upgrades-container [data-group-type="sponsor"] .upgrade-chip.selected').length;
-
-//   const techBadge = document.getElementById('count-tech');
-//   const sponsorBadge = document.getElementById('count-sponsor');
-
-//   if (techBadge) {
-//     techBadge.textContent = `${techCount} / 3`;
-//     techBadge.style.color = techCount >= 3 ? 'var(--success)' : 'var(--text-dim)';
-//   }
-//   if (sponsorBadge) {
-//     sponsorBadge.textContent = `${sponsorCount} / 5`;
-//     sponsorBadge.style.color = sponsorCount >= 5 ? 'var(--success)' : 'var(--text-dim)';
-//   }
-// }
-
-// DESHABILITADO TEMPORALMENTE: Event listener de mejoras
-// document.getElementById('player-upgrades-container').addEventListener('click', e => {
-//   const chip = e.target.closest('.upgrade-chip');
-//   if (!chip) return;
-//   const group = chip.closest('.upgrade-modal-group');
-//   const groupType = group.dataset.groupType;
-//   const maxItems = groupType === 'sponsor' ? 5 : 3;
-//   const currentlySelected = group.querySelectorAll('.upgrade-chip.selected').length;
-  
-//   if (chip.classList.contains('selected')) {
-//     chip.classList.remove('selected');
-//   } else {
-//     if (currentlySelected >= maxItems) {
-//       const typeName = groupType === 'sponsor' ? 'patrocinios' : 'mejoras técnicas';
-//       showToast(`Máximo ${maxItems} ${typeName} permitidos`, 'error');
-//       return;
-//     }
-//     chip.classList.add('selected');
-//   }
-  
-//   // updateUpgradeCount();
-// });
-
-function openPlayerModal(playerId = null) {
-  editingPlayerId = playerId;
-  const nameInput = document.getElementById('player-name-input');
-  const iconInput = document.getElementById('player-icon-input');
-  let currentUpgrades = [];
-
-  if (playerId) {
-    const p = getPlayerById(playerId);
-    document.getElementById('modal-player-title').textContent = 'Editar piloto';
-    nameInput.value       = p.name;
-    iconInput.value       = p.icon || '';
-    document.getElementById('player-is-legend').checked = p.isLegend || false;
-    selectedPlayerColor   = p.color;
-    currentUpgrades       = p.upgrades || [];
-  } else {
-    document.getElementById('modal-player-title').textContent = 'Añadir piloto';
-    nameInput.value = '';
-    iconInput.value = '';
-    document.getElementById('player-is-legend').checked = false;
-    selectedPlayerColor = '#e63b2e';
-  }
-
-  document.querySelectorAll('.color-option').forEach(el =>
-    el.classList.toggle('selected', el.dataset.color === selectedPlayerColor)
-  );
-
-  // Actualizar opciones de color para mostrar los usados
-  updateColorOptions();
-
-  // Agregar validación en tiempo real para el icono
-  const playerIconInput = document.getElementById('player-icon-input');
-  playerIconInput.addEventListener('input', updateIconValidation);
-  updateIconValidation(); // Validar estado inicial
-
-  // DESHABILITADO TEMPORALMENTE: Construir UI de mejoras
-  // buildPlayerUpgradesUI(currentUpgrades);
-  openModal('modal-player');
-  setTimeout(() => nameInput.focus(), 100);
-}
-
-function updateColorOptions() {
-  const usedColors = state.players
-    .filter(p => p.id !== editingPlayerId) // Excluir el piloto que se está editando
-    .map(p => p.color);
-  
-  document.querySelectorAll('.color-option').forEach(el => {
-    const color = el.dataset.color;
-    const isUsed = usedColors.includes(color);
-    
-    // Quitar o añadir clases según el estado
-    el.classList.toggle('color-used', isUsed);
-    el.classList.toggle('color-disabled', isUsed && editingPlayerId === null); // Solo deshabilitar al crear nuevo
-    
-    // Si el color está en uso y no es el piloto actual, no permitir selección
-    if (isUsed && !usedColors.includes(selectedPlayerColor)) {
-      el.style.opacity = '0.3';
-      el.style.cursor = 'not-allowed';
-      el.title = `Color ya usado por ${state.players.find(p => p.color === color)?.name}`;
-    } else {
-      el.style.opacity = '';
-      el.style.cursor = '';
-      el.title = el.title.replace(/Color ya usado por .*/, '') || el.getAttribute('title') || '';
-    }
-  });
-}
-
-function updateIconValidation() {
-  const usedIcons = state.players
-    .filter(p => p.id !== editingPlayerId) // Excluir el piloto que se está editando
-    .map(p => p.icon);
-  
-  const iconInput = document.getElementById('player-icon-input');
-  const currentIcon = iconInput.value.trim();
-  const isUsed = usedIcons.includes(currentIcon);
-  
-  // Actualizar estilo del input según si está en uso
-  if (isUsed && currentIcon) {
-    iconInput.style.borderColor = 'var(--error)';
-    iconInput.title = `Número/icono ya usado por ${state.players.find(p => p.icon === currentIcon)?.name}`;
-  } else {
-    iconInput.style.borderColor = '';
-    iconInput.title = '';
-  }
-}
-
-document.querySelectorAll('.color-option').forEach(el => {
-  el.addEventListener('click', () => {
-    const color = el.dataset.color;
-    const colorConflict = state.players.find(p => p.color === color && p.id !== editingPlayerId);
-    
-    if (colorConflict) {
-      showToast(`El color ya lo usa ${colorConflict.name}`, 'error');
-      return; // No permitir seleccionar el color
-    }
-    
-    selectedPlayerColor = color;
-    document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
-    el.classList.add('selected');
-  });
-});
-
-document.getElementById('btn-save-circuit').addEventListener('click', saveCircuit);
-
-// Country change listener
-document.getElementById('circuit-country-select').addEventListener('change', () => {
-  const countryId = document.getElementById('circuit-country-select').value;
-  const country = getCountryById(countryId);
-  const flagInput = document.getElementById('circuit-flag-input');
-  if (flagInput) {
-    flagInput.value = country ? country.flag : '🏁';
-  }
-});
-
-document.getElementById('btn-save-player').addEventListener('click', () => {
-  const name = document.getElementById('player-name-input').value.trim();
-  const icon = document.getElementById('player-icon-input').value.trim();
-  if (!name) { showToast('Introduce un nombre para el piloto', 'error'); return; }
-  if (!icon) { showToast('Introduce un número para el piloto', 'error'); return; }
-
-  const colorConflict = state.players.find(p => p.color === selectedPlayerColor && p.id !== editingPlayerId);
-  if (colorConflict) { showToast(`El color ya lo usa ${colorConflict.name}`, 'error'); return; }
-
-  // Validar que el número no se repita y que sea solo números
-  const iconConflict = state.players.find(p => p.icon === icon && p.id !== editingPlayerId);
-  if (iconConflict) { showToast(`El número ya lo usa ${iconConflict.name}`, 'error'); return; }
-  
-  // Validar que solo sean números
-  if (!/^\d+$/.test(icon)) {
-    showToast('El número solo puede contener dígitos (0-9)', 'error'); return;
-  }
-
-  // DESHABILITADO TEMPORALMENTE: Guardar mejoras
-  // const upgrades = [...document.querySelectorAll('#player-upgrades-container .upgrade-chip.selected')]
-  //   .map(el => el.dataset.upgradeId);
-  // const upgrades = []; // Mantener vacío para no perder datos existentes
-  
-  // PRESERVAR MEJORAS EXISTENTES: No modificar el array de mejoras al guardar
-  let upgrades = [];
-  if (editingPlayerId) {
-    // Si editamos, mantener las mejoras existentes
-    const existingPlayer = state.players.find(p => p.id === editingPlayerId);
-    upgrades = existingPlayer?.upgrades || [];
-  } else {
-    // Si es nuevo, empezar sin mejoras
-    upgrades = [];
-  }
-  
-  const isLegend = document.getElementById('player-is-legend').checked;
-
-  if (editingPlayerId) {
-    const idx = state.players.findIndex(p => p.id === editingPlayerId);
-    state.players[idx] = { ...state.players[idx], name, color: selectedPlayerColor, icon, upgrades, isLegend };
-    showToast('Piloto actualizado ✓', 'success');
-  } else {
-    state.players.push({ id: uid(), name, color: selectedPlayerColor, icon, upgrades, isLegend });
-    showToast(`${name} añadido ✓`, 'success');
-  }
-
-  saveState();
-  closeModal('modal-player');
-  renderView('players');
-  renderView('championship');
-});
-
-function deletePlayer(playerId) {
-  const p = getPlayerById(playerId);
-  if (!confirm(`¿Eliminar a ${p.name}? Sus resultados en carreras se conservarán pero sin nombre.`)) return;
-  state.players = state.players.filter(x => x.id !== playerId);
-  state.championship.playerIds = state.championship.playerIds.filter(id => id !== playerId);
-  saveState();
-  renderView('players');
-  renderView('championship');
-  showToast('Piloto eliminado', 'info');
-}
 
 // DESHABILITADO: Ya no se necesita inscripción manual, todos los pilotos participan automáticamente
 // // ============================================================
@@ -1210,12 +483,23 @@ function openAddRaceModal(raceId = null) {
 
   // render circuits
   const grid = document.getElementById('add-race-circuits-grid');
-  grid.innerHTML = window.CIRCUITS.map(c => {
+  // Combinar circuitos oficiales con personalizados
+  const allCircuits = [...(window.CIRCUITS || []), ...(state.circuits || [])];
+  grid.innerHTML = allCircuits.map(c => {
     const country = getCountryById(c.countryId);
+    // Determinar el badge
+    let badgeHtml = '';
+    if (c.expansion) {
+      const badgeClass = c.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+      badgeHtml = `<div class="diff-badge ${badgeClass}">${escHtml(c.expansion)}</div>`;
+    } else if (!['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(c.expansion)) {
+      badgeHtml = `<div class="diff-badge personalizado">Personalizado</div>`;
+    }
+    
     return `<div class="circuit-card ${c.id === addRaceSelectedCircuit ? 'selected' : ''}" data-circuit="${c.id}">
       <div class="circuit-flag">${country ? country.flag : '🏁'}</div>
       <div class="circuit-name">${c.name || (country ? country.name : '')}</div>
-      ${c.expansion ? `<div class="diff-badge ${c.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-')}">${escHtml(c.expansion)}</div>` : ''}
+      ${badgeHtml}
       <div class="circuit-info-stats">
         <span>🏁 ${c.laps} vueltas</span>
         <span>⤵ ${c.curves} curvas</span>
@@ -1335,129 +619,9 @@ document.getElementById('btn-save-cal-race').addEventListener('click', () => {
   renderView('dashboard');
 });
 
-//  ENTER RACE RESULTS
 // ============================================================
-let resultsRaceId    = null;
-let resultsOrder     = []; // [{playerId}]
-let resultsDragSrcIdx = null;
-
-function openResultsModal(raceId) {
-  resultsRaceId = raceId;
-  const race    = state.championship.calendar.find(r => r.id === raceId);
-  if (!race) return;
-
-  const circuit = getCircuitById(race.circuitId);
-  document.getElementById('modal-results-title').textContent =
-    `Registrar resultado — ${circuit?.flag || ''} ${getCircuitName(circuit)}`;
-
-  // Build starting order: if already has results, use them; else standings order
-  if (race.status === 'completed' && race.results.length > 0) {
-    resultsOrder = race.results.map(r => ({ playerId: r.playerId, dnf: r.dnf || false }));
-    // add any enrolled players not in results
-    enrolledPlayers().forEach(p => {
-      if (!resultsOrder.find(r => r.playerId === p.id)) resultsOrder.push({ playerId: p.id, dnf: false });
-    });
-  } else {
-    const standing = getStandings();
-    const ep = enrolledPlayers();
-    // prefer standings order, fallback to enrolled order
-    resultsOrder = ep.map(p => ({ playerId: p.id, dnf: false }));
-  }
-
-  renderResultsSortable();
-  openModal('modal-results');
-}
-
-function renderResultsSortable() {
-  const list = document.getElementById('results-sortable-list');
-  const pts  = getPointsArray(resultsRaceId);
-
-  list.innerHTML = resultsOrder.map((entry, i) => {
-    const player = getPlayerById(entry.playerId);
-    if (!player) return '';
-    const pos   = i + 1;
-    const earnedPts = entry.dnf ? 0 : (pts[i] ?? 0);
-    return `<div class="result-row" draggable="true" data-player-id="${entry.playerId}" data-idx="${i}">
-      <div class="result-pos pos-${pos <= 3 ? pos : ''}">${pos}º</div>
-      <div class="result-avatar" style="background:${player.color}">${escHtml(player.icon || initials(player.name))}</div>
-      <div class="result-name">${escHtml(player.name)}</div>
-      <div class="result-pts-preview" id="rpts-${i}">${earnedPts + ' pts'}</div>
-      <div class="result-dnf-container">
-        <label class="checkbox-label">
-          <input type="checkbox" class="result-dnf-checkbox" data-idx="${i}" ${entry.dnf ? 'checked' : ''}>
-          DNF
-        </label>
-      </div>
-      <div class="result-move-btns">
-        <button class="result-move-btn" data-move="up" data-idx="${i}">▲</button>
-        <button class="result-move-btn" data-move="down" data-idx="${i}">▼</button>
-      </div>
-    </div>`;
-  }).join('');
-
-  setupResultsDragDrop('results-sortable-list', resultsOrder, () => renderResultsSortable());
-
-  // Add DNF checkbox event listeners
-  list.querySelectorAll('.result-dnf-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', () => {
-      const idx = parseInt(checkbox.dataset.idx);
-      resultsOrder[idx].dnf = checkbox.checked;
-      // Update points preview
-      const ptsPreview = document.getElementById(`rpts-${idx}`);
-      const earnedPts = checkbox.checked ? 0 : (getPointsArray(resultsRaceId)[idx] ?? 0);
-      ptsPreview.textContent = earnedPts + ' pts';
-      ptsPreview.style.color = checkbox.checked ? 'var(--text-dim)' : '';
-    });
-  });
-
-  list.querySelectorAll('.result-move-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx    = parseInt(btn.dataset.idx);
-      const newIdx = btn.dataset.move === 'up' ? idx - 1 : idx + 1;
-      if (newIdx < 0 || newIdx >= resultsOrder.length) return;
-      [resultsOrder[idx], resultsOrder[newIdx]] = [resultsOrder[newIdx], resultsOrder[idx]];
-      renderResultsSortable();
-    });
-  });
-}
-
-function setupResultsDragDrop(listId, orderArr, rerenderFn) {
-  const rows = document.querySelectorAll(`#${listId} .result-row`);
-  let dragSrc = null;
-  rows.forEach(row => {
-    row.addEventListener('dragstart', () => { dragSrc = parseInt(row.dataset.idx); row.style.opacity = '0.5'; });
-    row.addEventListener('dragend',   () => { row.style.opacity = '1'; });
-    row.addEventListener('dragover',  e => { e.preventDefault(); row.classList.add('drag-over'); });
-    row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
-    row.addEventListener('drop', e => {
-      e.preventDefault(); row.classList.remove('drag-over');
-      const dropIdx = parseInt(row.dataset.idx);
-      if (dragSrc === null || dragSrc === dropIdx) return;
-      const moved = orderArr.splice(dragSrc, 1)[0];
-      orderArr.splice(dropIdx, 0, moved);
-      dragSrc = null;
-      rerenderFn();
-    });
-  });
-}
-
-document.getElementById('btn-save-results').addEventListener('click', () => {
-  const race = state.championship.calendar.find(r => r.id === resultsRaceId);
-  if (!race) return;
-
-  race.results = resultsOrder.map((entry, i) => ({
-    playerId: entry.playerId,
-    position: i + 1,
-    dnf: entry.dnf || false
-  }));
-  race.status = 'completed';
-
-  saveState();
-  closeModal('modal-results');
-  renderView('championship');
-  renderView('dashboard');
-  showToast('Resultado registrado ✓', 'success');
-});
+//  ENTER RACE RESULTS (moved to championship.js)
+// ============================================================
 
 // ============================================================
 //  RACE DETAIL MODAL
@@ -1598,21 +762,11 @@ document.getElementById('btn-delete-race').addEventListener('click', function ()
   showToast('Carrera eliminada', 'info');
 });
 
-document.getElementById('btn-edit-result').addEventListener('click', function () {
-  const raceId = this.dataset.raceId;
-  closeModal('modal-race-detail');
-  openResultsModal(raceId);
-});
+// Edit result button (moved to championship.js)
 
 // ============================================================
-//  SIDEBAR
+//  SIDEBAR (renderSidebarChamp moved to championship.js)
 // ============================================================
-function renderSidebarChamp() {
-  const nameEl = document.getElementById('sidebar-champ-name');
-  if (nameEl) {
-    nameEl.textContent = state.championship.name;
-  }
-}
 
 // ============================================================
 //  EVENT DELEGATION
@@ -1629,79 +783,34 @@ document.addEventListener('click', e => {
   // Overlay backdrop
   if (e.target.classList.contains('modal-overlay')) { e.target.style.display = 'none'; return; }
 
-  // Championship config
-  if (e.target.closest('#btn-edit-champ') || e.target.closest('#btn-champ-settings-inline')) { openChampModal(); return; }
+  // Championship config (moved to championship.js)
+  if (e.target.closest('#btn-edit-champ') || e.target.closest('#btn-champ-settings-inline')) { 
+    // openChampModal() - handled in championship.js
+    return; 
+  }
 
   // Open reset modal
   if (e.target.closest('#btn-open-reset')) { openModal('modal-reset'); return; }
 
-  // Reset section buttons
-  const resetBtn = e.target.closest('.btn-reset-section');
-  if (resetBtn) { resetSection(resetBtn.dataset.section); return; }
+  // System actions (moved to system.js)
+  // Reset, Export, Import, Templates handled in system.js
 
-  // Export section buttons
-  const exportBtn = e.target.closest('.btn-export-section');
-  if (exportBtn) { 
-    exportData(exportBtn.dataset.section); 
-    return; 
-  }
-
-  // Import section buttons
-  const importBtn = e.target.closest('.btn-import-section');
-  if (importBtn) { 
-    const section = importBtn.dataset.section;
-    // Crear un input file temporal para esta sección
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => importData(e.target.files[0], section);
-    input.click();
-    return; 
-  }
-
-  // Add player
-  if (e.target.closest('#btn-add-player')) { openPlayerModal(); return; }
-
-  // Edit player
-  const editBtn = e.target.closest('[data-edit-player]');
-  if (editBtn) { openPlayerModal(editBtn.dataset.editPlayer); return; }
-
-  // Delete player
-  const delBtn = e.target.closest('[data-del-player]');
-  if (delBtn) { deletePlayer(delBtn.dataset.delPlayer); return; }
+  // Player actions (moved to players.js)
+  // Add player, Edit player, Delete player handled in players.js
 
   // DESHABILITADO: Ya no se necesita toggle de inscripción
   // // Toggle enroll player
   // const toggleBtn = e.target.closest('[data-toggle-player]');
   // if (toggleBtn) { toggleEnrollPlayer(toggleBtn.dataset.togglePlayer); return; }
 
-  // Add circuit
-  if (e.target.closest('#btn-add-circuit')) { openCircuitModal(); return; }
-
-  // Edit circuit
-  const editCircuitBtn = e.target.closest('[data-edit-circuit]');
-  if (editCircuitBtn) { 
-    console.log('Edit circuit button clicked:', editCircuitBtn.dataset.editCircuit);
-    openCircuitModal(editCircuitBtn.dataset.editCircuit); 
-    return; 
-  }
-
-  // Delete circuit
-  const delCircuitBtn = e.target.closest('[data-del-circuit]');
-  if (delCircuitBtn) { 
-    console.log('Delete circuit button clicked:', delCircuitBtn.dataset.delCircuit);
-    deleteCircuit(delCircuitBtn.dataset.delCircuit); 
-    return; 
-  }
+  // Circuit actions (moved to circuits.js)
+  // Add circuit, Edit circuit, Delete circuit handled in circuits.js
 
   // Add calendar race
   if (e.target.closest('#btn-add-cal-race')) { openAddRaceModal(); return; }
 
-  // Show championship templates
-  if (e.target.closest('#btn-show-champ-templates')) { openChampTemplatesModal(); return; }
-
-  // Reset championship
-  if (e.target.closest('#btn-reset-championship')) { resetChampionship(); return; }
+  // System actions (moved to system.js)
+  // Templates, Reset championship handled in system.js
 
   // Delete calendar race
   const delRaceBtn = e.target.closest('[data-delete-cal-race]');
@@ -1775,9 +884,8 @@ document.addEventListener('click', e => {
     return; 
   }
 
-  // Dashboard recent race row
-  const recentRow = e.target.closest('.recent-race-row');
-  if (recentRow) { openRaceDetailModal(recentRow.dataset.calRaceId); return; }
+  // Dashboard actions (moved to dashboard.js)
+  // Recent race rows handled in dashboard.js
 
   // Mobile sidebar
   if (e.target.closest('#mnav-menu-btn')) { openMobileSidebar(); return; }
@@ -1787,273 +895,20 @@ document.addEventListener('click', e => {
 // Keyboard shortcuts
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
-  if ((e.ctrlKey || e.metaKey) && e.key === 'p') { e.preventDefault(); openPlayerModal(); }
+  // Ctrl+P shortcut moved to players.js
 });
 
 // ============================================================
-//  RESET
+//  RESET (moved to system.js)
 // ============================================================
-const RESET_CONFIRM = {
-  championship: { msg: '¿Resetear el nombre y sistema de puntos?\n\nLos pilotos y el calendario NO se verán afectados.' },
-  calendar:     { msg: '¿Eliminar TODAS las carreras del calendario?\n\nLos pilotos se mantendrán.' },
-  players:      { msg: '¿Eliminar TODOS los pilotos?\n\nTambién se eliminará el calendario (depende de los pilotos).' },
-  all:          { msg: '⚠ ¿BORRAR TODO y empezar desde cero?\n\nPilotos, calendario y configuración. No se puede deshacer.' }
-};
-
-function resetSection(section) {
-  const cfg = RESET_CONFIRM[section];
-  if (!cfg || !confirm(cfg.msg)) return;
-  switch (section) {
-    case 'championship':
-      state.championship = { ...defaultState().championship, playerIds: state.championship.playerIds, calendar: state.championship.calendar };
-      renderSidebarChamp(); renderView('dashboard'); renderView('championship');
-      showToast('Configuración del campeonato reseteada', 'info'); break;
-    case 'calendar':
-      state.championship.calendar = [];
-      renderView('championship'); renderView('dashboard');
-      showToast('Calendario eliminado', 'info'); break;
-    case 'players':
-      state.players = []; state.championship.playerIds = []; state.championship.calendar = [];
-      renderView('players'); renderView('championship'); renderView('dashboard');
-      showToast('Pilotos y calendario eliminados', 'info'); break;
-    case 'all':
-      state = defaultState();
-      renderSidebarChamp(); navigateTo('dashboard');
-      showToast('Reset global completado 🏁', 'info'); break;
-  }
-  saveState();
-  closeModal('modal-reset');
-}
 
 // ============================================================
-//  EXPORT / IMPORT
+//  EXPORT / IMPORT (moved to system.js)
 // ============================================================
-function exportData(section = 'all') {
-  let payload;
-  let filename;
-  
-  if (section === 'all') {
-    // Exportación completa (comportamiento original)
-    payload = { _meta: { app: 'heat-companion', version: 2, exportedAt: new Date().toISOString() }, ...state };
-    const champSlug = (state.championship.name || 'campeonato').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '').slice(0, 40);
-    filename = `heat-${champSlug}-completo.json`;
-  } else {
-    // Exportación por secciones
-    const sectionData = {};
-    
-    switch (section) {
-      case 'players':
-        sectionData.players = state.players;
-        filename = `heat-pilotos.json`;
-        break;
-      case 'races':
-        sectionData.championship = {
-          calendar: state.championship.calendar,
-          playerIds: state.championship.playerIds
-        };
-        filename = `heat-carreras.json`;
-        break;
-      case 'championship':
-        sectionData.championship = {
-          name: state.championship.name,
-          pointsSystem: state.championship.pointsSystem,
-          customPoints: state.championship.customPoints
-        };
-        filename = `heat-campeonato.json`;
-        break;
-      default:
-        showToast('Sección no válida', 'error');
-        return;
-    }
-    
-    payload = { 
-      _meta: { 
-        app: 'heat-companion', 
-        version: 2, 
-        exportedAt: new Date().toISOString(),
-        section: section 
-      }, 
-      ...sectionData 
-    };
-  }
-  
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const url  = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-  showToast(`Datos ${section === 'all' ? 'completos' : `de ${section}`} exportados correctamente`, 'success');
-}
-
-function importData(file, section = 'all') {
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    let parsed;
-    try { parsed = JSON.parse(e.target.result); } catch { showToast('JSON inválido', 'error'); return; }
-    
-    // Validar que el archivo sea de HEAT Companion
-    if (!parsed._meta || parsed._meta.app !== 'heat-companion') {
-      showToast('El archivo no es un guardado de HEAT Companion', 'error'); return;
-    }
-    
-    // Si el archivo tiene una sección específica y no coincide con la solicitada, advertir
-    if (parsed._meta.section && parsed._meta.section !== section) {
-      if (!confirm(`Este archivo contiene datos de "${parsed._meta.section}" pero estás intentando importar en "${section}". ¿Deseas continuar?`)) {
-        return;
-      }
-    }
-    
-    let confirmMsg = '';
-    let importFunction = null;
-    
-    if (section === 'all') {
-      // Importación completa (comportamiento original)
-      if (!parsed.championship || !Array.isArray(parsed.players)) {
-        showToast('El archivo no contiene todos los datos necesarios para importación completa', 'error'); return;
-      }
-      const champName  = parsed.championship?.name || '?';
-      const numPlayers = parsed.players?.length ?? 0;
-      const numRaces   = parsed.championship?.calendar?.length ?? 0;
-      confirmMsg = `¿Importar campeonato "${champName}"?\n👤 Pilotos: ${numPlayers}\n🏁 Carreras: ${numRaces}\n\n⚠ Reemplazará todos los datos actuales.`;
-      importFunction = () => {
-        const { _meta, ...importedState } = parsed;
-        state = { ...defaultState(), ...importedState };
-      };
-    } else {
-      // Importación por secciones
-      switch (section) {
-        case 'players':
-          if (!Array.isArray(parsed.players)) {
-            showToast('El archivo no contiene datos de pilotos', 'error'); return;
-          }
-          confirmMsg = `¿Importar ${parsed.players.length} piloto(s)?\n\n⚠ Esto reemplazará todos los pilotos actuales.`;
-          importFunction = () => {
-            state.players = parsed.players;
-            // Actualizar playerIds para mantener solo los pilotos importados que existían
-            const importedPlayerIds = parsed.players.map(p => p.id);
-            state.championship.playerIds = state.championship.playerIds.filter(id => importedPlayerIds.includes(id));
-          };
-          break;
-          
-        case 'races':
-          if (!parsed.championship?.calendar) {
-            showToast('El archivo no contiene datos de carreras', 'error'); return;
-          }
-          const numRaces = parsed.championship.calendar.length;
-          confirmMsg = `¿Importar ${numRaces} carrera(s)?\n\n⚠ Esto reemplazará el calendario actual.`;
-          importFunction = () => {
-            state.championship.calendar = parsed.championship.calendar;
-            if (parsed.championship.playerIds) {
-              state.championship.playerIds = parsed.championship.playerIds;
-            }
-          };
-          break;
-          
-        case 'championship':
-          if (!parsed.championship) {
-            showToast('El archivo no contiene datos de campeonato', 'error'); return;
-          }
-          const champName = parsed.championship?.name || '?';
-          confirmMsg = `¿Importar configuración del campeonato "${champName}"?\n\n⚠ Esto reemplazará la configuración actual.`;
-          importFunction = () => {
-            state.championship.name = parsed.championship.name || state.championship.name;
-            state.championship.pointsSystem = parsed.championship.pointsSystem || state.championship.pointsSystem;
-            state.championship.customPoints = parsed.championship.customPoints || state.championship.customPoints;
-          };
-          break;
-          
-        default:
-          showToast('Sección no válida', 'error');
-          return;
-      }
-    }
-    
-    if (!confirm(confirmMsg)) return;
-    
-    // Ejecutar la importación
-    importFunction();
-    saveState();
-    renderSidebarChamp();
-    navigateTo('dashboard');
-    showToast(`Datos de ${section === 'all' ? 'campeonato completo' : section} importados ✓`, 'success');
-  };
-  reader.onerror = () => showToast('Error al leer el archivo', 'error');
-  reader.readAsText(file);
-  document.getElementById('import-file-input').value = '';
-}
 
 // ============================================================
-//  HISTORIC CHAMPIONSHIP TEMPLATES
+//  HISTORIC CHAMPIONSHIP TEMPLATES (moved to system.js)
 // ============================================================
-function openChampTemplatesModal() {
-  const grid = document.getElementById('templates-grid');
-  grid.innerHTML = window.CHAMPIONSHIP_TEMPLATES.map(t => {
-    const circuitNames = t.races.map(r => {
-      const circuit = getCircuitById(r.circuitId);
-      const country = getCountryById(circuit?.countryId);
-      const result = country ? country.name : 'Circuito desconocido';
-      console.log('Circuit name result:', result);
-      return result;
-    }).join(' · ');
-    console.log('Final circuitNames:', circuitNames);
-    return `<div class="template-card" data-template-id="${t.id}">
-      <h3>${t.name}</h3>
-      <div class="template-race-mini-list">${t.races.length} carreras: ${circuitNames}</div>
-      <div class="template-card-footer">Cargar campeonato →</div>
-    </div>`;
-  }).join('');
-  openModal('modal-champ-templates');
-}
-
-document.getElementById('templates-grid').addEventListener('click', e => {
-  const card = e.target.closest('.template-card');
-  if (!card) return;
-  const tid = card.dataset.templateId;
-  loadChampTemplate(tid);
-});
-
-function loadChampTemplate(tid) {
-  const t = window.CHAMPIONSHIP_TEMPLATES.find(x => x.id === tid);
-  if (!t) return;
-
-  if (state.championship.calendar.length > 0) {
-    if (!confirm('¿Cargar este campeonato histórico? Perderás el calendario actual y los resultados de carreras no completadas.')) return;
-  }
-
-  state.championship.name = t.name;
-  state.championship.pointsSystem = t.pointsSystem || 'classic';
-  state.championship.calendar = t.races.map(r => {
-    const circuit = getCircuitById(r.circuitId);
-    return {
-      id: uid(),
-      circuitId: r.circuitId,
-      laps: circuit ? circuit.laps : 3,
-      mods: r.mods || { weather: false, sponsors: false, press: false },
-      weatherType: r.weatherType || 'sun',
-      eventId: r.eventId || null, // New format: store eventId
-      event: r.event || '', // Legacy fallback
-      rules: r.rules || '', // Legacy fallback
-      setup: r.setup || { sponsors: 0, press: '' },
-      status: 'scheduled',
-      results: []
-    };
-  });
-
-  saveState();
-  closeModal('modal-champ-templates');
-  renderSidebarChamp();
-  renderChampionship();
-  showToast(`${t.name} cargado correctamente ✓`, 'success');
-}
-
-function resetChampionship() {
-  if (!confirm('¿Deseas vaciar el calendario de carreras del campeonato? Los pilotos y sus mejoras se conservarán.')) return;
-  state.championship.calendar = [];
-  saveState();
-  renderView('championship');
-  showToast('Calendario reseteado', 'info');
-}
 
 // ============================================================
 //  INIT
@@ -2074,8 +929,7 @@ function init() {
   // bind core UI buttons (also bound on DOMContentLoaded for safety)
   bindGlobalButtons();
 
-  document.getElementById('btn-show-champ-templates').addEventListener('click', openChampTemplatesModal);
-  document.getElementById('btn-reset-championship').addEventListener('click', resetChampionship);
+  // System event listeners (moved to system.js)
 
   // Mobile sidebar controls
   document.getElementById('mnav-menu-btn').addEventListener('click', openMobileSidebar);

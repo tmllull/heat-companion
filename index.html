@@ -281,8 +281,10 @@
     </div>
     <div class="modal-body">
       <!-- Basic info -->
-      <label class="form-label">Nombre del piloto <span style="color:var(--error);">*</span></label>
-      <input class="form-input" id="player-name-input" type="text" placeholder="Ej: Carlos Sainz" maxlength="30" />
+      <label class="form-label">Nombre del piloto <span style="color:red;">*</span></label>
+      <input class="form-input" id="player-name-input" type="text" placeholder="Ej: Carlos Sainz" maxlength="30" style="margin-bottom:4px;" />
+      <div id="name-validation-msg" class="validation-msg" style="color:red; font-size:11px; margin-top:2px; margin-bottom:8px; min-height:14px;"></div>
+      
       <div style="margin: 4px 0 16px">
         <label class="checkbox-label"><input type="checkbox" id="player-is-legend" /> Piloto Leyenda (Bot)</label>
       </div>
@@ -299,8 +301,9 @@
         <div class="color-option" data-color="#94a3b8" style="background:#94a3b8" title="Gris"></div>
       </div>
 
-      <label class="form-label">Número <span style="color:var(--error);">*</span></label>
-      <input class="form-input" id="player-icon-input" type="text" placeholder="Obligatorio: Ej: 1, 77, 99" maxlength="3" />
+      <label class="form-label">Número <span style="color:red;">*</span></label>
+      <input class="form-input" id="player-icon-input" type="text" placeholder="Obligatorio: Ej: 1, 77, 99" maxlength="3" style="margin-bottom:4px;" />
+      <div id="icon-validation-msg" class="validation-msg" style="color:red; font-size:11px; margin-top:2px; margin-bottom:16px; min-height:14px;"></div>
 
       <!-- Upgrades -->
       <!-- DESHABILITADO TEMPORALMENTE
@@ -625,6 +628,22 @@
 
 </div> <!-- #app -->
 
+<!-- Circuit Map Modal -->
+<div id="modal-circuit-map" class="modal-overlay" style="display:none">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h2 id="modal-circuit-map-title">Mapa del Circuito</h2>
+      <button class="modal-close" data-modal="modal-circuit-map">✕</button>
+    </div>
+    <div class="modal-body" style="text-align:center; padding:20px;">
+      <img id="circuit-map-image" src="" alt="Mapa del circuito" style="max-width:100%; max-height:70vh; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2);" />
+      <div id="circuit-map-error" style="display:none; color:var(--error); padding:20px;">
+        No se pudo cargar la imagen del mapa del circuito.
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="data/countries.js"></script>
 <script src="data/meta.js"></script>
 <script src="data/circuits.js"></script>
@@ -635,6 +654,13 @@
 <script src="data/points.js"></script>
 <script src="data/events.js"></script>
 <script src="data/championships.js"></script>
+<script src="js/players.js"></script>
+<script src="js/championship.js"></script>
+<script src="js/circuits.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/manual.js"></script>
+<script src="js/system.js"></script>
 <script src="app.js"></script>
+<script defer data-domain="tmllull.github.io/heat-companion" src="https://analytics.tonimiquel.com/js/script.js"></script>
 </body>
 </html>
