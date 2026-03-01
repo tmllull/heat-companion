@@ -164,10 +164,18 @@ function openCircuitMapModal(circuitId) {
   const mapError = document.getElementById('circuit-map-error');
   
   if (imagePath) {
-    // Mostrar la imagen
-    mapImage.src = imagePath;
-    mapImage.style.display = 'block';
+    // Ocultar imagen temporalmente y limpiar la anterior
+    mapImage.style.display = 'none';
     mapError.style.display = 'none';
+    
+    // Cargar nueva imagen
+    mapImage.src = imagePath;
+    
+    // Mostrar la imagen cuando se cargue correctamente
+    mapImage.onload = function() {
+      mapImage.style.display = 'block';
+      mapError.style.display = 'none';
+    };
     
     // Manejar errores de carga
     mapImage.onerror = function() {
