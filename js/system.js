@@ -168,10 +168,6 @@ function importData(file, section = 'all') {
 
 // ---- CHAMPIONSHIP TEMPLATES ----
 function openChampTemplatesModal() {
-  console.log('openChampTemplatesModal called');
-  console.log('CHAMPIONSHIP_TEMPLATES:', window.CHAMPIONSHIP_TEMPLATES);
-  console.log('CIRCUITS available:', window.CIRCUITS);
-  
   const grid = document.getElementById('templates-grid');
   
   // Remover event listeners anteriores clonando el elemento
@@ -179,11 +175,8 @@ function openChampTemplatesModal() {
   grid.parentNode.replaceChild(newGrid, grid);
   
   newGrid.innerHTML = window.CHAMPIONSHIP_TEMPLATES.map(t => {
-    console.log('Processing template:', t);
     const circuitNames = t.races.map(r => {
-      console.log('Processing race with circuitId:', r.circuitId);
       const circuit = getCircuitById(r.circuitId);
-      console.log('Found circuit:', circuit);
       
       // Manejar diferentes casos para obtener el nombre del circuito
       let circuitName = `Circuit ${r.circuitId}`;
@@ -197,10 +190,8 @@ function openChampTemplatesModal() {
         }
       }
       
-      console.log('Final circuit name:', circuitName);
       return circuitName;
     });
-    console.log('Circuit names for template:', circuitNames);
     
     return `<div class="template-card" data-template-id="${t.id}">
       <h3>${escHtml(t.name)}</h3>

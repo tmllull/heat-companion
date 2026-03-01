@@ -21,45 +21,90 @@ function renderCircuits() {
   }
 
   empty.style.display = 'none';
-  grid.innerHTML = allCircuits.map(c => {
-    console.log('Rendering circuit:', c);
-    const country = getCountryById(c.countryId);
-    console.log('Country found:', country);
-    
-    // Verificar si el circuito pertenece a una expansión oficial
-    const isOfficialExpansion = ['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(c.expansion);
-    
-    // Determinar el badge y su clase
-    let badgeHtml = '';
-    if (c.expansion) {
-      const badgeClass = c.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
-      badgeHtml = `<div class="diff-badge ${badgeClass}">${escHtml(c.expansion)}</div>`;
-    } else if (!isOfficialExpansion) {
-      badgeHtml = `<div class="diff-badge personalizado">Personalizado</div>`;
-    }
-    
-    return `<div class="circuit-card" data-circuit-id="${c.id}">
-      ${!isOfficialExpansion ? `
-        <div class="circuit-card-actions-left">
-          <button class="btn-icon btn-icon-edit" data-edit-circuit="${c.id}">✎</button>
+
+  // Separar circuitos en originales y fanmade
+  const originalCircuits = allCircuits.filter(c => 
+    ['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(c.expansion)
+  );
+  const fanmadeCircuits = allCircuits.filter(c => 
+    !['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(c.expansion)
+  );
+
+  let html = '<div class="circuits-sections-container">';
+
+  // Sección de circuitos originales
+  if (originalCircuits.length > 0) {
+    html += `
+      <div class="section-card collapsible collapsed" id="original-circuits-section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <h2>🏁 Circuitos Originales</h2>
+          <span class="section-toggle">▼</span>
         </div>
-      ` : ''}
-      <div class="circuit-flag">${country ? country.flag : '🏁'}</div>
-      ${!isOfficialExpansion ? `
-        <div class="circuit-card-actions-right">
-          <button class="btn-icon btn-icon-del" data-del-circuit="${c.id}">🗑</button>
+        <div class="section-content">
+          <div class="circuits-grid">
+            ${originalCircuits.map(c => renderCircuitCard(c)).join('')}
+          </div>
         </div>
-      ` : ''}
-      <div class="circuit-country">${country ? escHtml(country.name) : ''}</div>
-      <div class="circuit-name">${escHtml(c.name) || '---'}</div>
-      ${badgeHtml}
-      <div class="circuit-details">
-        ${c.spaces ? `<div>🎯 ${c.spaces} espacios</div>` : ''}
-        ${c.curves ? `<div>🔄 ${c.curvas} curvas</div>` : ''}
-        ${c.laps ? `<div>🏁 ${c.laps} vueltas</div>` : ''}
       </div>
-    </div>`;
-  }).join('');
+    `;
+  }
+
+  // Sección de circuitos fanmade
+  if (fanmadeCircuits.length > 0) {
+    html += `
+      <div class="section-card collapsible collapsed" id="fanmade-circuits-section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <h2>🎨 Circuitos Fanmade</h2>
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <div class="circuits-grid">
+            ${fanmadeCircuits.map(c => renderCircuitCard(c)).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  html += '</div>';
+
+  grid.innerHTML = html;
+}
+
+function renderCircuitCard(c) {
+  const country = getCountryById(c.countryId);
+  
+  // Verificar si el circuito pertenece a una expansión oficial
+  const isOfficialExpansion = ['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(c.expansion);
+  
+  // Determinar el badge y su clase
+  let badgeHtml = '';
+  if (c.expansion) {
+    const badgeClass = c.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+    badgeHtml = `<div class="diff-badge ${badgeClass}">${escHtml(c.expansion)}</div>`;
+  }
+  
+  return `<div class="circuit-card" data-circuit-id="${c.id}">
+    ${!isOfficialExpansion ? `
+      <div class="circuit-card-actions-left">
+        <button class="btn-icon btn-icon-edit" data-edit-circuit="${c.id}">✎</button>
+      </div>
+    ` : ''}
+    <div class="circuit-flag">${country ? country.flag : '🏁'}</div>
+    ${!isOfficialExpansion ? `
+      <div class="circuit-card-actions-right">
+        <button class="btn-icon btn-icon-del" data-del-circuit="${c.id}">🗑</button>
+      </div>
+    ` : ''}
+    <div class="circuit-country">${country ? escHtml(country.name) : ''}</div>
+    <div class="circuit-name">${escHtml(c.name) || '---'}</div>
+    ${badgeHtml}
+    <div class="circuit-details">
+      ${c.spaces ? `<div>📏 ${c.spaces} espacios</div>` : ''}
+      ${c.curves ? `<div>⤴️ ${c.curves} curvas</div>` : ''}
+      ${c.laps ? `<div>🏁 ${c.laps} vueltas</div>` : ''}
+    </div>
+  </div>`;
 }
 
 // ---- CIRCUIT MODAL FUNCTIONS ----
@@ -226,7 +271,6 @@ function bindCircuitEventListeners() {
     if (circuitCard && !e.target.closest('.circuit-card-actions')) {
       // Si el clic es en la tarjeta pero no en los botones de acción
       const circuitId = circuitCard.dataset.circuitId;
-      console.log('Circuit card clicked:', circuitId);
       openCircuitMapModal(circuitId);
       return;
     }
@@ -248,7 +292,6 @@ function bindCircuitEventListeners() {
         return;
       }
       
-      console.log('Edit circuit button clicked:', circuitId);
       openCircuitModal(circuitId); 
       return; 
     }
@@ -267,7 +310,6 @@ function bindCircuitEventListeners() {
         return;
       }
       
-      console.log('Delete circuit button clicked:', circuitId);
       deleteCircuit(circuitId); 
       return; 
     }

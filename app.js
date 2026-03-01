@@ -194,7 +194,6 @@ function getCircuitById(id) {
 }
 function getCountryById(countryId) { 
   const country = COUNTRIES.find(c => c.id === countryId);
-  console.log('getCountryById called with:', countryId, 'result:', country);
   return country;
 }
 
@@ -284,7 +283,6 @@ function getPoints(position, raceId = null) {
 }
 
 function renderView(name) {
-  console.log('renderView called with:', name);
   switch (name) {
     case 'dashboard':    renderDashboard();    break;
     case 'championship': renderChampionship(); break;
@@ -292,7 +290,6 @@ function renderView(name) {
     case 'players':      renderPlayers();      break;
     case 'standings':    renderStandings();    break;
     case 'manual':       
-      console.log('Calling renderManual()');
       renderManual();       
       break;
   }
@@ -503,27 +500,54 @@ function openAddRaceModal(raceId = null) {
   const grid = document.getElementById('add-race-circuits-grid');
   // Combinar circuitos oficiales con personalizados
   const allCircuits = [...(window.CIRCUITS || []), ...(state.circuits || [])];
-  grid.innerHTML = allCircuits.map(c => {
-    const country = getCountryById(c.countryId);
-    // Determinar el badge
-    let badgeHtml = '';
-    if (c.expansion) {
-      const badgeClass = c.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
-      badgeHtml = `<div class="diff-badge ${badgeClass}">${escHtml(c.expansion)}</div>`;
-    } else if (!['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(c.expansion)) {
-      badgeHtml = `<div class="diff-badge personalizado">Personalizado</div>`;
-    }
-    
-    return `<div class="circuit-card ${c.id === addRaceSelectedCircuit ? 'selected' : ''}" data-circuit="${c.id}">
-      <div class="circuit-flag">${country ? country.flag : '🏁'}</div>
-      <div class="circuit-name">${c.name || (country ? country.name : '')}</div>
-      ${badgeHtml}
-      <div class="circuit-info-stats">
-        <span>🏁 ${c.laps} vueltas</span>
-        <span>⤵ ${c.curves} curvas</span>
+  
+  // Separar circuitos en originales y fanmade
+  const originalCircuits = allCircuits.filter(c => 
+    ['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(c.expansion)
+  );
+  const fanmadeCircuits = allCircuits.filter(c => 
+    !['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(c.expansion)
+  );
+
+  let circuitsHtml = '<div class="circuits-sections-container">';
+
+  // Sección de circuitos originales
+  if (originalCircuits.length > 0) {
+    circuitsHtml += `
+      <div class="section-card collapsible" style="margin-bottom: 0;">
+        <div class="section-header" onclick="toggleSection(this)">
+          <h3>🏁 Circuitos Originales</h3>
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <div class="circuits-grid">
+            ${originalCircuits.map(c => renderRaceCircuitCard(c)).join('')}
+          </div>
+        </div>
       </div>
-    </div>`;
-  }).join('');
+    `;
+  }
+
+  // Sección de circuitos fanmade
+  if (fanmadeCircuits.length > 0) {
+    circuitsHtml += `
+      <div class="section-card collapsible collapsed" style="margin-bottom: 0;">
+        <div class="section-header" onclick="toggleSection(this)">
+          <h3>🎨 Circuitos Fanmade</h3>
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <div class="circuits-grid">
+            ${fanmadeCircuits.map(c => renderRaceCircuitCard(c)).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  circuitsHtml += '</div>';
+
+  grid.innerHTML = circuitsHtml;
 
   // render weather options
   const wGrid = document.getElementById('add-race-weather-grid');
@@ -538,6 +562,26 @@ function openAddRaceModal(raceId = null) {
     </div>`).join('');
 
   openModal('modal-add-race');
+}
+
+function renderRaceCircuitCard(c) {
+  const country = getCountryById(c.countryId);
+  // Determinar el badge
+  let badgeHtml = '';
+  if (c.expansion) {
+    const badgeClass = c.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+    badgeHtml = `<div class="diff-badge ${badgeClass}">${escHtml(c.expansion)}</div>`;
+  }
+  
+  return `<div class="circuit-card ${c.id === addRaceSelectedCircuit ? 'selected' : ''}" data-circuit="${c.id}">
+    <div class="circuit-flag">${country ? country.flag : '🏁'}</div>
+    <div class="circuit-name">${c.name || (country ? country.name : '')}</div>
+    ${badgeHtml}
+    <div class="circuit-info-stats">
+      <span>🏁 ${c.laps} vueltas</span>
+      <span>⤵ ${c.curves} curvas</span>
+    </div>
+  </div>`;
 }
 
 document.getElementById('add-race-mod-weather').addEventListener('change', e => {
@@ -904,7 +948,6 @@ document.addEventListener('click', e => {
   // Cal race row (open detail)
   const calRow = e.target.closest('.cal-race-row');
   if (calRow && !e.target.closest('button')) { 
-    console.log('Cal race row clicked:', calRow.dataset.calRaceId);
     openRaceDetailModal(calRow.dataset.calRaceId); 
     return; 
   }

@@ -1533,6 +1533,65 @@ ul {
   gap: 12px;
 }
 
+/* Override for sections container */
+#circuits-grid,
+#add-race-circuits-grid {
+  display: block !important;
+  width: 100% !important;
+}
+
+/* Horizontal layout for circuit sections */
+#circuits-grid .circuits-sections-container,
+#add-race-circuits-grid .circuits-sections-container {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+#circuits-grid .circuits-sections-container .section-card,
+#add-race-circuits-grid .circuits-sections-container .section-card {
+  margin-bottom: 20px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+#circuits-grid .circuits-sections-container .section-card .section-content,
+#add-race-circuits-grid .circuits-sections-container .section-card .section-content {
+  padding: 0;
+  overflow: hidden;
+  width: 100% !important;
+}
+
+#circuits-grid .circuits-sections-container .section-card:not(.collapsed) .section-content,
+#add-race-circuits-grid .circuits-sections-container .section-card:not(.collapsed) .section-content {
+  padding: 20px 20px 20px;
+  width: 100% !important;
+}
+
+#circuits-grid .circuits-sections-container .circuits-grid,
+#add-race-circuits-grid .circuits-sections-container .circuits-grid {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 12px;
+  align-items: flex-start;
+  width: 100% !important;
+  justify-content: flex-start;
+}
+
+/* Responsive for circuit sections */
+@media (max-width: 768px) {
+  #circuits-grid .circuits-sections-container .circuits-grid,
+  #add-race-circuits-grid .circuits-sections-container .circuits-grid {
+    gap: 8px;
+  }
+  
+  #circuits-grid .circuits-sections-container .circuits-grid .circuit-card,
+  #add-race-circuits-grid .circuits-sections-container .circuits-grid .circuit-card {
+    min-width: calc(50% - 4px);
+  }
+}
+
 .circuit-card:hover {
   border-color: var(--border-bright);
   background: var(--surface-4);
@@ -1801,6 +1860,11 @@ ul {
 
 .modal-wide {
   max-width: 680px;
+}
+
+.modal-large {
+  max-width: min(90vw, 1200px);
+  width: auto;
 }
 
 @keyframes slideUp {
@@ -2628,6 +2692,10 @@ ul {
   background: rgba(168, 85, 247, 0.15);
   color: #a855f7;
 }
+.diff-badge.fanmade {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
 .diff-badge.personalizado {
   background: rgba(251, 146, 60, 0.15);
   color: #fb923c;
@@ -3300,6 +3368,12 @@ ul {
   .modal-wide {
     max-width: 100%;
     width: 100%;
+    max-height: 92vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+  .modal-large {
+    max-width: 100%;
+    width: auto;
     max-height: 92vh;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
