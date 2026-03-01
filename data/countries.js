@@ -74,6 +74,11 @@ const COUNTRIES = [
     flag: "🇲🇽"
   },
   {
+    id: "argentina",
+    name: "Argentina",
+    flag: "🇦🇷"
+  },
+  {
     id: "other",
     name: "Otro",
     flag: "🌍"

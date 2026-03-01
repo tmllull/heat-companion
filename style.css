@@ -1529,8 +1529,9 @@ ul {
 /* Circuits grid */
 .circuits-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, 180px);
   gap: 12px;
+  justify-content: start;
 }
 
 /* Override for sections container */
@@ -1570,25 +1571,24 @@ ul {
 
 #circuits-grid .circuits-sections-container .circuits-grid,
 #add-race-circuits-grid .circuits-sections-container .circuits-grid {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  gap: 12px;
-  align-items: flex-start;
-  width: 100% !important;
-  justify-content: flex-start;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, 180px) !important;
+  gap: 12px !important;
+  justify-content: start !important;
 }
 
 /* Responsive for circuit sections */
 @media (max-width: 768px) {
   #circuits-grid .circuits-sections-container .circuits-grid,
   #add-race-circuits-grid .circuits-sections-container .circuits-grid {
-    gap: 8px;
+    grid-template-columns: repeat(auto-fill, 180px) !important;
+    gap: 8px !important;
   }
   
   #circuits-grid .circuits-sections-container .circuits-grid .circuit-card,
   #add-race-circuits-grid .circuits-sections-container .circuits-grid .circuit-card {
-    min-width: calc(50% - 4px);
+    width: 180px !important;
+    min-width: 180px !important;
   }
 }
 
@@ -2569,8 +2569,9 @@ ul {
 /* Circuits Selection Grid */
 .circuits-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, 180px);
   gap: 12px;
+  justify-content: start;
 }
 .circuit-card {
   background: var(--surface-3);
@@ -2725,12 +2726,16 @@ ul {
   gap: 10px;
 }
 .weather-card {
-  padding: 10px;
-  background: var(--surface-3);
+  padding: 14px;
+  background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  text-align: center;
+  position: relative;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   transition: all var(--transition);
 }
 .weather-card:hover {

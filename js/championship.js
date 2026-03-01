@@ -336,6 +336,12 @@ function saveResults() {
   const race = state.championship.calendar.find(r => r.id === resultsRaceId);
   if (!race) return;
 
+  // Validar que haya participantes
+  if (!resultsOrder || resultsOrder.length === 0) {
+    showToast('Debe añadir al menos un participante para guardar los resultados', 'error');
+    return;
+  }
+
   race.results = resultsOrder.map((entry, i) => ({
     playerId: entry.playerId,
     position: i + 1,

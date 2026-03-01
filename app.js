@@ -514,7 +514,7 @@ function openAddRaceModal(raceId = null) {
   // Sección de circuitos originales
   if (originalCircuits.length > 0) {
     circuitsHtml += `
-      <div class="section-card collapsible" style="margin-bottom: 0;">
+      <div class="section-card collapsible collapsed" style="margin-bottom: 0;">
         <div class="section-header" onclick="toggleSection(this)">
           <h3>🏁 Circuitos Originales</h3>
           <span class="section-toggle">▼</span>
@@ -533,7 +533,7 @@ function openAddRaceModal(raceId = null) {
     circuitsHtml += `
       <div class="section-card collapsible collapsed" style="margin-bottom: 0;">
         <div class="section-header" onclick="toggleSection(this)">
-          <h3>🎨 Circuitos Fanmade</h3>
+          <h3>📐 Circuitos Fanmade</h3>
           <span class="section-toggle">▼</span>
         </div>
         <div class="section-content">

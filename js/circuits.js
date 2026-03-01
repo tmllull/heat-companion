@@ -54,7 +54,7 @@ function renderCircuits() {
     html += `
       <div class="section-card collapsible collapsed" id="fanmade-circuits-section">
         <div class="section-header" onclick="toggleSection(this)">
-          <h2>🎨 Circuitos Fanmade</h2>
+          <h2>📐 Circuitos Fanmade</h2>
           <span class="section-toggle">▼</span>
         </div>
         <div class="section-content">
@@ -74,8 +74,9 @@ function renderCircuits() {
 function renderCircuitCard(c) {
   const country = getCountryById(c.countryId);
   
-  // Verificar si el circuito pertenece a una expansión oficial
-  const isOfficialExpansion = ['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(c.expansion);
+  // Determinar si el circuito pertenece a una expansión oficial (incluye fanmade)
+  const isOfficialExpansion = ['Base', 'Lluvia Torrencial', 'Visión de Túnel', 'Fanmade'].includes(c.expansion);
+  const canEdit = !isOfficialExpansion;
   
   // Determinar el badge y su clase
   let badgeHtml = '';
@@ -85,13 +86,13 @@ function renderCircuitCard(c) {
   }
   
   return `<div class="circuit-card" data-circuit-id="${c.id}">
-    ${!isOfficialExpansion ? `
+    ${canEdit ? `
       <div class="circuit-card-actions-left">
         <button class="btn-icon btn-icon-edit" data-edit-circuit="${c.id}">✎</button>
       </div>
     ` : ''}
     <div class="circuit-flag">${country ? country.flag : '🏁'}</div>
-    ${!isOfficialExpansion ? `
+    ${canEdit ? `
       <div class="circuit-card-actions-right">
         <button class="btn-icon btn-icon-del" data-del-circuit="${c.id}">🗑</button>
       </div>
@@ -207,7 +208,7 @@ function saveCircuit() {
   };
 
   if (editingCircuitId) {
-    // Editar circuito existente
+    // Editar circuito existente (solo circuitos personalizados)
     const index = state.circuits.findIndex(c => c.id === editingCircuitId);
     if (index !== -1) {
       state.circuits[index] = { ...state.circuits[index], ...circuitData };
@@ -236,8 +237,10 @@ function deleteCircuit(circuitId) {
   
   const circuit = state.circuits.find(c => c.id === circuitId);
   
-  // Verificar si es un circuito oficial
-  const isOfficialExpansion = ['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(circuit.expansion);
+  if (!circuit) return;
+  
+  // Verificar si es un circuito oficial (incluye fanmade)
+  const isOfficialExpansion = ['Base', 'Lluvia Torrencial', 'Visión de Túnel', 'Fanmade'].includes(circuit.expansion);
   if (isOfficialExpansion) {
     showToast('No se pueden eliminar circuitos oficiales', 'error');
     return;
@@ -285,8 +288,8 @@ function bindCircuitEventListeners() {
       // Buscar en circuitos oficiales y personalizados
       const circuit = [...(window.CIRCUITS || []), ...(state.circuits || [])].find(c => c.id === circuitId);
       
-      // Verificar si es un circuito oficial
-      const isOfficialExpansion = ['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(circuit.expansion);
+      // Verificar si es un circuito oficial (incluye fanmade)
+      const isOfficialExpansion = ['Base', 'Lluvia Torrencial', 'Visión de Túnel', 'Fanmade'].includes(circuit.expansion);
       if (isOfficialExpansion) {
         showToast('No se pueden modificar circuitos oficiales', 'error');
         return;
@@ -303,8 +306,8 @@ function bindCircuitEventListeners() {
       // Buscar en circuitos oficiales y personalizados
       const circuit = [...(window.CIRCUITS || []), ...(state.circuits || [])].find(c => c.id === circuitId);
       
-      // Verificar si es un circuito oficial
-      const isOfficialExpansion = ['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(circuit.expansion);
+      // Verificar si es un circuito oficial (incluye fanmade)
+      const isOfficialExpansion = ['Base', 'Lluvia Torrencial', 'Visión de Túnel', 'Fanmade'].includes(circuit.expansion);
       if (isOfficialExpansion) {
         showToast('No se pueden eliminar circuitos oficiales', 'error');
         return;

@@ -32,7 +32,7 @@ window.CIRCUITS = [
     spaces: 54,
     expansion: "Base",
     laps: 3,
-    mapImage: "italy.jpg"
+    mapImage: "italia.jpg"
   },
   {
     id: "france",
@@ -97,5 +97,105 @@ window.CIRCUITS = [
     expansion: "Fanmade",
     laps: 2,
     mapImage: "bilbao-urban-circuit.jpg"
+  },
+  {
+    id: "adelaide",
+    name: "Adelaide",
+    countryId: "australia",
+    curves: 8,
+    spaces: 102,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "adelaide.jpg"
+  },
+  {
+    id: "autodromo-buenos-aires",
+    name: "Autodromo Buenos Aires",
+    countryId: "argentina",
+    curves: 7,
+    spaces: 126,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "autodromo-buenos-aires.jpg"
+  },
+  {
+    id: "jarama",
+    name: "Jarama",
+    countryId: "spain",
+    curves: 8,
+    spaces: 112,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "jarama.jpg"
+  },
+  {
+    id: "jerez",
+    name: "Jerez",
+    countryId: "spain",
+    curves: 9,
+    spaces: 113,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "jerez.jpg"
+  },
+  {
+    id: "monaco",
+    name: "Monaco",
+    countryId: "monaco",
+    curves: 8,
+    spaces: 100,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "monaco.jpg"
+  },
+  {
+    id: "le-mans",
+    name: "Le Mans",
+    countryId: "france",
+    curves: 7,
+    spaces: 115,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "le-mans.jpg"
+  },
+  {
+    id: "imola",
+    name: "Imola",
+    countryId: "italy",
+    curves: 6,
+    spaces: 89,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "imola.jpg"
+  },
+  {
+    id: "interlagos",
+    name: "Interlagos",
+    countryId: "brazil",
+    curves: 9,
+    spaces: 115,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "interlagos.jpg"
+  },
+  {
+    id: "gilles-villeneuve",
+    name: "Gilles Villeneuve",
+    countryId: "canada",
+    curves: 6,
+    spaces: 80,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "gilles-villeneuve.jpg"
+  },
+  {
+    id: "suzuka",
+    name: "Suzuka",
+    countryId: "japan",
+    curves: 10,
+    spaces: 115,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "suzuka.jpg"
   }
 ];
