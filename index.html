@@ -27,38 +27,49 @@
 
     <ul class="nav-links">
       <li><a href="#" class="nav-link active" data-view="dashboard" id="nav-dashboard">
-        <span class="nav-icon">🏁</span><span>Dashboard</span>
+        <span class="nav-icon">🏁</span><span data-i18n="nav.dashboard">Dashboard</span>
       </a></li>
       <li><a href="#" class="nav-link" data-view="players" id="nav-players">
-        <span class="nav-icon">👤</span><span>Pilotos</span>
+        <span class="nav-icon">👤</span><span data-i18n="nav.players">Pilotos</span>
       </a></li>
       <li><a href="#" class="nav-link" data-view="championship" id="nav-championship">
-        <span class="nav-icon">🏆</span><span>Campeonato</span>
+        <span class="nav-icon">🏆</span><span data-i18n="nav.championship">Campeonato</span>
       </a></li>
       <li><a href="#" class="nav-link" data-view="circuits" id="nav-circuits">
-        <span class="nav-icon">🗺️</span><span>Circuitos</span>
+        <span class="nav-icon">🗺️</span><span data-i18n="nav.circuits">Circuitos</span>
       </a></li>
       <li><a href="#" class="nav-link" data-view="standings" id="nav-standings">
-        <span class="nav-icon">📊</span><span>Clasificación</span>
+        <span class="nav-icon">📊</span><span data-i18n="nav.standings">Clasificación</span>
       </a></li>
       <li><a href="#" class="nav-link" data-view="manual" id="nav-manual">
-        <span class="nav-icon">📖</span><span>Referencia</span>
+        <span class="nav-icon">📖</span><span data-i18n="nav.manual">Referencia</span>
       </a></li>
     </ul>
 
     <div class="sidebar-championship">
-      <!-- <div class="championship-label">Campeonato</div> -->
-      <!-- <div class="championship-name" id="sidebar-champ-name">Sin nombre</div> -->
-      <button class="btn-edit-champ" id="btn-edit-champ">✎ Configurar</button>
+      <div class="side-config-row">
+        <div class="lang-dropdown-wrapper">
+          <button class="btn-data-action" id="btn-lang-toggle" title="Change Language">
+            <span id="current-lang-flag">🇪🇸</span>
+          </button>
+          <div class="lang-dropdown-menu" id="lang-dropdown-menu">
+            <button class="lang-option" data-lang="es">🇪🇸 <span data-i18n="lang.es">Español</span></button>
+            <button class="lang-option" data-lang="en">🇬🇧 <span data-i18n="lang.en">English</span></button>
+          </div>
+        </div>
+
+        <button class="btn-data-action btn-icon-only" id="btn-theme-toggle" title="Cambiar tema" data-i18n-title="nav.theme">🌙</button>
+
+        <button class="btn-edit-champ" id="btn-edit-champ">✎ <span data-i18n="nav.config">Configurar</span></button>
+      </div>
     </div>
 
     <div class="sidebar-data-actions">
-      <button class="btn-data-action" id="btn-theme-toggle" title="Cambiar tema">🌙</button>
-      <button class="btn-data-action" id="btn-export" title="Exportar">⬇ Exportar</button>
-      <button class="btn-data-action btn-data-import" id="btn-import" title="Importar">⬆ Importar</button>
+      <button class="btn-data-action" id="btn-export" title="Exportar" data-i18n-title="nav.export">⬇ <span data-i18n="nav.export">Exportar</span></button>
+      <button class="btn-data-action btn-data-import" id="btn-import" title="Importar" data-i18n-title="nav.import">⬆ <span data-i18n="nav.import">Importar</span></button>
     </div>
     <div class="sidebar-data-actions" style="padding-top:0">
-      <button class="btn-data-action btn-data-reset" id="btn-open-reset">⚠ Resetear...</button>
+      <button class="btn-data-action btn-data-reset" id="btn-open-reset">⚠ <span data-i18n="nav.reset">Resetear...</span></button>
     </div>
     <div class="sidebar-version">
       <a href="https://github.com/tmllull/heat-companion" target="_blank" title="Ver en GitHub" class="github-link">
@@ -82,27 +93,27 @@
     <div id="view-dashboard" class="view active">
       <div class="view-header">
         <div>
-          <h1 id="dash-title">Bienvenido a HEAT Companion</h1>
-          <p id="dash-subtitle">Gestiona tu campeonato de Heat: Pedal to the Metal</p>
+          <h1 id="dash-title" data-i18n="dashboard.title">Bienvenido a HEAT Companion</h1>
+          <p id="dash-subtitle" data-i18n="dashboard.subtitle">Gestiona tu campeonato de Heat: Pedal to the Metal</p>
         </div>
       </div>
       <div class="dashboard-grid">
-        <div class="stat-card"><div class="stat-icon">🏁</div><div class="stat-value" id="stat-races-val">0</div><div class="stat-label">Carreras disputadas</div></div>
-        <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-value" id="stat-pending-val">0</div><div class="stat-label">Carreras pendientes</div></div>
-        <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-value" id="stat-players-val">0</div><div class="stat-label">Pilotos inscritos</div></div>
-        <div class="stat-card"><div class="stat-icon">🥇</div><div class="stat-value" id="stat-leader-val">—</div><div class="stat-label">Líder del campeonato</div></div>
+        <div class="stat-card"><div class="stat-icon">🏁</div><div class="stat-value" id="stat-races-val">0</div><div class="stat-label" data-i18n="dashboard.statRaces">Carreras disputadas</div></div>
+        <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-value" id="stat-pending-val">0</div><div class="stat-label" data-i18n="dashboard.statPending">Carreras pendientes</div></div>
+        <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-value" id="stat-players-val">0</div><div class="stat-label" data-i18n="dashboard.statPlayers">Pilotos inscritos</div></div>
+        <div class="stat-card"><div class="stat-icon">🥇</div><div class="stat-value" id="stat-leader-val">—</div><div class="stat-label" data-i18n="dashboard.statLeader">Líder del campeonato</div></div>
       </div>
       <div class="section-card">
         <div class="section-header">
-          <h2>Clasificación actual</h2>
-          <a href="#" class="link-view-all" data-view="standings">Ver completa →</a>
+          <h2 data-i18n="dashboard.standingsTitle">Clasificación actual</h2>
+          <a href="#" class="link-view-all" data-view="standings" data-i18n="dashboard.viewAll">Ver completa →</a>
         </div>
         <div id="dash-standings-list" class="mini-standings"></div>
       </div>
       <div class="section-card">
         <div class="section-header">
-          <h2>Próximas / Últimas carreras</h2>
-          <a href="#" class="link-view-all" data-view="championship">Ver calendario →</a>
+          <h2 data-i18n="dashboard.recentRaces">Próximas / Últimas carreras</h2>
+          <a href="#" class="link-view-all" data-view="championship" data-i18n="dashboard.viewCalendar">Ver calendario →</a>
         </div>
         <div id="dash-recent-races" class="recent-races-list"></div>
       </div>
@@ -121,17 +132,17 @@
       <!-- Race calendar -->
       <div class="section-card">
         <div class="section-header">
-          <h2>🗓 Calendario de carreras</h2>
+          <h2 data-i18n="championship.calendar">🗓 Calendario de carreras</h2>
           <div class="header-actions">
-            <button class="btn-text-icon" id="btn-show-champ-templates">📜 Históricos</button>
-            <button class="btn-text-icon" id="btn-reset-championship">🔄 Reiniciar</button>
-            <button class="btn-primary" id="btn-add-cal-race">+ Añadir carrera</button>
+            <button class="btn-text-icon" id="btn-show-champ-templates" data-i18n="championship.historics">📜 Históricos</button>
+            <button class="btn-text-icon" id="btn-reset-championship" data-i18n="championship.restart">🔄 Reiniciar</button>
+            <button class="btn-primary" id="btn-add-cal-race" data-i18n="championship.addRace">+ Añadir carrera</button>
           </div>
         </div>
         <div id="calendar-list" class="calendar-list"></div>
         <div id="calendar-empty" class="empty-state" style="display:none">
           <div class="empty-icon">📅</div>
-          <p>El calendario está vacío. ¡Añade la primera carrera!</p>
+          <p data-i18n="championship.empty">El calendario está vacío. ¡Añade la primera carrera!</p>
         </div>
       </div>
     </div>
@@ -140,15 +151,15 @@
     <div id="view-circuits" class="view">
       <div class="view-header">
         <div>
-          <h1>Circuitos</h1>
-          <p>Gestiona los circuitos disponibles para las carreras</p>
+          <h1 data-i18n="circuits.title">Circuitos</h1>
+          <p data-i18n="circuits.subtitle">Gestiona los circuitos disponibles para las carreras</p>
         </div>
-        <button class="btn-primary" id="btn-add-circuit">+ Añadir circuito</button>
+        <button class="btn-primary" id="btn-add-circuit" data-i18n="circuits.add">+ Añadir circuito</button>
       </div>
       <div id="circuits-grid" class="circuits-grid"></div>
       <div id="circuits-empty" class="empty-state" style="display:none">
         <div class="empty-icon">🛣️</div>
-        <p>No hay circuitos configurados. ¡Añade el primero!</p>
+        <p data-i18n="circuits.empty">No hay circuitos configurados. ¡Añade el primero!</p>
       </div>
     </div>
 
@@ -156,15 +167,15 @@
     <div id="view-players" class="view">
       <div class="view-header">
         <div>
-          <h1>Pilotos</h1>
-          <p>Gestiona los pilotos y sus cartas de mejora</p>
+          <h1 data-i18n="players.title">Pilotos</h1>
+          <p data-i18n="players.subtitle">Gestiona los pilotos y sus cartas de mejora</p>
         </div>
-        <button class="btn-primary" id="btn-add-player">+ Añadir piloto</button>
+        <button class="btn-primary" id="btn-add-player" data-i18n="players.add">+ Añadir piloto</button>
       </div>
       <div id="players-grid" class="players-grid"></div>
       <div id="players-empty" class="empty-state" style="display:none">
         <div class="empty-icon">👤</div>
-        <p>No hay pilotos aún. ¡Añade el primero!</p>
+        <p data-i18n="players.empty">No hay pilotos aún. ¡Añade el primero!</p>
       </div>
     </div>
 
@@ -172,14 +183,14 @@
     <div id="view-standings" class="view">
       <div class="view-header">
         <div>
-          <h1>Clasificación del Campeonato</h1>
+          <h1 data-i18n="standings.title">Clasificación del Campeonato</h1>
           <p id="standings-champ-name">—</p>
         </div>
       </div>
       <div id="standings-table-wrap" class="standings-wrap"></div>
       <div id="standings-empty" class="empty-state" style="display:none">
         <div class="empty-icon">📊</div>
-        <p>Añade pilotos al campeonato y disputa carreras para ver la clasificación</p>
+        <p data-i18n="standings.empty">Añade pilotos al campeonato y disputa carreras para ver la clasificación</p>
       </div>
     </div>
 
@@ -199,14 +210,14 @@
       <div class="manual-grid">
         <div class="section-card collapsible collapsed">
           <div class="section-header" onclick="toggleSection(this)">
-            <h2>🔥 Mecánicas Básicas</h2>
+            <h2 data-i18n="manual.basics">🔥 Mecánicas Básicas</h2>
             <span class="section-toggle">▼</span>
           </div>
           <div id="manual-basics-list" class="manual-list section-content"></div>
         </div>
         <div class="section-card collapsible collapsed">
           <div class="section-header" onclick="toggleSection(this)">
-            <h2>🌤️ Efectos de Clima</h2>
+            <h2 data-i18n="manual.weather">🌤️ Efectos de Clima</h2>
             <span class="section-toggle">▼</span>
           </div>
           <div id="manual-weather-list" class="manual-list section-content"></div>
@@ -221,33 +232,33 @@
 <div id="modal-circuit" class="modal-overlay" style="display:none">
   <div class="modal">
     <div class="modal-header">
-      <h2 id="modal-circuit-title">Añadir circuito</h2>
+      <h2 id="modal-circuit-title" data-i18n="modals.addCircuit.title">Añadir circuito</h2>
       <button class="modal-close" data-modal="modal-circuit">✕</button>
     </div>
     <div class="modal-body">
-      <label class="form-label">Nombre del circuito <span style="color:var(--error);">*</span></label>
+      <label class="form-label"><span data-i18n="modals.addCircuit.name">Nombre del circuito</span> <span style="color:var(--error);">*</span></label>
       <input class="form-input" id="circuit-name-input" type="text" placeholder="Ej: Circuit de Barcelona-Catalunya" maxlength="60" />
       
-      <label class="form-label">País <span style="color:var(--error);">*</span></label>
+      <label class="form-label" data-i18n="modals.addCircuit.country">País <span style="color:var(--error);">*</span></label>
       <select class="form-select" id="circuit-country-select">
-        <option value="">Selecciona un país...</option>
+        <option value="" data-i18n="modals.addCircuit.selectCountry">Selecciona un país...</option>
       </select>
       
-      <label class="form-label">Descripción</label>
+      <label class="form-label" data-i18n="modals.addCircuit.description">Descripción</label>
       <textarea class="form-input" id="circuit-description-input" rows="3" placeholder="Características del circuito..."></textarea>
       
-      <label class="form-label">Espacios (casillas)</label>
+      <label class="form-label" data-i18n="modals.addCircuit.spaces">Espacios (casillas)</label>
       <input class="form-input" id="circuit-spaces-input" type="number" min="1" max="200" placeholder="Ej: 69" />
       
-      <label class="form-label">Número de curvas</label>
+      <label class="form-label" data-i18n="modals.addCircuit.curves">Número de curvas</label>
       <input class="form-input" id="circuit-curves-input" type="number" min="1" max="30" placeholder="Ej: 16" />
       
-      <label class="form-label">Vueltas recomendadas</label>
+      <label class="form-label" data-i18n="modals.addCircuit.laps">Vueltas recomendadas</label>
       <input class="form-input" id="circuit-laps-input" type="number" min="1" max="10" placeholder="Ej: 2" />
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" data-modal="modal-circuit">Cancelar</button>
-      <button class="btn-primary" id="btn-save-circuit">Guardar</button>
+      <button class="btn-secondary" data-modal="modal-circuit" data-i18n="modals.cancel">Cancelar</button>
+      <button class="btn-primary" id="btn-save-circuit" data-i18n="modals.save">Guardar</button>
     </div>
   </div>
 </div>
@@ -298,7 +309,7 @@
       <div id="name-validation-msg" class="validation-msg" style="color:red; font-size:11px; margin-top:2px; margin-bottom:8px; min-height:14px;"></div>
       
       <div style="margin: 4px 0 16px">
-        <label class="checkbox-label"><input type="checkbox" id="player-is-legend" /> Piloto Leyenda (Bot)</label>
+        <label class="checkbox-label"><input type="checkbox" id="player-is-legend" /> <span data-i18n="players.legend">Piloto Leyenda (Bot)</span></label>
       </div>
 
       <label class="form-label">Color del coche</label>
@@ -603,22 +614,22 @@
 <!-- MOBILE BOTTOM NAV -->
 <nav id="mobile-nav">
   <a href="#" class="mobile-nav-item active" data-view="dashboard" id="mnav-dashboard">
-    <span class="mnav-icon">🏁</span><span class="mnav-label">Inicio</span>
+    <span class="mnav-icon">🏁</span><span class="mnav-label" data-i18n="nav.inicio">Inicio</span>
   </a>
   <a href="#" class="mobile-nav-item" data-view="championship" id="mnav-championship">
-    <span class="mnav-icon">🏆</span><span class="mnav-label">Campeonato</span>
+    <span class="mnav-icon">🏆</span><span class="mnav-label" data-i18n="nav.championship">Campeonato</span>
   </a>
   <a href="#" class="mobile-nav-item" data-view="players" id="mnav-players">
-    <span class="mnav-icon">👤</span><span class="mnav-label">Pilotos</span>
+    <span class="mnav-icon">👤</span><span class="mnav-label" data-i18n="nav.players">Pilotos</span>
   </a>
   <a href="#" class="mobile-nav-item" data-view="circuits" id="mnav-circuits">
-    <span class="mnav-icon">🗺️</span><span class="mnav-label">Circuitos</span>
+    <span class="mnav-icon">🗺️</span><span class="mnav-label" data-i18n="nav.circuits">Circuitos</span>
   </a>
   <a href="#" class="mobile-nav-item" data-view="standings" id="mnav-standings">
-    <span class="mnav-icon">📊</span><span class="mnav-label">Tabla</span>
+    <span class="mnav-icon">📊</span><span class="mnav-label" data-i18n="nav.tabla">Tabla</span>
   </a>
   <button class="mobile-nav-item" id="mnav-menu-btn">
-    <span class="mnav-icon">☰</span><span class="mnav-label">Menú</span>
+    <span class="mnav-icon">☰</span><span class="mnav-label" data-i18n="nav.menu">Menú</span>
   </button>
 </nav>
 
@@ -680,6 +691,9 @@
   </div>
 </div>
 
+<script src="locales/es.js"></script>
+<script src="locales/en.js"></script>
+<script src="js/i18n.js"></script>
 <script src="data/countries.js"></script>
 <script src="data/meta.js"></script>
 <script src="data/circuits.js"></script>

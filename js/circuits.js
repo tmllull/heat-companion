@@ -37,7 +37,7 @@ function renderCircuits() {
     html += `
       <div class="section-card collapsible collapsed" id="original-circuits-section">
         <div class="section-header" onclick="toggleSection(this)">
-          <h2>🏁 Circuitos Originales</h2>
+          <h2 data-i18n="championship.originalCircuits">${i18n.t('championship.originalCircuits')}</h2>
           <span class="section-toggle">▼</span>
         </div>
         <div class="section-content">
@@ -54,7 +54,7 @@ function renderCircuits() {
     html += `
       <div class="section-card collapsible collapsed" id="fanmade-circuits-section">
         <div class="section-header" onclick="toggleSection(this)">
-          <h2>📐 Circuitos Fanmade</h2>
+          <h2 data-i18n="championship.fanmadeCircuits">${i18n.t('championship.fanmadeCircuits')}</h2>
           <span class="section-toggle">▼</span>
         </div>
         <div class="section-content">
@@ -81,8 +81,11 @@ function renderCircuitCard(c) {
   // Determinar el badge y su clase
   let badgeHtml = '';
   if (c.expansion) {
-    const badgeClass = c.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
-    badgeHtml = `<div class="diff-badge ${badgeClass}">${escHtml(c.expansion)}</div>`;
+    const expansionKey = c.expansion === 'Lluvia Torrencial' ? 'heavyRain' : 
+                         c.expansion === 'Visión de Túnel' ? 'tunnelVision' : 
+                         c.expansion.toLowerCase();
+    const badgeClass = expansionKey.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+    badgeHtml = `<div class="diff-badge ${badgeClass}">${i18n.t('data.expansions.' + expansionKey)}</div>`;
   }
   
   return `<div class="circuit-card" data-circuit-id="${c.id}">
@@ -97,13 +100,13 @@ function renderCircuitCard(c) {
         <button class="btn-icon btn-icon-del" data-del-circuit="${c.id}">🗑</button>
       </div>
     ` : ''}
-    <div class="circuit-country">${country ? escHtml(country.name) : ''}</div>
+    <div class="circuit-country">${country ? i18n.t('data.countries.' + country.id) : ''}</div>
     <div class="circuit-name">${escHtml(c.name) || '---'}</div>
     ${badgeHtml}
     <div class="circuit-details">
-      ${c.spaces ? `<div>📏 ${c.spaces} espacios</div>` : ''}
-      ${c.curves ? `<div>⤴️ ${c.curves} curvas</div>` : ''}
-      ${c.laps ? `<div>🏁 ${c.laps} vueltas</div>` : ''}
+      ${c.spaces ? `<div>📏 ${i18n.t('championship.spaces', { n: c.spaces })}</div>` : ''}
+      ${c.curves ? `<div>⤴️ ${i18n.t('championship.curves', { n: c.curves })}</div>` : ''}
+      ${c.laps ? `<div>🏁 ${i18n.t('championship.laps', { n: c.laps })}</div>` : ''}
     </div>
   </div>`;
 }
@@ -119,14 +122,14 @@ function openCircuitModal(circuitId = null) {
   const lapsInput = document.getElementById('circuit-laps-input');
 
   // Populate country options
-  countrySelect.innerHTML = '<option value="">Selecciona un país...</option>' + 
-    COUNTRIES.map(c => `<option value="${c.id}">${c.flag} ${c.name}</option>`).join('');
+  countrySelect.innerHTML = `<option value="" data-i18n="modals.addCircuit.selectCountry">${i18n.t('modals.addCircuit.selectCountry')}</option>` + 
+    COUNTRIES.map(c => `<option value="${c.id}">${c.flag} ${i18n.t('data.countries.' + c.id)}</option>`).join('');
 
   if (circuitId) {
     // Buscar en circuitos oficiales y personalizados
     const circuit = [...(window.CIRCUITS || []), ...(state.circuits || [])].find(c => c.id === circuitId);
     const country = getCountryById(circuit.countryId);
-    document.getElementById('modal-circuit-title').textContent = 'Editar circuito';
+    document.getElementById('modal-circuit-title').textContent = i18n.t('modals.editResult'); // Reuse "Edit"
     nameInput.value = circuit.name || '';
     countrySelect.value = circuit.countryId || '';
     descriptionInput.value = circuit.description || '';
@@ -134,7 +137,7 @@ function openCircuitModal(circuitId = null) {
     curvesInput.value = circuit.curves || '';
     lapsInput.value = circuit.laps || '';
   } else {
-    document.getElementById('modal-circuit-title').textContent = 'Añadir circuito';
+    document.getElementById('modal-circuit-title').textContent = i18n.t('modals.addCircuit.title');
     nameInput.value = '';
     countrySelect.value = '';
     descriptionInput.value = '';
@@ -220,7 +223,7 @@ function saveCircuit() {
     const index = state.circuits.findIndex(c => c.id === editingCircuitId);
     if (index !== -1) {
       state.circuits[index] = { ...state.circuits[index], ...circuitData };
-      showToast('Circuito actualizado ✓', 'success');
+      showToast(i18n.t('toast.settingsUpdated'), 'success');
     }
   } else {
     // Añadir nuevo circuito
@@ -229,7 +232,7 @@ function saveCircuit() {
       state.circuits = [];
     }
     state.circuits.push(circuitData);
-    showToast(`${name} añadido ✓`, 'success');
+    showToast(`${name} ✓`, 'success');
   }
 
   closeModal('modal-circuit');
