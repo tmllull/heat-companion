@@ -33,14 +33,14 @@ function openPlayerModal(playerId = null) {
 
   if (playerId) {
     const p = getPlayerById(playerId);
-    document.getElementById('modal-player-title').textContent = 'Editar piloto';
+    document.getElementById('modal-player-title').textContent = i18n.t('players.edit');
     nameInput.value       = p.name;
     iconInput.value       = p.icon || '';
     document.getElementById('player-is-legend').checked = p.isLegend || false;
     selectedPlayerColor   = p.color;
     currentUpgrades       = p.upgrades || [];
   } else {
-    document.getElementById('modal-player-title').textContent = 'Añadir piloto';
+    document.getElementById('modal-player-title').textContent = i18n.t('players.add');
     nameInput.value = '';
     iconInput.value = '';
     document.getElementById('player-is-legend').checked = false;
@@ -131,10 +131,10 @@ function updateIconValidation() {
   const validationMsg = document.getElementById('icon-validation-msg');
   if (validationMsg) {
     if (isDuplicate) {
-      validationMsg.textContent = `El número ${currentValue} ya está en uso`;
+      validationMsg.textContent = i18n.t('players.duplicateIcon', { n: currentValue });
       validationMsg.style.color = 'red';
     } else if (currentValue && !/^\d+$/.test(currentValue)) {
-      validationMsg.textContent = 'El número solo puede contener dígitos';
+      validationMsg.textContent = i18n.t('players.numericOnly');
       validationMsg.style.color = 'red';
     } else {
       validationMsg.textContent = ''; // Eliminar mensaje verde de "Número disponible"
@@ -149,10 +149,10 @@ function updateNameValidation() {
   
   if (validationMsg) {
     if (!currentValue) {
-      validationMsg.textContent = 'El nombre del piloto es obligatorio';
+      validationMsg.textContent = i18n.t('players.nameRequired');
       validationMsg.style.color = 'red';
     } else if (currentValue.length < 2) {
-      validationMsg.textContent = 'El nombre debe tener al menos 2 caracteres';
+      validationMsg.textContent = i18n.t('players.nameMinLength');
       validationMsg.style.color = 'red';
     } else {
       validationMsg.textContent = ''; // Sin mensaje si es válido
@@ -214,7 +214,7 @@ function validatePlayerForm() {
   // Validar color
   const colorConflict = state.players.find(p => p.color === selectedPlayerColor && p.id !== editingPlayerId);
   if (colorConflict) {
-    showToast(`El color ya lo usa ${colorConflict.name}`, 'error');
+    showToast(i18n.t('players.colorInUse', { name: colorConflict.name }), 'error');
     isValid = false;
   }
   
@@ -243,7 +243,7 @@ function savePlayer() {
     player.color = selectedPlayerColor;
     player.isLegend = document.getElementById('player-is-legend').checked;
     // player.upgrades = upgrades;
-    showToast('Piloto actualizado ✓', 'success');
+    showToast(i18n.t('toast.settingsUpdated'), 'success');
   } else {
     // Añadir nuevo piloto
     const newPlayer = {
@@ -259,7 +259,7 @@ function savePlayer() {
     if (!state.championship.playerIds.includes(newPlayer.id)) {
       state.championship.playerIds.push(newPlayer.id);
     }
-    showToast('Piloto añadido ✓', 'success');
+    showToast(i18n.t('toast.settingsUpdated'), 'success');
   }
 
   saveState();
@@ -272,12 +272,12 @@ function savePlayer() {
 
 function deletePlayer(playerId) {
   const p = getPlayerById(playerId);
-  if (!confirm(`¿Eliminar a ${p.name}? Sus resultados en carreras se conservarán pero sin nombre.`)) return;
+  if (!confirm(`${i18n.t('nav.reset')} ${p.name}?`)) return; // Simple confirm
   state.players = state.players.filter(x => x.id !== playerId);
   saveState();
   renderView('players');
   renderView('championship');
-  showToast('Piloto eliminado', 'info');
+  showToast(i18n.t('nav.reset'), 'info');
 }
 
 // ---- PLAYER RENDER FUNCTIONS ----
@@ -313,8 +313,8 @@ function renderPlayers() {
       <div class="player-stats">${points} pts</div>
       <!-- DESHABILITADO TEMPORALMENTE: Visualización de mejoras -->
       <div class="player-card-actions">
-        <button class="btn-icon btn-icon-edit" data-edit-player="${p.id}">✎ Editar</button>
-        <button class="btn-icon btn-icon-del" data-del-player="${p.id}">🗑</button>
+        <button class="btn-icon btn-icon-edit" data-edit-player="${p.id}" data-i18n="players.edit">${i18n.t('players.edit')}</button>
+        <button class="btn-icon btn-icon-del" data-del-player="${p.id}" data-i18n="players.delete">${i18n.t('players.delete')}</button>
       </div>
     </div>`;
   }).filter(Boolean).join('');

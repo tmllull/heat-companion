@@ -8,7 +8,7 @@ function renderChampionship() {
   const champ = state.championship;
   document.getElementById('champ-view-name').textContent = champ.name;
   document.getElementById('champ-view-sub').textContent  =
-    `${champ.calendar.length} carrera(s) en calendario`;
+    `${champ.calendar.length} ${i18n.t('dashboard.statPending').toLowerCase()}`;
 
   // --- Calendar ---
   const listEl  = document.getElementById('calendar-list');
@@ -25,7 +25,7 @@ function renderChampionship() {
       const mods      = [];
       if (race.mods?.weather) {
         const wOpt = window.WEATHER_OPTIONS.find(w => w.id === race.weatherType);
-        mods.push(`${wOpt?.emoji || '🌧'} ${wOpt?.name || 'Clima'}`);
+        mods.push(`${wOpt?.emoji || '🌧'} ${i18n.t('data.weather.' + race.weatherType + '.name')}`);
       }
 
       let podiumHtml = '';
@@ -54,20 +54,20 @@ function renderChampionship() {
           <div class="cal-race-name">${escHtml(circuit?.country || getCircuitName(circuit))}</div>
           <div class="cal-race-event" style="font-size: smaller">${escHtml(getRaceEventData(race).name)}</div>
           <div class="cal-race-meta">
-            <span>🏁 Vueltas: ${race.laps || 3}</span>
-            ${race.setup?.sponsors !== undefined ? `<span>📋 Patrocinios: ${race.setup.sponsors}</span>` : ''}
-            ${race.setup?.press ? `<span>🎥 Prensa: ${race.setup.press}</span>` : ''}
-            ${mods.length ? `<span class="cal-mods">${mods.join(' ')}</span>` : '<span style="color:var(--text-dim)">Sin módulos</span>'}
+            <span>🏁 ${i18n.t('championship.laps', { n: race.laps || 3 })}</span>
+            ${race.setup?.sponsors !== undefined ? `<span>📋 ${i18n.t('championship.sponsors')}: ${race.setup.sponsors}</span>` : ''}
+            ${race.setup?.press ? `<span>🎥 ${i18n.t('championship.press')}: ${race.setup.press}</span>` : ''}
+            ${mods.length ? `<span class="cal-mods">${mods.join(' ')}</span>` : `<span style="color:var(--text-dim)">${i18n.t('championship.empty').includes('Empty') ? 'No modules' : 'Sin módulos'}</span>`}
           </div>
           ${podiumHtml}
         </div>
-        <div class="cal-race-actions">
+        <div class="cal-race-actions" data-i18n-ctx="badges">
           ${completed
-            ? `<span class="race-status-badge completed"> Completada </span>
+            ? `<span class="race-status-badge completed"> ${i18n.t('dashboard.completed')} </span>
                <button class="btn-cal-action" data-view-result="${race.id}">Ver</button>`
-            : `<span class="race-status-badge pending"> Pendiente </span>
+            : `<span class="race-status-badge pending"> ${i18n.t('dashboard.pending')} </span>
                <button class="btn-cal-action" data-edit-cal-race="${race.id}" title="Editar carrera">✎</button>
-               <button class="btn-cal-action primary" data-enter-result="${race.id}">Registrar resultado</button>`
+               <button class="btn-cal-action primary" data-enter-result="${race.id}">${i18n.t('modals.editResult')}</button>`
           }
           <button class="btn-cal-delete" data-delete-cal-race="${race.id}" title="Eliminar carrera">✕</button>
         </div>
@@ -165,7 +165,10 @@ function openChampModal() {
       warningMsg = document.createElement('div');
       warningMsg.id = 'points-system-warning';
       warningMsg.className = 'form-warning';
-      warningMsg.innerHTML = `⚠️ <strong>Sistema de puntos bloqueado</strong><br>No se puede cambiar el sistema de puntuación después de disputar la primera carrera.`;
+      warningMsg.innerHTML = `⚠️ <strong>Points system locked</strong><br>The scoring system cannot be changed after the first race.`;
+      if (i18n.currentLocale === 'es') {
+        warningMsg.innerHTML = `⚠️ <strong>Sistema de puntos bloqueado</strong><br>No se puede cambiar el sistema de puntuación después de disputar la primera carrera.`;
+      }
       pointsSelect.parentNode.insertBefore(warningMsg, pointsSelect.nextSibling);
     }
   } else {
@@ -214,7 +217,7 @@ function saveChampionship() {
   saveState();
   renderSidebarChamp();
   closeModal('modal-champ');
-  showToast('Configuración guardada', 'success');
+  showToast(i18n.t('toast.settingsUpdated'), 'success');
   renderView('dashboard');
   renderView('championship');
 }
@@ -239,7 +242,7 @@ function openResultsModal(raceId) {
 
   const circuit = getCircuitById(race.circuitId);
   document.getElementById('modal-results-title').textContent =
-    `Registrar resultado — ${circuit?.flag || ''} ${getCircuitName(circuit)}`;
+    `${i18n.t('modals.editResult')} — ${circuit?.flag || ''} ${getCircuitName(circuit)}`;
 
   // Build starting order: if already has results, use them; else standings order
   if (race.status === 'completed' && race.results.length > 0) {
@@ -353,7 +356,7 @@ function saveResults() {
   closeModal('modal-results');
   renderView('championship');
   renderView('dashboard');
-  showToast('Resultado registrado ✓', 'success');
+  showToast(i18n.t('toast.settingsUpdated'), 'success');
 }
 
 // ---- CHAMPIONSHIP EVENT LISTENERS ----
@@ -429,12 +432,12 @@ function bindChampionshipEventListeners() {
     if (deleteCalRaceBtn) {
       const raceId = deleteCalRaceBtn.dataset.deleteCalRace;
       const race = state.championship.calendar.find(r => r.id === raceId);
-      if (!confirm(`¿Eliminar carrera del calendario?\n\n${getCircuitName(getCircuitById(race.circuitId))}`)) return;
+      if (!confirm(`${i18n.t('championship.deleteConfirm')}\n\n${getCircuitName(getCircuitById(race.circuitId))}`)) return;
       state.championship.calendar = state.championship.calendar.filter(r => r.id !== raceId);
       saveState();
       renderChampionship();
       renderView('dashboard');
-      showToast('Carrera eliminada del calendario', 'info');
+      showToast(i18n.t('nav.reset'), 'info');
       return;
     }
 

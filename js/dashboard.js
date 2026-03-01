@@ -13,8 +13,8 @@ function renderDashboard() {
   document.getElementById('dash-title').textContent = champ.name;
   document.getElementById('dash-subtitle').textContent =
     enrolledPlayers().length > 0
-      ? `${enrolledPlayers().length} piloto(s) · ${completed.length} carrera(s) disputada(s)`
-      : 'Configura el campeonato para empezar';
+      ? `${enrolledPlayers().length} ${i18n.t('nav.players').toLowerCase()} · ${completed.length} ${i18n.t('dashboard.statRaces').toLowerCase()}`
+      : i18n.t('dashboard.subtitle');
 
   document.getElementById('stat-races-val').textContent   = completed.length;
   document.getElementById('stat-pending-val').textContent  = pending.length;
@@ -26,7 +26,7 @@ function renderDashboard() {
   // Mini standings (top 5)
   const miniEl = document.getElementById('dash-standings-list');
   if (standings.length === 0) {
-    miniEl.innerHTML = '<div style="color:var(--text-dim);font-size:13px;text-align:center;padding:16px">Inscribe pilotos en el campeonato para ver la clasificación</div>';
+    miniEl.innerHTML = `<div style="color:var(--text-dim);font-size:13px;text-align:center;padding:16px">${i18n.t('standings.empty')}</div>`;
   } else {
     miniEl.innerHTML = standings.slice(0, 5).map((s, i) => {
       const pos = i + 1;
@@ -43,7 +43,7 @@ function renderDashboard() {
   const recentEl = document.getElementById('dash-recent-races');
   const shown = [...completed.slice(-3).reverse(), ...pending.slice(0, 3)];
   if (shown.length === 0) {
-    recentEl.innerHTML = '<div style="color:var(--text-dim);font-size:13px;text-align:center;padding:16px">No hay carreras en el calendario</div>';
+    recentEl.innerHTML = `<div style="color:var(--text-dim);font-size:13px;text-align:center;padding:16px">${i18n.t('championship.empty')}</div>`;
   } else {
     recentEl.innerHTML = shown.map(race => {
       const circuit = getCircuitById(race.circuitId);
@@ -55,14 +55,14 @@ function renderDashboard() {
         <div class="race-info">
           <div class="race-info-name">${escHtml(getCircuitName(circuit))}</div>
           <div class="race-info-meta">
-            <span class="race-info-laps">🏁 ${race.laps || 3} vueltas</span>
-            ${circuit ? `<span class="race-info-spaces">📏 ${circuit.spaces || 0} casillas</span>` : ''}
-            ${circuit ? `<span class="race-info-curves">⤵ ${circuit.curves || 0} curvas</span>` : ''}
-            ${race.mods?.weather ? `<span class="race-info-weather">${window.WEATHER_OPTIONS.find(w => w.id === race.weatherType)?.emoji || '🌧'} ${window.WEATHER_OPTIONS.find(w => w.id === race.weatherType)?.name || 'Clima'}</span>` : ''}
+            <span class="race-info-laps">🏁 ${i18n.t('championship.laps', { n: race.laps || 3 })}</span>
+            ${circuit ? `<span class="race-info-spaces">📏 ${i18n.t('championship.spaces', { n: circuit.spaces || 0 })}</span>` : ''}
+            ${circuit ? `<span class="race-info-curves">⤵ ${i18n.t('championship.curves', { n: circuit.curves || 0 })}</span>` : ''}
+            ${race.mods?.weather ? `<span class="race-info-weather">${window.WEATHER_OPTIONS.find(w => w.id === race.weatherType)?.emoji || '🌧'} ${i18n.t('data.weather.' + race.weatherType + '.name')}</span>` : ''}
           </div>
         </div>
         ${isPending
-          ? `<span class="race-status-badge pending">Pendiente</span>`
+          ? `<span class="race-status-badge pending">${i18n.t('dashboard.pending').toUpperCase()}</span>`
           : winnerP
             ? `<div class="race-winner"><div class="race-winner-dot" style="background:${winnerP.color}"></div>${escHtml(winnerP.name)}</div>`
             : ''

@@ -17,6 +17,23 @@ if (typeof CHAMPIONSHIP_TEMPLATES !== 'undefined') {
 // ---- STATE ----
 let state = loadState();
 
+// Initialize i18n
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. Añadir el listener ANTES de inicializar i18n
+  window.addEventListener('languageChanged', (e) => {
+    renderView(state.currentView || 'dashboard');
+  });
+
+  // 2. Inicializar i18n (esto disparará setLanguage -> languageChanged)
+  await i18n.init();
+  
+  // 3. Update initial flag
+  const flagEl = document.getElementById('current-lang-flag');
+  if (flagEl) {
+    flagEl.textContent = i18n.currentLocale === 'es' ? '🇪🇸' : '🇬🇧';
+  }
+});
+
 function defaultState() {
   return {
     championship: {
@@ -127,7 +144,7 @@ function bindGlobalButtons() {
       e.preventDefault();
       e.stopPropagation();
       toggleTheme();
-      showToast('Tema cambiado');
+      showToast(i18n.t('toast.themeChanged'));
     });
   } else console.warn('Theme toggle button not found during bindGlobalButtons');
 
@@ -142,9 +159,38 @@ function bindGlobalButtons() {
   const importInput = document.getElementById('import-file-input');
   if (importInput) importInput.addEventListener('change', e => importData(e.target.files[0]));
   else console.warn('Import file input not found during bindGlobalButtons');
+
+  const langBtn = document.getElementById('btn-lang-toggle');
+  const langMenu = document.getElementById('lang-dropdown-menu');
+  if (langBtn && langMenu) {
+    langBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      langMenu.classList.toggle('open');
+    });
+
+    document.querySelectorAll('.lang-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const lang = opt.dataset.lang;
+        i18n.setLanguage(lang);
+        langMenu.classList.remove('open');
+        showToast(i18n.t('toast.settingsUpdated'));
+        
+        // Actualizar bandera principal
+        const flagEl = document.getElementById('current-lang-flag');
+        if (flagEl) flagEl.textContent = lang === 'es' ? '🇪🇸' : '🇬🇧';
+      });
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', () => {
+      langMenu.classList.remove('open');
+    });
+  }
 }
 
-document.addEventListener('DOMContentLoaded', bindGlobalButtons);
+// Removed duplicate binding: bindGlobalButtons is now called exclusively within the init() function
+// to ensure each listener is attached only once.
+// document.addEventListener('DOMContentLoaded', bindGlobalButtons);
 
 
 function getPointsArray(raceId = null) {
@@ -216,8 +262,8 @@ function renderMetaInfo() {
 }
 function getCircuitName(circuit) {
   if (!circuit) return '—';
-  const country = getCountryById(circuit.countryId);
-  return country ? country.name : '—';
+  const name = i18n.t('data.countries.' + circuit.countryId);
+  return name === 'data.countries.' + circuit.countryId ? (circuit.name || '—') : name;
 }
 function getUpgradeById(id) { 
   return window.UPGRADES.find(u => u.id === id) || window.SPONSORS.find(s => s.id === id); 
@@ -283,15 +329,14 @@ function getPoints(position, raceId = null) {
 }
 
 function renderView(name) {
+  state.currentView = name;
   switch (name) {
     case 'dashboard':    renderDashboard();    break;
     case 'championship': renderChampionship(); break;
     case 'circuits':     renderCircuits();     break;
     case 'players':      renderPlayers();      break;
     case 'standings':    renderStandings();    break;
-    case 'manual':       
-      renderManual();       
-      break;
+    case 'manual':       renderManual();       break;
   }
 }
 
@@ -314,16 +359,6 @@ function navigateTo(viewName) {
   closeMobileSidebar();
 
   renderView(viewName);
-}
-
-function renderView(name) {
-  switch (name) {
-    case 'dashboard':    renderDashboard();    break;
-    case 'championship': renderChampionship(); break;
-    case 'circuits':     renderCircuits();     break;
-    case 'players':      renderPlayers();      break;
-    case 'standings':    renderStandings();    break;
-  }
 }
 
 // ============================================================
@@ -366,7 +401,7 @@ function renderStandings() {
 
   const ep = enrolledPlayers();
   if (ep.length === 0) {
-    wrap.innerHTML = '<table class="standings-table"><thead><tr><th>Pos</th><th>Piloto</th><th>Pts</th><th>Gap</th><th>Carreras</th></tr></thead><tbody><tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:20px">No hay pilotos creados. Ve a la sección "Pilotos" para añadirlos.</td></tr></tbody></table>';
+    wrap.innerHTML = `<table class="standings-table"><thead><tr><th>${i18n.t('standings.pos')}</th><th>${i18n.t('standings.player')}</th><th>${i18n.t('standings.pts')}</th><th>${i18n.t('standings.gap')}</th><th>${i18n.t('standings.races')}</th></tr></thead><tbody><tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:20px">${i18n.t('players.empty')}</td></tr></tbody></table>`;
     empty.style.display = 'none';
     return;
   }
@@ -411,7 +446,7 @@ function renderStandings() {
 
   wrap.innerHTML = `<table class="standings-table">
     <thead><tr>
-      <th>Pos</th><th>Piloto</th><th>Pts</th><th>Gap</th><th>Carreras</th>
+      <th>${i18n.t('standings.pos')}</th><th>${i18n.t('standings.player')}</th><th>${i18n.t('standings.pts')}</th><th>${i18n.t('standings.gap')}</th><th>${i18n.t('standings.races')}</th>
       ${raceCols}
     </tr></thead>
     <tbody>${rows}</tbody>
@@ -467,7 +502,7 @@ function openAddRaceModal(raceId = null) {
   addRaceSelectedSponsors = race ? (race.sponsorCards || 0) : 1;
   addRaceSelectedLaps = race ? (race.laps || 3) : 3;
   
-  document.getElementById('modal-add-race-title').textContent = raceId ? 'Editar carrera' : 'Añadir carrera al calendario';
+  document.getElementById('modal-add-race-title').textContent = raceId ? i18n.t('modals.editResult') : i18n.t('championship.addRace');
   document.getElementById('add-race-laps-input').value = addRaceSelectedLaps;
   document.getElementById('add-race-event-input').value = race ? (race.event || '') : '';
   document.getElementById('add-race-rules-input').value = race ? (race.rules || '') : '';
@@ -516,7 +551,7 @@ function openAddRaceModal(raceId = null) {
     circuitsHtml += `
       <div class="section-card collapsible collapsed" style="margin-bottom: 0;">
         <div class="section-header" onclick="toggleSection(this)">
-          <h3>🏁 Circuitos Originales</h3>
+          <h3 data-i18n="championship.originalCircuits">${i18n.t('championship.originalCircuits')}</h3>
           <span class="section-toggle">▼</span>
         </div>
         <div class="section-content">
@@ -533,7 +568,7 @@ function openAddRaceModal(raceId = null) {
     circuitsHtml += `
       <div class="section-card collapsible collapsed" style="margin-bottom: 0;">
         <div class="section-header" onclick="toggleSection(this)">
-          <h3>📐 Circuitos Fanmade</h3>
+          <h3 data-i18n="championship.fanmadeCircuits">${i18n.t('championship.fanmadeCircuits')}</h3>
           <span class="section-toggle">▼</span>
         </div>
         <div class="section-content">
@@ -554,10 +589,10 @@ function openAddRaceModal(raceId = null) {
   wGrid.innerHTML = window.WEATHER_OPTIONS.map(w => `
     <div class="weather-card ${w.id === addRaceSelectedWeather ? 'selected' : ''}" data-weather="${w.id}">
       <div class="weather-card-emoji">${w.emoji}</div>
-      <div class="weather-card-name">${w.name}</div>
+      <div class="weather-card-name">${i18n.t('data.weather.' + w.id + '.name')}</div>
       <div class="weather-card-effect">
-        <div><strong>Prep:</strong> ${w.effect.preparation}</div>
-        <div><strong>Efecto de pista:</strong> ${w.effect.trackEffect}</div>
+        <div><strong>Prep:</strong> ${i18n.t('data.weather.' + w.id + '.prep')}</div>
+        <div><strong>Efecto de pista:</strong> ${i18n.t('data.weather.' + w.id + '.track')}</div>
       </div>
     </div>`).join('');
 
@@ -575,11 +610,11 @@ function renderRaceCircuitCard(c) {
   
   return `<div class="circuit-card ${c.id === addRaceSelectedCircuit ? 'selected' : ''}" data-circuit="${c.id}">
     <div class="circuit-flag">${country ? country.flag : '🏁'}</div>
-    <div class="circuit-name">${c.name || (country ? country.name : '')}</div>
+    <div class="circuit-name">${c.name || (country ? i18n.t('data.countries.' + country.id) : '')}</div>
     ${badgeHtml}
     <div class="circuit-info-stats">
-      <span>🏁 ${c.laps} vueltas</span>
-      <span>⤵ ${c.curves} curvas</span>
+      <span>🏁 ${i18n.t('championship.laps', { n: c.laps })}</span>
+      <span>⤵ ${i18n.t('championship.curves', { n: c.curves })}</span>
     </div>
   </div>`;
 }
@@ -994,7 +1029,7 @@ function init() {
   renderSidebarChamp();
   navigateTo('dashboard');
 
-  // bind core UI buttons (also bound on DOMContentLoaded for safety)
+  // bind core UI buttons (only once here)
   bindGlobalButtons();
 
   // System event listeners (moved to system.js)
