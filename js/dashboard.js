@@ -55,9 +55,9 @@ function renderDashboard() {
         <div class="race-info">
           <div class="race-info-name">${escHtml(getCircuitName(circuit))}</div>
           <div class="race-info-meta">
-            <span class="race-info-laps">🏁 ${i18n.t('championship.laps', { n: race.laps || 3 })}</span>
-            ${circuit ? `<span class="race-info-spaces">📏 ${i18n.t('championship.spaces', { n: circuit.spaces || 0 })}</span>` : ''}
-            ${circuit ? `<span class="race-info-curves">⤵ ${i18n.t('championship.curves', { n: circuit.curves || 0 })}</span>` : ''}
+            <span class="race-info-laps">🏁 ${i18n.t('common.laps')}: ${race.laps || 3}</span>
+            ${circuit ? `<span class="race-info-spaces">📏 ${i18n.t('common.spaces')}: ${circuit.spaces || 0}</span>` : ''}
+            ${circuit ? `<span class="race-info-curves">⤵ ${i18n.t('common.curves')}: ${circuit.curves || 0}</span>` : ''}
             ${race.mods?.weather ? `<span class="race-info-weather">${window.WEATHER_OPTIONS.find(w => w.id === race.weatherType)?.emoji || '🌧'} ${i18n.t('data.weather.' + race.weatherType + '.name')}</span>` : ''}
           </div>
         </div>

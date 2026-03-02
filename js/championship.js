@@ -52,24 +52,24 @@ function renderChampionship() {
         <div class="cal-race-flag">${circuit ? (getCountryById(circuit.countryId)?.flag || '🏁') : '🏁'}</div>
         <div class="cal-race-info">
           <div class="cal-race-name">${escHtml(circuit?.country || getCircuitName(circuit))}</div>
-          <div class="cal-race-event" style="font-size: smaller">${escHtml(getRaceEventData(race).name)}</div>
+          <div class="cal-race-event" style="font-size: smaller">${escHtml(getRaceEventData(race).id ? i18n.t('modals.championshipTemplates.events.' + getRaceEventData(race).id + '.name', { defaultValue: getRaceEventData(race).name }) : getRaceEventData(race).name)}</div>
           <div class="cal-race-meta">
-            <span>🏁 ${i18n.t('championship.laps', { n: race.laps || 3 })}</span>
-            ${race.setup?.sponsors !== undefined ? `<span>📋 ${i18n.t('championship.sponsors')}: ${race.setup.sponsors}</span>` : ''}
-            ${race.setup?.press ? `<span>🎥 ${i18n.t('championship.press')}: ${race.setup.press}</span>` : ''}
-            ${mods.length ? `<span class="cal-mods">${mods.join(' ')}</span>` : `<span style="color:var(--text-dim)">${i18n.t('championship.empty').includes('Empty') ? 'No modules' : 'Sin módulos'}</span>`}
+            <span>🏁 ${i18n.t('common.laps')}: ${race.laps || 3}</span>
+            ${race.setup?.sponsors !== undefined ? `<span>📋 ${i18n.t('common.sponsors')}: ${race.setup.sponsors}</span>` : ''}
+            ${race.setup?.press ? `<span>🎥 ${i18n.t('common.press')}: ${race.setup.press}</span>` : ''}
+            ${mods.length ? `<span class="cal-mods">${mods.join(' ')}</span>` : `<span style="color:var(--text-dim)">${i18n.t('common.noModules')}</span>`}
           </div>
           ${podiumHtml}
         </div>
         <div class="cal-race-actions" data-i18n-ctx="badges">
           ${completed
             ? `<span class="race-status-badge completed"> ${i18n.t('dashboard.completed')} </span>
-               <button class="btn-cal-action" data-view-result="${race.id}">Ver</button>`
+               <button class="btn-cal-action" data-view-result="${race.id}">${i18n.t('common.view')}</button>`
             : `<span class="race-status-badge pending"> ${i18n.t('dashboard.pending')} </span>
-               <button class="btn-cal-action" data-edit-cal-race="${race.id}" title="Editar carrera">✎</button>
-               <button class="btn-cal-action primary" data-enter-result="${race.id}">${i18n.t('modals.editResult')}</button>`
+               <button class="btn-cal-action" data-edit-cal-race="${race.id}" title="${i18n.t('common.edit')}">✎</button>
+               <button class="btn-cal-action primary" data-enter-result="${race.id}">${i18n.t('common.edit')} ${i18n.t('common.result').toLowerCase()}</button>`
           }
-          <button class="btn-cal-delete" data-delete-cal-race="${race.id}" title="Eliminar carrera">✕</button>
+          <button class="btn-cal-delete" data-delete-cal-race="${race.id}" title="${i18n.t('common.delete')}">✕</button>
         </div>
       </div>`;
     }).join('');
@@ -242,7 +242,7 @@ function openResultsModal(raceId) {
 
   const circuit = getCircuitById(race.circuitId);
   document.getElementById('modal-results-title').textContent =
-    `${i18n.t('modals.editResult')} — ${circuit?.flag || ''} ${getCircuitName(circuit)}`;
+    `${i18n.t('common.edit')} ${i18n.t('common.result').toLowerCase()} — ${circuit?.flag || ''} ${getCircuitName(circuit)}`;
 
   // Build starting order: if already has results, use them; else standings order
   if (race.status === 'completed' && race.results.length > 0) {
@@ -432,7 +432,8 @@ function bindChampionshipEventListeners() {
     if (deleteCalRaceBtn) {
       const raceId = deleteCalRaceBtn.dataset.deleteCalRace;
       const race = state.championship.calendar.find(r => r.id === raceId);
-      if (!confirm(`${i18n.t('championship.deleteConfirm')}\n\n${getCircuitName(getCircuitById(race.circuitId))}`)) return;
+      const circuit = getCircuitById(race.circuitId);
+      if (!confirm(i18n.t('common.confirmDelete', { item: getCircuitName(circuit) }))) return;
       state.championship.calendar = state.championship.calendar.filter(r => r.id !== raceId);
       saveState();
       renderChampionship();

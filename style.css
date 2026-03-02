@@ -2800,6 +2800,10 @@ ul {
   background: rgba(168, 85, 247, 0.15);
   color: #a855f7;
 }
+.diff-badge.terreno-inestable {
+  background: rgba(251, 146, 60, 0.15);
+  color: #fb923c;
+}
 .diff-badge.fanmade {
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;

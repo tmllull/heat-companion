@@ -24,10 +24,10 @@ function renderCircuits() {
 
   // Separar circuitos en originales y fanmade
   const originalCircuits = allCircuits.filter(c => 
-    ['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(c.expansion)
+    ['Base', 'Lluvia Torrencial', 'Visión de Túnel', 'Terreno Inestable'].includes(c.expansion)
   );
   const fanmadeCircuits = allCircuits.filter(c => 
-    !['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(c.expansion)
+    !['Base', 'Lluvia Torrencial', 'Visión de Túnel', 'Terreno Inestable'].includes(c.expansion)
   );
 
   let html = '<div class="circuits-sections-container">';
@@ -37,7 +37,7 @@ function renderCircuits() {
     html += `
       <div class="section-card collapsible collapsed" id="original-circuits-section">
         <div class="section-header" onclick="toggleSection(this)">
-          <h2 data-i18n="championship.originalCircuits">${i18n.t('championship.originalCircuits')}</h2>
+          <h2 data-i18n="circuits.original">${i18n.t('circuits.original')}</h2>
           <span class="section-toggle">▼</span>
         </div>
         <div class="section-content">
@@ -54,7 +54,7 @@ function renderCircuits() {
     html += `
       <div class="section-card collapsible collapsed" id="fanmade-circuits-section">
         <div class="section-header" onclick="toggleSection(this)">
-          <h2 data-i18n="championship.fanmadeCircuits">${i18n.t('championship.fanmadeCircuits')}</h2>
+          <h2 data-i18n="circuits.fanmade">${i18n.t('circuits.fanmade')}</h2>
           <span class="section-toggle">▼</span>
         </div>
         <div class="section-content">
@@ -75,7 +75,7 @@ function renderCircuitCard(c) {
   const country = getCountryById(c.countryId);
   
   // Determinar si el circuito pertenece a una expansión oficial (incluye fanmade)
-  const isOfficialExpansion = ['Base', 'Lluvia Torrencial', 'Visión de Túnel', 'Fanmade'].includes(c.expansion);
+  const isOfficialExpansion = ['Base', 'Lluvia Torrencial', 'Visión de Túnel', 'Terreno Inestable', 'Fanmade'].includes(c.expansion);
   const canEdit = !isOfficialExpansion;
   
   // Determinar el badge y su clase
@@ -83,8 +83,21 @@ function renderCircuitCard(c) {
   if (c.expansion) {
     const expansionKey = c.expansion === 'Lluvia Torrencial' ? 'heavyRain' : 
                          c.expansion === 'Visión de Túnel' ? 'tunnelVision' : 
+                         c.expansion === 'Terreno Inestable' ? 'rockyRoads' :
                          c.expansion.toLowerCase();
-    const badgeClass = expansionKey.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+    
+    // Generar la clase CSS correcta para cada expansión
+    let badgeClass;
+    if (c.expansion === 'Lluvia Torrencial') {
+      badgeClass = 'lluvia-torrencial';
+    } else if (c.expansion === 'Visión de Túnel') {
+      badgeClass = 'vision-de-tunel';
+    } else if (c.expansion === 'Terreno Inestable') {
+      badgeClass = 'terreno-inestable';
+    } else {
+      badgeClass = expansionKey.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+    }
+    
     badgeHtml = `<div class="diff-badge ${badgeClass}">${i18n.t('data.expansions.' + expansionKey)}</div>`;
   }
   
@@ -104,9 +117,9 @@ function renderCircuitCard(c) {
     <div class="circuit-name">${escHtml(c.name) || '---'}</div>
     ${badgeHtml}
     <div class="circuit-details">
-      ${c.spaces ? `<div>📏 ${i18n.t('championship.spaces', { n: c.spaces })}</div>` : ''}
-      ${c.curves ? `<div>⤴️ ${i18n.t('championship.curves', { n: c.curves })}</div>` : ''}
-      ${c.laps ? `<div>🏁 ${i18n.t('championship.laps', { n: c.laps })}</div>` : ''}
+      ${c.spaces ? `<div>📏 ${i18n.t('common.spaces')}: ${c.spaces}</div>` : ''}
+      ${c.curves ? `<div>⤴️ ${i18n.t('common.curves')}: ${c.curves}</div>` : ''}
+      ${c.laps ? `<div>🏁 ${i18n.t('common.laps')}: ${c.laps}</div>` : ''}
     </div>
   </div>`;
 }
@@ -129,7 +142,7 @@ function openCircuitModal(circuitId = null) {
     // Buscar en circuitos oficiales y personalizados
     const circuit = [...(window.CIRCUITS || []), ...(state.circuits || [])].find(c => c.id === circuitId);
     const country = getCountryById(circuit.countryId);
-    document.getElementById('modal-circuit-title').textContent = i18n.t('modals.editResult'); // Reuse "Edit"
+    document.getElementById('modal-circuit-title').textContent = i18n.t('common.edit') + ' ' + i18n.t('common.circuit').toLowerCase(); // Reuse "Edit"
     nameInput.value = circuit.name || '';
     countrySelect.value = circuit.countryId || '';
     descriptionInput.value = circuit.description || '';
@@ -251,7 +264,7 @@ function deleteCircuit(circuitId) {
   if (!circuit) return;
   
   // Verificar si es un circuito oficial (incluye fanmade)
-  const isOfficialExpansion = ['Base', 'Lluvia Torrencial', 'Visión de Túnel', 'Fanmade'].includes(circuit.expansion);
+  const isOfficialExpansion = ['Base', 'Lluvia Torrencial', 'Visión de Túnel', 'Terreno Inestable', 'Fanmade'].includes(circuit.expansion);
   if (isOfficialExpansion) {
     showToast('No se pueden eliminar circuitos oficiales', 'error');
     return;

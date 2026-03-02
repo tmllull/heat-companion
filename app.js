@@ -117,6 +117,7 @@ function getRaceEventData(race) {
     const event = getEventById(race.eventId);
     if (event) {
       return {
+        id: race.eventId,
         name: event.name,
         description: event.description,
         pointsOverride: event.pointsOverride
@@ -126,7 +127,8 @@ function getRaceEventData(race) {
   
   // Legacy fallback: use event and rules directly from race
   return {
-    name: race.event || 'Carrera',
+    id: race.eventId,
+    name: race.event || i18n.t('common.circuit'),
     description: race.rules || '',
     pointsOverride: null
   };
@@ -159,6 +161,12 @@ function bindGlobalButtons() {
   const importInput = document.getElementById('import-file-input');
   if (importInput) importInput.addEventListener('change', e => importData(e.target.files[0]));
   else console.warn('Import file input not found during bindGlobalButtons');
+
+  const resetBtn = document.getElementById('btn-open-reset');
+  if (resetBtn) resetBtn.addEventListener('click', () => openModal('modal-reset'));
+
+  const editChampBtn = document.getElementById('btn-edit-champ');
+  if (editChampBtn) editChampBtn.addEventListener('click', () => openModal('modal-champ'));
 
   const langBtn = document.getElementById('btn-lang-toggle');
   const langMenu = document.getElementById('lang-dropdown-menu');
@@ -434,7 +442,7 @@ function renderStandings() {
         <div class="st-avatar" style="background:${s.player.color}">${escHtml(s.player.icon || initials(s.player.name))}</div>
         <div>
           <div class="st-name">${escHtml(s.player.name)}</div>
-          <div style="font-size:11px;color:var(--text-muted)">${s.wins}V · ${s.podiums} podios</div>
+          <div style="font-size:11px;color:var(--text-muted)">${s.wins}W · ${s.podiums} ${i18n.t('common.result').toLowerCase()}s</div>
         </div>
       </div></td>
       <td><span class="st-pts">${s.points}</span></td>
@@ -502,7 +510,7 @@ function openAddRaceModal(raceId = null) {
   addRaceSelectedSponsors = race ? (race.sponsorCards || 0) : 1;
   addRaceSelectedLaps = race ? (race.laps || 3) : 3;
   
-  document.getElementById('modal-add-race-title').textContent = raceId ? i18n.t('modals.editResult') : i18n.t('championship.addRace');
+  document.getElementById('modal-add-race-title').textContent = raceId ? i18n.t('common.edit') + ' ' + i18n.t('common.circuit').toLowerCase() : i18n.t('common.add') + ' ' + i18n.t('common.circuit').toLowerCase();
   document.getElementById('add-race-laps-input').value = addRaceSelectedLaps;
   document.getElementById('add-race-event-input').value = race ? (race.event || '') : '';
   document.getElementById('add-race-rules-input').value = race ? (race.rules || '') : '';
@@ -538,10 +546,10 @@ function openAddRaceModal(raceId = null) {
   
   // Separar circuitos en originales y fanmade
   const originalCircuits = allCircuits.filter(c => 
-    ['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(c.expansion)
+    ['Base', 'Lluvia Torrencial', 'Visión de Túnel', 'Terreno Inestable'].includes(c.expansion)
   );
   const fanmadeCircuits = allCircuits.filter(c => 
-    !['Base', 'Lluvia Torrencial', 'Visión de Túnel'].includes(c.expansion)
+    !['Base', 'Lluvia Torrencial', 'Visión de Túnel', 'Terreno Inestable'].includes(c.expansion)
   );
 
   let circuitsHtml = '<div class="circuits-sections-container">';
@@ -551,7 +559,7 @@ function openAddRaceModal(raceId = null) {
     circuitsHtml += `
       <div class="section-card collapsible collapsed" style="margin-bottom: 0;">
         <div class="section-header" onclick="toggleSection(this)">
-          <h3 data-i18n="championship.originalCircuits">${i18n.t('championship.originalCircuits')}</h3>
+          <h3 data-i18n="circuits.original">${i18n.t('circuits.original')}</h3>
           <span class="section-toggle">▼</span>
         </div>
         <div class="section-content">
@@ -568,7 +576,7 @@ function openAddRaceModal(raceId = null) {
     circuitsHtml += `
       <div class="section-card collapsible collapsed" style="margin-bottom: 0;">
         <div class="section-header" onclick="toggleSection(this)">
-          <h3 data-i18n="championship.fanmadeCircuits">${i18n.t('championship.fanmadeCircuits')}</h3>
+          <h3 data-i18n="circuits.fanmade">${i18n.t('circuits.fanmade')}</h3>
           <span class="section-toggle">▼</span>
         </div>
         <div class="section-content">
@@ -604,7 +612,17 @@ function renderRaceCircuitCard(c) {
   // Determinar el badge
   let badgeHtml = '';
   if (c.expansion) {
-    const badgeClass = c.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+    // Generar la clase CSS correcta para cada expansión
+    let badgeClass;
+    if (c.expansion === 'Lluvia Torrencial') {
+      badgeClass = 'lluvia-torrencial';
+    } else if (c.expansion === 'Visión de Túnel') {
+      badgeClass = 'vision-de-tunel';
+    } else if (c.expansion === 'Terreno Inestable') {
+      badgeClass = 'terreno-inestable';
+    } else {
+      badgeClass = c.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+    }
     badgeHtml = `<div class="diff-badge ${badgeClass}">${escHtml(c.expansion)}</div>`;
   }
   
@@ -613,8 +631,8 @@ function renderRaceCircuitCard(c) {
     <div class="circuit-name">${c.name || (country ? i18n.t('data.countries.' + country.id) : '')}</div>
     ${badgeHtml}
     <div class="circuit-info-stats">
-      <span>🏁 ${i18n.t('championship.laps', { n: c.laps })}</span>
-      <span>⤵ ${i18n.t('championship.curves', { n: c.curves })}</span>
+      <span>🏁 ${i18n.t('common.laps')}: ${c.laps}</span>
+      <span>⤵ ${i18n.t('common.curves')}: ${c.curves}</span>
     </div>
   </div>`;
 }
@@ -666,7 +684,7 @@ document.getElementById('add-race-laps-input').addEventListener('change', e => {
 });
 
 document.getElementById('btn-save-cal-race').addEventListener('click', () => {
-  if (!addRaceSelectedCircuit) { showToast('Selecciona un circuito', 'error'); return; }
+  if (!addRaceSelectedCircuit) { showToast(i18n.t('common.circuit'), 'error'); return; }
   
   const isWeatherActive = document.getElementById('add-race-mod-weather').checked;
   const isSponsorsActive = document.getElementById('add-race-mod-sponsors').checked;
@@ -707,7 +725,7 @@ document.getElementById('btn-save-cal-race').addEventListener('click', () => {
     };
     state.championship.calendar.push(newRace);
     const c = getCircuitById(addRaceSelectedCircuit);
-    showToast(`${c?.flag || '🏁'} ${c?.name} añadido al calendario ✓`, 'success');
+    showToast(`${c?.flag || '🏁'} ${c?.name} ✓`, 'success');
   }
 
   saveState();
@@ -738,10 +756,10 @@ function openRaceDetailModal(raceId) {
   }
   if (race.mods?.sponsors) {
     const count = race.sponsorCards || 1;
-    activeMods.push(`💰 Patrocinios (${count})`);
+    activeMods.push(`💰 ${i18n.t('common.sponsors')} (${count})`);
   }
   if (race.mods?.press && race.setup?.press) {
-    activeMods.push(`📷 Prensa (${race.setup.press})`);
+    activeMods.push(`📷 ${i18n.t('common.press')} (${race.setup.press})`);
   }
 
   // DESHABILITADO TEMPORALMENTE: Visualización de mejoras en campeonato
@@ -773,7 +791,7 @@ function openRaceDetailModal(raceId) {
           <div class="detail-result-pts">${earnedPts} pts</div>
         </div>`;
       }).join('')
-    : '<div style="color:var(--text-dim);font-size:13px;padding:12px">Carrera aún no disputada.</div>';
+    : '<div style="color:var(--text-dim);font-size:13px;padding:12px">' + i18n.t('modals.championshipTemplates.raceNotPlayed') + '</div>';
 
   const wOpt = race.mods?.weather ? window.WEATHER_OPTIONS.find(w => w.id === race.weatherType) : null;
   
@@ -783,18 +801,18 @@ function openRaceDetailModal(raceId) {
     if (wOpt) {
       bannerContent += `
         <div style="margin-bottom:8px">
-          <div style="font-size:13px; font-weight:600"><span style="font-size:16px">${wOpt.emoji}</span> Clima: ${wOpt.name}</div>
+          <div style="font-size:13px; font-weight:600"><span style="font-size:16px">${wOpt.emoji}</span> ${i18n.t('modals.championshipTemplates.weather')}: ${i18n.t('data.weather.' + wOpt.id + '.name')}</div>
           <div style="font-size:11px; color:var(--text-muted); margin-left:24px">
             Prep: ${wOpt.effect.preparation}<br>
-            Efecto de pista: ${wOpt.effect.trackEffect}
+            ${i18n.t('modals.championshipTemplates.trackEffect')}: ${wOpt.effect.trackEffect}
           </div>
         </div>`;
     }
     if (race.setup?.sponsors !== undefined) {
-      bannerContent += `<div style="font-size:13px"><span style="font-weight:600">📋 Patrocinios:</span> ${race.setup.sponsors}</div>`;
+      bannerContent += `<div style="font-size:13px"><span style="font-weight:600">📋 ${i18n.t('modals.championshipTemplates.sponsorsLabel')}:</span> ${race.setup.sponsors}</div>`;
     }
     if (race.setup?.press) {
-      bannerContent += `<div style="font-size:13px"><span style="font-weight:600">🎥 Prensa:</span> ${race.setup.press}</div>`;
+      bannerContent += `<div style="font-size:13px"><span style="font-weight:600">🎥 ${i18n.t('modals.championshipTemplates.pressLabel')}:</span> ${race.setup.press}</div>`;
     }
     moduleBannerHtml = `
     <div style="margin-top:8px; padding:8px 12px; background:rgba(139,92,246,0.05); border:1px solid rgba(139,92,246,0.2); border-radius:var(--radius-sm)">
@@ -805,13 +823,13 @@ function openRaceDetailModal(raceId) {
   const eventData = getRaceEventData(race);
   const historicHtml = eventData.name && eventData.name !== 'Carrera' ? `
     <div class="detail-section">
-      <h3>📜 Evento Histórico</h3>
+      <h3>${i18n.t('modals.championshipTemplates.historicEvent')}</h3>
       <div class="historic-event-card">
-        <div class="historic-event-title">${eventData.name}</div>
-        ${eventData.description ? `<div class="historic-event-rules"><strong>Reglas</strong><br>${eventData.description}</div>` : ''}
-        <div class="historic-event-setup"><strong>Setup</strong><br>
-          📋 Patrocinios: ${race.setup.sponsors}<br>
-          🎥 Prensa: ${race.setup.press}
+        <div class="historic-event-title">${eventData.id ? i18n.t('modals.championshipTemplates.events.' + eventData.id + '.name', { defaultValue: eventData.name }) : eventData.name}</div>
+        ${eventData.description ? `<div class="historic-event-rules"><strong>${i18n.t('modals.championshipTemplates.rulesSection')}</strong><br>${eventData.id ? i18n.t('modals.championshipTemplates.events.' + eventData.id + '.description', { defaultValue: eventData.description }) : eventData.description}</div>` : ''}
+        <div class="historic-event-setup"><strong>${i18n.t('modals.championshipTemplates.setup')}</strong><br>
+          📋 ${i18n.t('modals.championshipTemplates.sponsorsLabel')}: ${race.setup.sponsors}<br>
+          🎥 ${i18n.t('modals.championshipTemplates.pressLabel')}: ${race.setup.press}
         </div>
       </div>
     </div>` : '';
@@ -819,24 +837,24 @@ function openRaceDetailModal(raceId) {
   document.getElementById('detail-race-body').innerHTML = `
     ${historicHtml}
     <div class="detail-section">
-      <h3>Circuito</h3>
+      <h3>${i18n.t('modals.championshipTemplates.circuit')}</h3>
       <div class="detail-circuit-card">
         <div class="detail-circuit-flag">${circuit ? (getCountryById(circuit.countryId)?.flag || '🏁') : '🏁'}</div>
         <div style="flex:1">
           <div class="detail-circuit-name">${getCircuitName(circuit)}</div>
           <div class="detail-circuit-meta-row">
             <span>${circuit?.country || ''}</span>
-            <span class="diff-badge ${circuit?.expansion ? circuit.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-') : ''}">${circuit?.expansion || ''}</span>
+            <span class="diff-badge ${circuit?.expansion ? (circuit.expansion === 'Lluvia Torrencial' ? 'lluvia-torrencial' : circuit.expansion === 'Visión de Túnel' ? 'vision-de-tunel' : circuit.expansion === 'Terreno Inestable' ? 'terreno-inestable' : circuit.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-')) : ''}">${circuit?.expansion || ''}</span>
           </div>
           <div class="detail-circuit-stats-row">
-            <span>🏁 ${race.laps || circuit?.laps || 3} vueltas · ⤵ ${circuit?.curves || 0} curvas · 📏 ${circuit?.spaces || 0} casillas</span>
+            <span>🏁 ${race.laps || circuit?.laps || 3} ${i18n.t('modals.championshipTemplates.laps')} · ⤵ ${circuit?.curves || 0} ${i18n.t('modals.championshipTemplates.curves')} · 📏 ${circuit?.spaces || 0} ${i18n.t('modals.championshipTemplates.spaces')}</span>
           </div>
         </div>
       </div>
       ${moduleBannerHtml}
     </div>
     <div class="detail-section">
-      <h3>Resultado</h3>
+      <h3>${i18n.t('modals.championshipTemplates.result')}</h3>
       <div class="detail-results-list">${resultsHtml}</div>
     </div>`;
 
