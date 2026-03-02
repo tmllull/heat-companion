@@ -144,6 +144,14 @@ window.LOCALE_ES = {
       selectCountry: "Selecciona un país...",
       placeholderDescription: "Características del circuito..."
     },
+    addPlayer: {
+      title: "Añadir piloto",
+      name: "Nombre del piloto",
+      namePlaceholder: "Ej: Ayrton Senna",
+      carColor: "Color del coche",
+      number: "Número",
+      numberPlaceholder: "Obligatorio: Ej: 1, 77, 99"
+    },
     championship: {
       title: "Configurar Campeonato",
       name: "Nombre del campeonato",
@@ -161,6 +169,8 @@ window.LOCALE_ES = {
       historicEvent: "📜 Evento Histórico",
       trackEffect: "Efecto de pista",
       raceNotPlayed: "Carrera aún no disputada.",
+      rulesSection: "Reglas Especiales",
+      setup: "Preparación",
       events: {
         "1961-inauguracion-tribuna": {
           name: "Inauguración de la nueva Tribuna",

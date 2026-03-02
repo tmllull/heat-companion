@@ -299,21 +299,22 @@
 <div id="modal-player" class="modal-overlay" style="display:none">
   <div class="modal modal-wide">
     <div class="modal-header">
-      <h2 id="modal-player-title">Añadir piloto</h2>
+      <h2 id="modal-player-title" data-i18n="modals.addPlayer.title">Añadir piloto</h2>
       <button class="modal-close" data-modal="modal-player">✕</button>
     </div>
     <div class="modal-body">
       <!-- Basic info -->
-      <label class="form-label">Nombre del piloto <span style="color:red;">*</span></label>
-      <input class="form-input" id="player-name-input" type="text" placeholder="Ej: Carlos Sainz" maxlength="30" style="margin-bottom:4px;" />
+      <label class="form-label"><span data-i18n="modals.addPlayer.name">Nombre del piloto</span> <span style="color:red;">*</span></label>
+      <input class="form-input" id="player-name-input" type="text" data-i18n-placeholder="modals.addPlayer.namePlaceholder" placeholder="Ej: Ayrton Senna" maxlength="30" style="margin-bottom:4px;" />
       <div id="name-validation-msg" class="validation-msg" style="color:red; font-size:11px; margin-top:2px; margin-bottom:8px; min-height:14px;"></div>
       
       <div style="margin: 4px 0 16px">
         <label class="checkbox-label"><input type="checkbox" id="player-is-legend" /> <span data-i18n="players.legend">Piloto Leyenda (Bot)</span></label>
       </div>
-
-      <label class="form-label">Color del coche</label>
+ 
+      <label class="form-label" data-i18n="modals.addPlayer.carColor">Color del coche</label>
       <div class="color-picker" id="player-color-picker">
+        <!-- ... color options ... -->
         <div class="color-option selected" data-color="#e63b2e" style="background:#e63b2e" title="Rojo"></div>
         <div class="color-option" data-color="#f97316" style="background:#f97316" title="Naranja"></div>
         <div class="color-option" data-color="#eab308" style="background:#eab308" title="Amarillo"></div>
@@ -323,9 +324,9 @@
         <div class="color-option" data-color="#000000" style="background:#000000" title="Negro"></div>
         <div class="color-option" data-color="#94a3b8" style="background:#94a3b8" title="Gris"></div>
       </div>
-
-      <label class="form-label">Número <span style="color:red;">*</span></label>
-      <input class="form-input" id="player-icon-input" type="text" placeholder="Obligatorio: Ej: 1, 77, 99" maxlength="3" style="margin-bottom:4px;" />
+ 
+      <label class="form-label"><span data-i18n="modals.addPlayer.number">Número</span> <span style="color:red;">*</span></label>
+      <input class="form-input" id="player-icon-input" type="text" data-i18n-placeholder="modals.addPlayer.numberPlaceholder" placeholder="Obligatorio: Ej: 1, 77, 99" maxlength="3" style="margin-bottom:4px;" />
       <div id="icon-validation-msg" class="validation-msg" style="color:red; font-size:11px; margin-top:2px; margin-bottom:16px; min-height:14px;"></div>
 
       <!-- Upgrades -->

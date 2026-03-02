@@ -599,8 +599,8 @@ function openAddRaceModal(raceId = null) {
       <div class="weather-card-emoji">${w.emoji}</div>
       <div class="weather-card-name">${i18n.t('data.weather.' + w.id + '.name')}</div>
       <div class="weather-card-effect">
-        <div><strong>Prep:</strong> ${i18n.t('data.weather.' + w.id + '.prep')}</div>
-        <div><strong>Efecto de pista:</strong> ${i18n.t('data.weather.' + w.id + '.track')}</div>
+        <div><strong>${i18n.t('modals.championshipTemplates.setup')}:</strong> ${i18n.t('data.weather.' + w.id + '.prep')}</div>
+        <div><strong>${i18n.t('modals.championshipTemplates.trackEffect')}:</strong> ${i18n.t('data.weather.' + w.id + '.track')}</div>
       </div>
     </div>`).join('');
 
@@ -801,18 +801,18 @@ function openRaceDetailModal(raceId) {
     if (wOpt) {
       bannerContent += `
         <div style="margin-bottom:8px">
-          <div style="font-size:13px; font-weight:600"><span style="font-size:16px">${wOpt.emoji}</span> ${i18n.t('modals.championshipTemplates.weather')}: ${i18n.t('data.weather.' + wOpt.id + '.name')}</div>
+          <div style="font-size:13px; font-weight:600"><span style="font-size:16px">${wOpt.emoji}</span> ${i18n.t('common.weather')}: ${i18n.t('data.weather.' + wOpt.id + '.name')}</div>
           <div style="font-size:11px; color:var(--text-muted); margin-left:24px">
-            Prep: ${wOpt.effect.preparation}<br>
-            ${i18n.t('modals.championshipTemplates.trackEffect')}: ${wOpt.effect.trackEffect}
+            ${i18n.t('modals.championshipTemplates.setup')}: ${i18n.t('data.weather.' + wOpt.id + '.prep')}<br>
+            ${i18n.t('modals.championshipTemplates.trackEffect')}: ${i18n.t('data.weather.' + wOpt.id + '.track')}
           </div>
         </div>`;
     }
     if (race.setup?.sponsors !== undefined) {
-      bannerContent += `<div style="font-size:13px"><span style="font-weight:600">📋 ${i18n.t('modals.championshipTemplates.sponsorsLabel')}:</span> ${race.setup.sponsors}</div>`;
+      bannerContent += `<div style="font-size:13px"><span style="font-weight:600">📋 ${i18n.t('common.sponsors')}:</span> ${race.setup.sponsors}</div>`;
     }
     if (race.setup?.press) {
-      bannerContent += `<div style="font-size:13px"><span style="font-weight:600">🎥 ${i18n.t('modals.championshipTemplates.pressLabel')}:</span> ${race.setup.press}</div>`;
+      bannerContent += `<div style="font-size:13px"><span style="font-weight:600">🎥 ${i18n.t('common.press')}:</span> ${race.setup.press}</div>`;
     }
     moduleBannerHtml = `
     <div style="margin-top:8px; padding:8px 12px; background:rgba(139,92,246,0.05); border:1px solid rgba(139,92,246,0.2); border-radius:var(--radius-sm)">
@@ -828,8 +828,8 @@ function openRaceDetailModal(raceId) {
         <div class="historic-event-title">${eventData.id ? i18n.t('modals.championshipTemplates.events.' + eventData.id + '.name', { defaultValue: eventData.name }) : eventData.name}</div>
         ${eventData.description ? `<div class="historic-event-rules"><strong>${i18n.t('modals.championshipTemplates.rulesSection')}</strong><br>${eventData.id ? i18n.t('modals.championshipTemplates.events.' + eventData.id + '.description', { defaultValue: eventData.description }) : eventData.description}</div>` : ''}
         <div class="historic-event-setup"><strong>${i18n.t('modals.championshipTemplates.setup')}</strong><br>
-          📋 ${i18n.t('modals.championshipTemplates.sponsorsLabel')}: ${race.setup.sponsors}<br>
-          🎥 ${i18n.t('modals.championshipTemplates.pressLabel')}: ${race.setup.press}
+          📋 ${i18n.t('common.sponsors')}: ${race.setup.sponsors}<br>
+          🎥 ${i18n.t('common.press')}: ${race.setup.press}
         </div>
       </div>
     </div>` : '';
@@ -837,24 +837,38 @@ function openRaceDetailModal(raceId) {
   document.getElementById('detail-race-body').innerHTML = `
     ${historicHtml}
     <div class="detail-section">
-      <h3>${i18n.t('modals.championshipTemplates.circuit')}</h3>
+      <h3>${i18n.t('common.circuit')}</h3>
       <div class="detail-circuit-card">
         <div class="detail-circuit-flag">${circuit ? (getCountryById(circuit.countryId)?.flag || '🏁') : '🏁'}</div>
         <div style="flex:1">
           <div class="detail-circuit-name">${getCircuitName(circuit)}</div>
           <div class="detail-circuit-meta-row">
-            <span>${circuit?.country || ''}</span>
-            <span class="diff-badge ${circuit?.expansion ? (circuit.expansion === 'Lluvia Torrencial' ? 'lluvia-torrencial' : circuit.expansion === 'Visión de Túnel' ? 'vision-de-tunel' : circuit.expansion === 'Terreno Inestable' ? 'terreno-inestable' : circuit.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-')) : ''}">${circuit?.expansion || ''}</span>
+            <span>${circuit ? i18n.t('data.countries.' + circuit.countryId) : ''}</span>
+            ${circuit?.expansion ? (function() {
+              const expKey = circuit.expansion === 'Lluvia Torrencial' ? 'heavyRain' : 
+                             circuit.expansion === 'Visión de Túnel' ? 'tunnelVision' : 
+                             circuit.expansion === 'Terreno Inestable' ? 'rockyRoads' :
+                             circuit.expansion === 'Base' ? 'base' :
+                             circuit.expansion.toLowerCase().trim();
+              
+              let badgeClass;
+              if (circuit.expansion === 'Lluvia Torrencial') badgeClass = 'lluvia-torrencial';
+              else if (circuit.expansion === 'Visión de Túnel') badgeClass = 'vision-de-tunel';
+              else if (circuit.expansion === 'Terreno Inestable') badgeClass = 'terreno-inestable';
+              else badgeClass = expKey.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+              
+              return `<span class="diff-badge ${badgeClass}">${i18n.t('data.expansions.' + expKey, { defaultValue: circuit.expansion })}</span>`;
+            })() : ''}
           </div>
           <div class="detail-circuit-stats-row">
-            <span>🏁 ${race.laps || circuit?.laps || 3} ${i18n.t('modals.championshipTemplates.laps')} · ⤵ ${circuit?.curves || 0} ${i18n.t('modals.championshipTemplates.curves')} · 📏 ${circuit?.spaces || 0} ${i18n.t('modals.championshipTemplates.spaces')}</span>
+            <span>🏁 ${race.laps || circuit?.laps || 3} ${i18n.t('common.laps')} · ⤵ ${circuit?.curves || 0} ${i18n.t('common.curves')} · 📏 ${circuit?.spaces || 0} ${i18n.t('common.spaces')}</span>
           </div>
         </div>
       </div>
       ${moduleBannerHtml}
     </div>
     <div class="detail-section">
-      <h3>${i18n.t('modals.championshipTemplates.result')}</h3>
+      <h3>${i18n.t('common.result')}</h3>
       <div class="detail-results-list">${resultsHtml}</div>
     </div>`;
 

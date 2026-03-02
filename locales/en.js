@@ -144,6 +144,14 @@ window.LOCALE_EN = {
       selectCountry: "Select a country...",
       placeholderDescription: "Circuit characteristics..."
     },
+    addPlayer: {
+      title: "Add driver",
+      name: "Driver name",
+      namePlaceholder: "e.g.: Ayrton Senna",
+      carColor: "Car color",
+      number: "Number",
+      numberPlaceholder: "Required: e.g.: 1, 77, 99"
+    },
     championship: {
       title: "Configure Championship",
       name: "Championship name",
@@ -161,6 +169,8 @@ window.LOCALE_EN = {
       historicEvent: "📜 Historic Event",
       trackEffect: "Track Effect",
       raceNotPlayed: "Race not yet played.",
+      rulesSection: "Special Rules",
+      setup: "Setup",
       events: {
         "1961-inauguracion-tribuna": {
           name: "New Grandstand Inauguration",

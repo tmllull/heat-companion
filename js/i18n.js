@@ -63,7 +63,7 @@ const i18n = {
     const localeData = window[`LOCALE_${this.currentLocale.toUpperCase()}`];
     if (!localeData) {
       console.warn(`Locale data for ${this.currentLocale} not found!`);
-      return key;
+      return params.defaultValue !== undefined ? params.defaultValue : key;
     }
 
     // Traverse the object using dot notation (e.g. 'dashboard.title')
@@ -75,19 +75,21 @@ const i18n = {
         const defaultData = window[`LOCALE_${this.defaultLocale.toUpperCase()}`];
         value = key.split('.').reduce((obj, i) => (obj ? obj[i] : undefined), defaultData);
       }
-      
-      if (value === undefined) {
-        console.warn(`Translation key not found: ${key}`);
-        return key;
-      }
+    }
+
+    if (value === undefined) {
+      if (params.defaultValue !== undefined) return params.defaultValue;
+      console.warn(`Translation key not found: ${key}`);
+      return key;
     }
 
     // Replace placeholders: {{name}} -> Carlos
+    let result = String(value);
     Object.keys(params).forEach(param => {
-      value = value.replace(new RegExp(`{{${param}}}`, 'g'), params[param]);
+      result = result.replace(new RegExp(`{{${param}}}`, 'g'), params[param]);
     });
 
-    return value;
+    return result;
   },
 
   /**
