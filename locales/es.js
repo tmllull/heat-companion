@@ -3,6 +3,29 @@
  */
 
 window.LOCALE_ES = {
+  common: {
+    cancel: "Cancelar",
+    save: "Guardar",
+    close: "Cerrar",
+    delete: "Eliminar",
+    edit: "Editar",
+    add: "Añadir",
+    weather: "Clima",
+    sponsors: "Patrocinios",
+    press: "Prensa",
+    laps: "Vueltas",
+    curves: "Curvas",
+    spaces: "Casillas",
+    circuit: "Circuito",
+    event: "Evento",
+    rules: "Reglas",
+    result: "Resultado",
+    player: "Piloto",
+    players: "Pilotos",
+    view: "Ver",
+    confirmDelete: "¿Eliminar {{item}} del calendario?",
+    noModules: "Sin módulos"
+  },
   nav: {
     dashboard: "Dashboard",
     players: "Pilotos",
@@ -43,29 +66,25 @@ window.LOCALE_ES = {
     calendar: "Calendario de carreras",
     historics: "Históricos",
     restart: "Reiniciar",
-    addRace: "Añadir carrera",
-    deleteConfirm: "¿Eliminar carrera del calendario?",
-    empty: "El calendario está vacío. ¡Añade la primera carrera!",
-    originalCircuits: "🏁 Circuitos Originales",
-    fanmadeCircuits: "📐 Circuitos Fanmade",
-    laps: "{{n}} vueltas",
-    curves: "{{n}} curvas",
-    spaces: "{{n}} casillas",
-    modules: "Módulos activos",
-    weather: "🌧 Clima",
-    sponsors: "💰 Patrocinios",
-    press: "📷 Prensa",
-    selectWeather: "Selecciona el clima",
-    pressLocation: "Ubicación de la Prensa (Curvas)",
-    pressPlaceholder: "Ej: A, B y D..."
+    addRace: {
+      title: "Añadir carrera al calendario",
+      eventName: "Nombre del evento",
+      eventNamePlaceholder: "Ej: Gran Premio de España, Carrera Nocturna...",
+      specialRules: "Reglas especiales",
+      specialRulesPlaceholder: "Reglas específicas de esta carrera...",
+      activeModules: "Módulos activos",
+      newRaceHint: "Las nuevas carreras se añadirán al final del calendario.",
+      selectWeather: "Selecciona el clima",
+      sponsorCards: "Cartas de patrocinio al inicio",
+      pressLocation: "Ubicación de la Prensa (Curvas)",
+      pressLocationPlaceholder: "Ej: A, B y D...",
+      addToCalendar: "Añadir al calendario"
+    }
   },
   players: {
     title: "Pilotos",
     subtitle: "Gestiona los pilotos y sus cartas de mejora",
-    add: "+ Añadir piloto",
     empty: "No hay pilotos aún. ¡Añade el primero!",
-    edit: "✎ Editar",
-    delete: "🗑 Eliminar",
     legend: "Piloto Leyenda (Bot)",
     duplicateIcon: "El número {{n}} ya está en uso",
     numericOnly: "El número solo puede contener dígitos",
@@ -76,42 +95,54 @@ window.LOCALE_ES = {
   circuits: {
     title: "Circuitos",
     subtitle: "Gestiona los circuitos disponibles para las carreras",
-    add: "+ Añadir circuito",
-    empty: "No hay circuitos configurados. ¡Añade el primero!"
+    empty: "No hay circuitos configurados. ¡Añade el primero!",
+    original: "🏁 Circuitos Originales",
+    fanmade: "📐 Circuitos Fanmade"
   },
   standings: {
     title: "Clasificación del Campeonato",
     empty: "Añade pilotos al campeonato y disputa carreras para ver la clasificación",
     pos: "Pos",
     player: "Piloto",
-    pts: "Pts",
-    gap: "Gap",
+    pts: "Puntos",
+    gap: "Diferencia",
     races: "Carreras"
   },
   manual: {
     title: "Manual de Referencia",
     subtitle: "Consulta las reglas rápidas de Clima, Motor Forzado y Estrés",
-    downloadBasic: "📄 Descargar Manual Básico",
-    downloadAdvanced: "📄 Descargar Manual Avanzado",
-    basics: "🔥 Mecánicas Básicas",
-    weather: "🌤️ Efectos de Clima"
+    downloadBasic: " Descargar Manual Básico",
+    downloadAdvanced: " Descargar Manual Avanzado",
+    basics: " Mecánicas Básicas",
+    weather: " Efectos de Clima",
+    heatTitle: "Motor Forzado",
+    heatDescription: "Representa el sobrecalentamiento del motor.",
+    stressTitle: "Estrés",
+    stressDescription: "Representa pérdida de concentración del piloto.",
+    slipstreamTitle: "Rebufo (Opcional)",
+    slipstreamDescription: "Representa la ventaja aerodinámica de estar cerca de otro coche.",
+    spinoutTitle: "Trompo",
+    spinoutDescription: "Ocurre al no poder pagar el Heat de una curva.",
+    weatherTrackTitle: "Clima y estado de la pista",
+    weatherTrackDescription: "y mas...",
+    weather_setupTitle: "Clima y estado de la pista",
+    weather_setupDescription: "Preparación del módulo de clima y carretera."
   },
   modals: {
-    cancel: "Cancelar",
-    save: "Guardar",
-    close: "Cerrar",
-    delete: "Eliminar",
-    editResult: "Editar resultado",
+    raceDetail: {
+      title: "Detalle de carrera"
+    },
+    results: {
+      title: "Registrar resultado",
+      hint: "Ordena los pilotos según la posición final. Usa los botones ▲▼ o arrastra.",
+      saveResult: "Guardar resultado"
+    },
     addCircuit: {
       title: "Añadir circuito",
       name: "Nombre del circuito",
       country: "País",
       selectCountry: "Selecciona un país...",
-      description: "Descripción",
-      placeholderDescription: "Características del circuito...",
-      spaces: "Espacios (casillas)",
-      curves: "Número de curvas",
-      laps: "Vueltas recomendadas"
+      placeholderDescription: "Características del circuito..."
     },
     championship: {
       title: "Configurar Campeonato",
@@ -121,6 +152,96 @@ window.LOCALE_ES = {
       podium: "Solo podio (3-2-1)",
       custom: "Personalizado",
       customPlaceholder: "Ej: 25,18,15,12,10,8,6,4,2,1 (separados por comas)"
+    },
+    championshipTemplates: {
+      title: "Campeonatos Históricos",
+      description: "Selecciona un campeonato histórico para cargar sus carreras y reglas oficiales.",
+      loadChampionship: "Cargar campeonato →",
+      races: "{{n}} carreras",
+      historicEvent: "📜 Evento Histórico",
+      trackEffect: "Efecto de pista",
+      raceNotPlayed: "Carrera aún no disputada.",
+      events: {
+        "1961-inauguracion-tribuna": {
+          name: "Inauguración de la nueva Tribuna",
+          description: "Los 3 primeros pilotos en cruzar la linea de meta en la primera vuelta ganan inmediatamente 1 carta de patrocinio."
+        },
+        "1961-nuevo-record-velocidad": {
+          name: "¡Nuevo Récord de Velocidad!",
+          description: "Cada vez que alcances una velocidad de 15 o más, ganas inmediatamente 1 carta de patrocinio."
+        },
+        "1961-huelga-pilotos": {
+          name: "Huelga de Pilotos",
+          description: "Esta carrera es 1 vuelta más corta de lo habitual. El ganador de la carrera recibe 2 puntos de Campeonato extra."
+        },
+        "1962-restricciones-mecanicas": {
+          name: "Se levantan las restricciones mecánicas",
+          description: "Los pilotos comienzan la carrera con 1 carta de Motor forzado adicional de la reserva en su Motor"
+        },
+        "1962-record-afluencia": {
+          name: "Record de afluencia",
+          description: "Esta carrera es 1 vuelta más larga de lo habitual, y el tamaño de mano de cartas aumenta a 8."
+        },
+        "1962-corrupcion-comision": {
+          name: "Corrupción en la Comisión de normas",
+          description: "Los 3 primeros clasificados de la carrera reciben 1 punto de Campeonato extra"
+        },
+        "1963-cambio-patrocinador": {
+          name: "Cambio de patrocinador",
+          description: "Esta carrera no tiene reglas especiales."
+        },
+        "1963-primera-tv-directo": {
+          name: "Primera TV en directo",
+          description: "Esta carrera no tiene reglas especiales."
+        },
+        "1963-nueva-normativa-seguridad": {
+          name: "Nueva normativa de seguridad",
+          description: "Esta carrera no tiene reglas especiales."
+        },
+        "1963-patrocinador-retira": {
+          name: "Patrocinador se retira",
+          description: "Esta carrera no tiene reglas especiales."
+        },
+        "1964-internacionalizacion": {
+          name: "Internacionalización",
+          description: "Las curvas con fichas de Prensa proporcionan 2 cartas de Patrocinio en lugar de 1."
+        },
+        "1964-vientes-turbulentos": {
+          name: "Vientos turbulentos",
+          description: "Los Rebufos solo se permiten en 3ª o 4ª marcha."
+        },
+        "1964-chicanes-seguridad": {
+          name: "Chicanes de mejorar la seguridad",
+          description: "En esta carrera puedes descartar cartas de Motor forzado durante el paso 8."
+        },
+        "1964-lluvia-retrasa": {
+          name: "La lluvia retrasa la carrera",
+          description: "En esta carrera nadie puede beneficiarse de la Adrenalina."
+        },
+        "1965-sujetate-bien": {
+          name: "¡Sujétate bien!",
+          description: "Solo se puede descartar un máximo de 1 carta por turno."
+        },
+        "1965-sonrie-saluda": {
+          name: "Sonríe y saluda",
+          description: "La Prensa solo entrega cartas de Patrocinio a los Coches que circulen por dejabo de la Velocidad máxima de la curva."
+        },
+        "1965-vision-tunel": {
+          name: "Visión de túnel",
+          description: "En esta carrera puedes descartar cartas de Estrés durante el paso 8."
+        },
+        "1965-olla-presion": {
+          name: "Olla a presión",
+          description: "Esta carrera es más larga de lo habitual y tiene una vuelta más. Cada vez que un Piloto complete una vuelta deberá retirar de la partida una carta de Motor forzado (Paso 8. Orden de preferencia: Motor > Mano > Descarte > Mazo de cartas.)."
+        }
+      },
+      championships: {
+        "1961": "Campeonato Histórico 1961",
+        "1962": "Campeonato Histórico 1962", 
+        "1963": "Campeonato Histórico 1963",
+        "1964": "Campeonato Histórico 1964 (Lluvia Torrencial)",
+        "1965": "Campeonato Histórico 1965 (Visión de Túnel)"
+      }
     }
   },
   data: {
@@ -128,6 +249,7 @@ window.LOCALE_ES = {
       base: "Base",
       heavyRain: "Lluvia Torrencial",
       tunnelVision: "Visión de Túnel",
+      rockyRoads: "Terreno Inestable",
       fanmade: "Fanmade"
     },
     weather: {
@@ -145,6 +267,7 @@ window.LOCALE_ES = {
       france: "Francia",
       japan: "Japón",
       spain: "España",
+      "south-africa": "Sudáfrica",
       netherlands: "Países Bajos",
       germany: "Alemania",
       belgium: "Bélgica",
@@ -156,6 +279,46 @@ window.LOCALE_ES = {
       argentina: "Argentina",
       other: "Otro"
     }
+  },
+  system: {
+    resetConfirm: {
+      championship: "¿Resetear el nombre y sistema de puntos?\n\nLos pilotos y el calendario NO se verán afectados.",
+      calendar: "¿Eliminar TODAS las carreras del calendario?\n\nLos pilotos se mantendrán.",
+      players: "¿Eliminar TODOS los pilotos?\n\nTambién se eliminará el calendario (depende de los pilotos).",
+      all: "⚠ ¿BORRAR TODO y empezar desde cero?\n\nPilotos, calendario y configuración. No se puede deshacer."
+    },
+    importConfirm: {
+      players: "¿Importar pilotos? Reemplazará todos los pilotos actuales.",
+      races: "¿Importar carreras? Reemplazará todo el calendario actual.",
+      championship: "¿Importar configuración del campeonato? Reemplazará nombre y sistema de puntos.",
+      all: "⚠ ¿Importar todos los datos? Reemplazará TODO el estado actual de la aplicación."
+    },
+    modals: {
+      reset: {
+        title: "⚠ Resetear datos",
+        intro: "Selecciona qué sección quieres borrar. Esta acción no se puede deshacer.",
+        championship: { title: "Configuración del campeonato", desc: "Borra nombre y puntos. Mantiene pilotos y calendario." },
+        calendar: { title: "Calendario de carreras", desc: "Elimina todas las carreras y resultados. Mantiene los pilotos." },
+        players: { title: "Pilotos", desc: "Elimina todos los pilotos y también el calendario." },
+        all: { title: "Reset global", desc: "Borra absolutamente todo y vuelve al estado inicial." },
+        btnReset: "Resetear",
+        btnAll: "Reset todo"
+      },
+      export: {
+        title: "📤 Exportar datos",
+        intro: "Selecciona qué sección quieres exportar.",
+        all: { title: "Todo", desc: "Exporta todos los datos completos." },
+        btnExport: "Exportar"
+      },
+      import: {
+        title: "📥 Importar datos",
+        intro: "Selecciona qué sección quieres importar. Esta acción puede reemplazar datos existentes.",
+        btnImport: "Importar"
+      }
+    },
+    resetSuccess: "Reseteado correctamente",
+    importSuccess: "Importado correctamente",
+    exportSuccess: "Exportado correctamente"
   },
   toast: {
     themeChanged: "Tema cambiado",

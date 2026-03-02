@@ -10,13 +10,13 @@ function renderManual() {
 
   // Render Basics - siempre renderizar
   if (window.GAME_BASICS && Object.keys(window.GAME_BASICS).length > 0) {
-    basicsList.innerHTML = Object.values(window.GAME_BASICS).map(b => `
+    basicsList.innerHTML = Object.entries(window.GAME_BASICS).map(([id, b]) => `
       <div class="manual-item">
         <div class="manual-item-header">
           <span class="manual-item-icon">${b.emoji}</span>
-          <span class="manual-item-name">${b.name}</span>
+          <span class="manual-item-name">${i18n.t('manual.' + id + 'Title', { defaultValue: b.name })}</span>
         </div>
-        <div class="manual-item-description">${b.description}</div>
+        <div class="manual-item-description">${i18n.t('manual.' + id + 'Description', { defaultValue: b.description })}</div>
       </div>
     `).join('');
   } else {
@@ -29,10 +29,12 @@ function renderManual() {
       <div class="manual-item">
         <div class="manual-item-header">
           <span class="manual-item-icon">${w.emoji}</span>
-          <span class="manual-item-name">${w.name}</span>
+          <span class="manual-item-name">${i18n.t('data.weather.' + w.id + '.name', { defaultValue: w.name })}</span>
         </div>
-        <div class="manual-item-description">${w.description}</div>
-        ${w.effects ? `<div class="manual-effects"><strong>Efectos:</strong> ${w.effects}</div>` : ''}
+        <div class="manual-item-description">
+          <div><strong>Prep:</strong> ${i18n.t('data.weather.' + w.id + '.prep', { defaultValue: w.effect.preparation })}</div>
+          <div><strong>${i18n.t('modals.championshipTemplates.trackEffect')}:</strong> ${i18n.t('data.weather.' + w.id + '.track', { defaultValue: w.effect.trackEffect })}</div>
+        </div>
       </div>
     `).join('');
   } else {

@@ -33,14 +33,14 @@ function openPlayerModal(playerId = null) {
 
   if (playerId) {
     const p = getPlayerById(playerId);
-    document.getElementById('modal-player-title').textContent = i18n.t('players.edit');
+    document.getElementById('modal-player-title').textContent = i18n.t('common.edit') + ' ' + i18n.t('common.player').toLowerCase();
     nameInput.value       = p.name;
     iconInput.value       = p.icon || '';
     document.getElementById('player-is-legend').checked = p.isLegend || false;
     selectedPlayerColor   = p.color;
     currentUpgrades       = p.upgrades || [];
   } else {
-    document.getElementById('modal-player-title').textContent = i18n.t('players.add');
+    document.getElementById('modal-player-title').textContent = i18n.t('common.add') + ' ' + i18n.t('common.player').toLowerCase();
     nameInput.value = '';
     iconInput.value = '';
     document.getElementById('player-is-legend').checked = false;
@@ -313,8 +313,8 @@ function renderPlayers() {
       <div class="player-stats">${points} pts</div>
       <!-- DESHABILITADO TEMPORALMENTE: Visualización de mejoras -->
       <div class="player-card-actions">
-        <button class="btn-icon btn-icon-edit" data-edit-player="${p.id}" data-i18n="players.edit">${i18n.t('players.edit')}</button>
-        <button class="btn-icon btn-icon-del" data-del-player="${p.id}" data-i18n="players.delete">${i18n.t('players.delete')}</button>
+        <button class="btn-icon btn-icon-edit" data-edit-player="${p.id}" data-i18n="common.edit">${i18n.t('common.edit')}</button>
+        <button class="btn-icon btn-icon-del" data-del-player="${p.id}" data-i18n="common.delete">${i18n.t('common.delete')}</button>
       </div>
     </div>`;
   }).filter(Boolean).join('');

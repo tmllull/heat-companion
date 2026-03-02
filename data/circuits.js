@@ -86,6 +86,27 @@ window.CIRCUITS = [
     laps: 3,
     mapImage: "netherlands.jpg"
   },
+  // Expansion: Terreno Inestable
+  {
+    id: "south-africa",
+    name: "South Africa",
+    countryId: "south-africa",
+    curves: 7,
+    spaces: 71,
+    expansion: "Terreno Inestable",
+    laps: 3,
+    mapImage: "south-africa.png"
+  },
+  {
+    id: "deutschland",
+    name: "Deutschland",
+    countryId: "germany",
+    curves: 6,
+    spaces: 62,
+    expansion: "Terreno Inestable",
+    laps: 2,
+    mapImage: "deutschland.png"
+  },
 
   // Fan made
   {

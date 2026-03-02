@@ -4,27 +4,20 @@
 // ============================================================
 
 // ---- RESET FUNCTIONS ----
-const RESET_CONFIRM = {
-  championship: { msg: '¿Resetear el nombre y sistema de puntos?\n\nLos pilotos y el calendario NO se verán afectados.' },
-  calendar:     { msg: '¿Eliminar TODAS las carreras del calendario?\n\nLos pilotos se mantendrán.' },
-  players:      { msg: '¿Eliminar TODOS los pilotos?\n\nTambién se eliminará el calendario (depende de los pilotos).' },
-  all:          { msg: '⚠ ¿BORRAR TODO y empezar desde cero?\n\nPilotos, calendario y configuración. No se puede deshacer.' }
-};
-
 function resetSection(section) {
-  const cfg = RESET_CONFIRM[section];
-  if (!cfg || !confirm(cfg.msg)) return;
+  const msg = i18n.t(`system.resetConfirm.${section}`);
+  if (!msg || !confirm(msg)) return;
   switch (section) {
     case 'championship':
       state.championship = { ...defaultState().championship, playerIds: state.championship.playerIds, calendar: state.championship.calendar };
       renderSidebarChamp(); renderView('dashboard'); renderView('championship');
-      showToast('Configuración del campeonato reseteada', 'info'); 
+      showToast(i18n.t('system.resetSuccess'), 'info'); 
       closeModal('modal-reset');
       break;
     case 'calendar':
       state.championship.calendar = [];
       renderView('dashboard'); renderView('championship'); renderView('standings');
-      showToast('Calendario eliminado', 'info'); 
+      showToast(i18n.t('system.resetSuccess'), 'info'); 
       closeModal('modal-reset');
       break;
     case 'players':
@@ -32,13 +25,13 @@ function resetSection(section) {
       state.championship.playerIds = [];
       state.championship.calendar = [];
       renderView('dashboard'); renderView('championship'); renderView('players'); renderView('standings');
-      showToast('Pilotos y calendario eliminados', 'info'); 
+      showToast(i18n.t('system.resetSuccess'), 'info'); 
       closeModal('modal-reset');
       break;
     case 'all':
       state = defaultState();
       renderSidebarChamp(); navigateTo('dashboard');
-      showToast('Reset global completado 🏁', 'info'); 
+      showToast(i18n.t('system.resetSuccess') + ' 🏁', 'info'); 
       closeModal('modal-reset');
       break;
   }
@@ -46,7 +39,7 @@ function resetSection(section) {
 }
 
 function resetChampionship() {
-  if (!confirm('¿Resetear el campeonato actual?\n\nSe borrará el calendario y resultados, pero los pilotos se conservarán.')) return;
+  if (!confirm(i18n.t('system.resetConfirm.calendar'))) return;
   
   // Guardar los pilotos actuales
   const currentPlayers = state.players;
@@ -61,7 +54,7 @@ function resetChampionship() {
   renderSidebarChamp();
   renderView('championship');
   renderView('dashboard');
-  showToast('Campeonato reseteado. Los pilotos se han conservado.', 'info');
+  showToast(i18n.t('system.resetSuccess'), 'info');
 }
 
 // ---- EXPORT / IMPORT FUNCTIONS ----
@@ -103,7 +96,7 @@ function exportData(section = 'all') {
   a.click();
   URL.revokeObjectURL(url);
   
-  showToast(`Datos ${section === 'all' ? 'completos' : `de ${section}`} exportados correctamente`, 'success');
+  showToast(i18n.t('system.exportSuccess'), 'success');
 }
 
 function importData(file, section = 'all') {
@@ -142,21 +135,13 @@ function importData(file, section = 'all') {
         }
       };
       
-      // Confirmación específica para cada sección
-      const confirmMessages = {
-        'players': '¿Importar pilotos? Reemplazará todos los pilotos actuales.',
-        'races': '¿Importar carreras? Reemplazará todo el calendario actual.',
-        'championship': '¿Importar configuración del campeonato? Reemplazará nombre y sistema de puntos.',
-        'all': '⚠ ¿Importar todos los datos? Reemplazará TODO el estado actual de la aplicación.'
-      };
-      
-      if (confirm(confirmMessages[section] || confirmMessages['all'])) {
+      if (confirm(i18n.t(`system.importConfirm.${section}`))) {
         // Ejecutar la importación
         importFunction();
         saveState();
         renderSidebarChamp();
         navigateTo('dashboard');
-        showToast(`Datos de ${section === 'all' ? 'campeonato completo' : section} importados ✓`, 'success');
+        showToast(i18n.t('system.importSuccess'), 'success');
       };
     } catch (err) {
       showToast('Error al leer el archivo', 'error');
@@ -180,23 +165,14 @@ function openChampTemplatesModal() {
       
       // Manejar diferentes casos para obtener el nombre del circuito
       let circuitName = `Circuit ${r.circuitId}`;
-      if (circuit) {
-        if (circuit.name && circuit.name.trim()) {
-          circuitName = circuit.name;
-        } else {
-          // Si el nombre está vacío, usar el país
-          const country = getCountryById(circuit.countryId);
-          circuitName = country ? country.name : `Circuit ${r.circuitId}`;
-        }
-      }
       
       return circuitName;
     });
     
     return `<div class="template-card" data-template-id="${t.id}">
-      <h3>${escHtml(t.name)}</h3>
-      <div class="template-race-mini-list">${t.races.length} carreras: ${circuitNames.join(' · ')}</div>
-      <div class="template-card-footer">Cargar campeonato →</div>
+      <h3>${i18n.t('modals.championshipTemplates.championships.' + t.id)}</h3>
+      <div class="template-race-mini-list">${i18n.t('modals.championshipTemplates.races', { n: t.races.length })}: ${circuitNames.join(' · ')}</div>
+      <div class="template-card-footer">${i18n.t('modals.championshipTemplates.loadChampionship')}</div>
     </div>`;
   }).join('');
 

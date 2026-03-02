@@ -136,7 +136,7 @@
           <div class="header-actions">
             <button class="btn-text-icon" id="btn-show-champ-templates" data-i18n="championship.historics">📜 Históricos</button>
             <button class="btn-text-icon" id="btn-reset-championship" data-i18n="championship.restart">🔄 Reiniciar</button>
-            <button class="btn-primary" id="btn-add-cal-race" data-i18n="championship.addRace">+ Añadir carrera</button>
+            <button class="btn-primary" id="btn-add-cal-race"><span>+</span> <span data-i18n="common.add">Añadir</span> <span data-i18n="common.circuit">circuito</span></button>
           </div>
         </div>
         <div id="calendar-list" class="calendar-list"></div>
@@ -154,7 +154,7 @@
           <h1 data-i18n="circuits.title">Circuitos</h1>
           <p data-i18n="circuits.subtitle">Gestiona los circuitos disponibles para las carreras</p>
         </div>
-        <button class="btn-primary" id="btn-add-circuit" data-i18n="circuits.add">+ Añadir circuito</button>
+        <button class="btn-primary" id="btn-add-circuit"><span>+</span> <span data-i18n="common.add">Añadir</span> <span data-i18n="common.circuit">circuito</span></button>
       </div>
       <div id="circuits-grid" class="circuits-grid"></div>
       <div id="circuits-empty" class="empty-state" style="display:none">
@@ -170,7 +170,7 @@
           <h1 data-i18n="players.title">Pilotos</h1>
           <p data-i18n="players.subtitle">Gestiona los pilotos y sus cartas de mejora</p>
         </div>
-        <button class="btn-primary" id="btn-add-player" data-i18n="players.add">+ Añadir piloto</button>
+        <button class="btn-primary" id="btn-add-player"><span>+</span> <span data-i18n="common.add">Añadir</span> <span data-i18n="common.player">piloto</span></button>
       </div>
       <div id="players-grid" class="players-grid"></div>
       <div id="players-empty" class="empty-state" style="display:none">
@@ -198,11 +198,11 @@
     <div id="view-manual" class="view">
       <div class="view-header">
         <div>
-          <h1>Manual de Referencia</h1>
-          <p>Consulta las reglas rápidas de Clima, Motor Forzado y Estrés</p>
+          <h1 data-i18n="manual.title">Manual de Referencia</h1>
+          <p data-i18n="manual.subtitle">Consulta las reglas rápidas de Clima, Motor Forzado y Estrés</p>
           <div class="manual-downloads">
-            <a href="files/Rules-ES.pdf" download class="btn btn-secondary" target="_blank">📄 Descargar Manual Básico</a>
-            <a href="files/RulesAdvanced-ES.pdf" download class="btn btn-secondary" target="_blank">📄 Descargar Manual Avanzado</a>
+            <a href="files/Rules-ES.pdf" download class="btn btn-secondary" target="_blank" data-i18n="manual.downloadBasic">📄 Descargar Manual Básico</a>
+            <a href="files/RulesAdvanced-ES.pdf" download class="btn btn-secondary" target="_blank" data-i18n="manual.downloadAdvanced">📄 Descargar Manual Avanzado</a>
           </div>
         </div>
       </div>
@@ -257,8 +257,8 @@
       <input class="form-input" id="circuit-laps-input" type="number" min="1" max="10" placeholder="Ej: 2" />
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" data-modal="modal-circuit" data-i18n="modals.cancel">Cancelar</button>
-      <button class="btn-primary" id="btn-save-circuit" data-i18n="modals.save">Guardar</button>
+      <button class="btn-secondary" data-modal="modal-circuit" data-i18n="common.cancel">Cancelar</button>
+      <button class="btn-primary" id="btn-save-circuit" data-i18n="common.save">Guardar</button>
     </div>
   </div>
 </div>
@@ -272,25 +272,25 @@
 <div id="modal-champ" class="modal-overlay" style="display:none">
   <div class="modal">
     <div class="modal-header">
-      <h2>Configurar Campeonato</h2>
+      <h2 data-i18n="modals.championship.title">Configurar Campeonato</h2>
       <button class="modal-close" data-modal="modal-champ">✕</button>
     </div>
     <div class="modal-body">
-      <label class="form-label">Nombre del campeonato</label>
-      <input class="form-input" id="champ-name-input" type="text" placeholder="Ej: Gran Premio Anual 2025" maxlength="60" />
-      <label class="form-label">Sistema de puntos</label>
+      <label class="form-label" data-i18n="modals.championship.name">Nombre del campeonato</label>
+      <input class="form-input" id="champ-name-input" type="text" data-i18n-placeholder="modals.championship.namePlaceholder" placeholder="Ej: Gran Premio Anual 2025" maxlength="60" />
+      <label class="form-label" data-i18n="modals.championship.points">Sistema de puntos</label>
       <select class="form-select" id="champ-points-select">
-        <option value="classic" selected="selected">Clásico (9-6-4-3-2-1)</option>
-        <option value="podium">Solo podio (3-2-1)</option>
-        <option value="custom">Personalizado</option>
+        <option value="classic" selected="selected" data-i18n="modals.championship.classic">Clásico (9-6-4-3-2-1)</option>
+        <option value="podium" data-i18n="modals.championship.podium">Solo podio (3-2-1)</option>
+        <option value="custom" data-i18n="modals.championship.custom">Personalizado</option>
       </select>
       <input class="form-input" id="champ-points-custom" type="text"
-        placeholder="Ej: 25,18,15,12,10,8,6,4,2,1 (separados por comas)"
+        data-i18n-placeholder="modals.championship.customPlaceholder" placeholder="Ej: 25,18,15,12,10,8,6,4,2,1 (separados por comas)"
         style="display:none; margin-top:8px" />
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" data-modal="modal-champ">Cancelar</button>
-      <button class="btn-primary" id="btn-save-champ">Guardar</button>
+      <button class="btn-secondary" data-modal="modal-champ" data-i18n="common.cancel">Cancelar</button>
+      <button class="btn-primary" id="btn-save-champ" data-i18n="common.save">Guardar</button>
     </div>
   </div>
 </div>
@@ -338,8 +338,8 @@
       -->
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" data-modal="modal-player">Cancelar</button>
-      <button class="btn-primary" id="btn-save-player">Guardar</button>
+      <button class="btn-secondary" data-modal="modal-player" data-i18n="common.cancel">Cancelar</button>
+      <button class="btn-primary" id="btn-save-player" data-i18n="common.save">Guardar</button>
     </div>
   </div>
 </div>
@@ -348,58 +348,58 @@
 <div id="modal-add-race" class="modal-overlay" style="display:none">
   <div class="modal modal-wide">
     <div class="modal-header">
-      <h2 id="modal-add-race-title">Añadir carrera al calendario</h2>
+      <h2 id="modal-add-race-title" data-i18n="championship.addRace.title">Añadir carrera al calendario</h2>
       <button class="modal-close" data-modal="modal-add-race">✕</button>
     </div>
     <div class="modal-body">
       <div class="form-section">
-        <h3 class="form-section-title">1. Circuito</h3>
+        <h3 class="form-section-title">1. <span data-i18n="common.circuit">Circuito</span></h3>
         <div class="circuits-grid" id="add-race-circuits-grid"></div>
       </div>
 
       <div class="form-section">
-        <h3 class="form-section-title">2. Evento</h3>
+        <h3 class="form-section-title">2. <span data-i18n="common.event">Evento</span></h3>
         <div class="form-group" style="margin-bottom: 20px;">
-          <label class="form-label">Nombre del evento</label>
-          <input class="form-input" id="add-race-event-input" type="text" placeholder="Ej: Gran Premio de España, Carrera Nocturna..." />
+          <label class="form-label" data-i18n="championship.addRace.eventName">Nombre del evento</label>
+          <input class="form-input" id="add-race-event-input" type="text" data-i18n-placeholder="championship.addRace.eventNamePlaceholder" placeholder="Ej: Gran Premio de España, Carrera Nocturna..." />
         </div>
         <div class="form-group">
-          <label class="form-label">Reglas especiales</label>
-          <textarea class="form-input" id="add-race-rules-input" rows="3" placeholder="Reglas específicas de esta carrera..."></textarea>
+          <label class="form-label" data-i18n="championship.addRace.specialRules">Reglas especiales</label>
+          <textarea class="form-input" id="add-race-rules-input" rows="3" data-i18n-placeholder="championship.addRace.specialRulesPlaceholder" placeholder="Reglas específicas de esta carrera..."></textarea>
         </div>
       </div>
 
       <div class="form-section">
-        <h3 class="form-section-title">3. Vueltas</h3>
+        <h3 class="form-section-title">3. <span data-i18n="common.laps">Vueltas</span></h3>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Número de vueltas</label>
+            <label class="form-label" data-i18n="common.laps">Vueltas</label>
             <input class="form-input" id="add-race-laps-input" type="number" min="1" max="10" value="3" style="width: 80px;" />
           </div>
         </div>
       </div>
 
       <div class="form-section">
-        <h3 class="form-section-title">4. Opciones</h3>
+        <h3 class="form-section-title">4. <span data-i18n="common.add">Añadir</span></h3>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Módulos activos</label>
+            <label class="form-label" data-i18n="championship.addRace.activeModules">Módulos activos</label>
             <div class="checkbox-group">
-              <label class="checkbox-label"><input type="checkbox" id="add-race-mod-weather" /> 🌧 Clima</label>
-              <label class="checkbox-label"><input type="checkbox" id="add-race-mod-sponsors" /> 💰 Patrocinios</label>
-              <label class="checkbox-label"><input type="checkbox" id="add-race-mod-press" /> 📷 Prensa</label>
+              <label class="checkbox-label"><input type="checkbox" id="add-race-mod-weather" /> <span data-i18n="common.weather">Clima</span></label>
+              <label class="checkbox-label"><input type="checkbox" id="add-race-mod-sponsors" /> <span data-i18n="common.sponsors">Patrocinios</span></label>
+              <label class="checkbox-label"><input type="checkbox" id="add-race-mod-press" /> <span data-i18n="common.press">Prensa</span></label>
             </div>
           </div>
         </div>
-        <p class="form-hint">Las nuevas carreras se añadirán al final del calendario.</p>
+        <p class="form-hint" data-i18n="championship.addRace.newRaceHint">Las nuevas carreras se añadirán al final del calendario.</p>
 
         <div id="add-race-weather-section" style="display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--border)">
-          <label class="form-label">Selecciona el clima</label>
+          <label class="form-label" data-i18n="championship.addRace.selectWeather">Selecciona el clima</label>
           <div class="weather-selector-grid" id="add-race-weather-grid"></div>
         </div>
 
         <div id="add-race-sponsors-section" style="display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--border)">
-          <label class="form-label">Cartas de patrocinio al inicio</label>
+          <label class="form-label"><span data-i18n="common.sponsors">Patrocinios</span> <span data-i18n="championship.addRace.sponsorCards">al inicio</span></label>
           <div class="number-selector-grid" id="add-race-sponsors-grid">
             <div class="number-chip" data-val="0">0</div>
             <div class="number-chip selected" data-val="1">1</div>
@@ -409,15 +409,15 @@
         </div>
 
         <div id="add-race-press-section" style="display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--border)">
-          <label class="form-label">Ubicación de la Prensa (Curvas)</label>
-          <input class="form-input" id="add-race-press-input" type="text" placeholder="Ej: A, B y D..." />
+          <label class="form-label" data-i18n="championship.addRace.pressLocation">Ubicación de la Prensa (Curvas)</label>
+          <input class="form-input" id="add-race-press-input" type="text" data-i18n-placeholder="championship.addRace.pressLocationPlaceholder" placeholder="Ej: A, B y D..." />
         </div>
 
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" data-modal="modal-add-race">Cancelar</button>
-      <button class="btn-primary" id="btn-save-cal-race">Añadir al calendario</button>
+      <button class="btn-secondary" data-modal="modal-add-race" data-i18n="common.cancel">Cancelar</button>
+      <button class="btn-primary" id="btn-save-cal-race" data-i18n="championship.addRace.addToCalendar">Añadir al calendario</button>
     </div>
   </div>
 </div>
@@ -426,18 +426,18 @@
 <div id="modal-results" class="modal-overlay" style="display:none">
   <div class="modal modal-wide">
     <div class="modal-header">
-      <h2 id="modal-results-title">Registrar resultado</h2>
+      <h2 id="modal-results-title" data-i18n="modals.results.title">Registrar resultado</h2>
       <button class="modal-close" data-modal="modal-results">✕</button>
     </div>
     <div class="modal-body">
-      <p class="form-hint" style="margin-bottom:18px">
+      <p class="form-hint" style="margin-bottom:18px" data-i18n="modals.results.hint">
         Ordena los pilotos según la posición final. Usa los botones ▲▼ o arrastra.
       </p>
       <div id="results-sortable-list" class="results-sortable"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" data-modal="modal-results">Cancelar</button>
-      <button class="btn-primary" id="btn-save-results">Guardar resultado</button>
+      <button class="btn-secondary" data-modal="modal-results" data-i18n="common.cancel">Cancelar</button>
+      <button class="btn-primary" id="btn-save-results" data-i18n="modals.results.saveResult">Guardar resultado</button>
     </div>
   </div>
 </div>
@@ -446,14 +446,14 @@
 <div id="modal-race-detail" class="modal-overlay" style="display:none">
   <div class="modal modal-wide">
     <div class="modal-header">
-      <h2 id="detail-race-title">Detalle de carrera</h2>
+      <h2 id="detail-race-title" data-i18n="modals.raceDetail.title">Detalle de carrera</h2>
       <button class="modal-close" data-modal="modal-race-detail">✕</button>
     </div>
     <div class="modal-body" id="detail-race-body"></div>
     <div class="modal-footer">
-      <button class="btn-danger" id="btn-delete-race">🗑 Eliminar</button>
-      <button class="btn-secondary" id="btn-edit-result">✎ Editar resultado</button>
-      <button class="btn-secondary" data-modal="modal-race-detail">Cerrar</button>
+      <button class="btn-danger" id="btn-delete-race">🗑 <span data-i18n="common.delete">Eliminar</span></button>
+      <button class="btn-secondary" id="btn-edit-result">✎ <span data-i18n="common.edit">Editar</span> <span data-i18n="common.result">resultado</span></button>
+      <button class="btn-secondary" data-modal="modal-race-detail" data-i18n="common.close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -462,48 +462,48 @@
 <div id="modal-reset" class="modal-overlay" style="display:none">
   <div class="modal">
     <div class="modal-header">
-      <h2>⚠ Resetear datos</h2>
+      <h2 data-i18n="system.modals.reset.title">⚠ Resetear datos</h2>
       <button class="modal-close" data-modal="modal-reset">✕</button>
     </div>
     <div class="modal-body">
-      <p class="reset-intro">Selecciona qué sección quieres borrar. Esta acción <strong>no se puede deshacer</strong>.</p>
+      <p class="reset-intro" data-i18n="system.modals.reset.intro">Selecciona qué sección quieres borrar. Esta acción <strong>no se puede deshacer</strong>.</p>
       <div class="reset-cards">
         <div class="reset-card">
           <div class="reset-card-icon">⚙️</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Configuración del campeonato</div>
-            <div class="reset-card-desc">Borra nombre y puntos. Mantiene pilotos y calendario.</div>
+            <div class="reset-card-title" data-i18n="system.modals.reset.championship.title">Configuración del campeonato</div>
+            <div class="reset-card-desc" data-i18n="system.modals.reset.championship.desc">Borra nombre y puntos. Mantiene pilotos y calendario.</div>
           </div>
-          <button class="btn-reset-section" data-section="championship">Resetear</button>
+          <button class="btn-reset-section" data-section="championship" data-i18n="system.modals.reset.btnReset">Resetear</button>
         </div>
         <div class="reset-card">
           <div class="reset-card-icon">🏁</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Calendario de carreras</div>
-            <div class="reset-card-desc">Elimina todas las carreras y resultados. Mantiene los pilotos.</div>
+            <div class="reset-card-title" data-i18n="system.modals.reset.calendar.title">Calendario de carreras</div>
+            <div class="reset-card-desc" data-i18n="system.modals.reset.calendar.desc">Elimina todas las carreras y resultados. Mantiene los pilotos.</div>
           </div>
-          <button class="btn-reset-section" data-section="calendar">Resetear</button>
+          <button class="btn-reset-section" data-section="calendar" data-i18n="system.modals.reset.btnReset">Resetear</button>
         </div>
         <div class="reset-card">
           <div class="reset-card-icon">👤</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Pilotos</div>
-            <div class="reset-card-desc">Elimina todos los pilotos y también el calendario.</div>
+            <div class="reset-card-title" data-i18n="system.modals.reset.players.title">Pilotos</div>
+            <div class="reset-card-desc" data-i18n="system.modals.reset.players.desc">Elimina todos los pilotos y también el calendario.</div>
           </div>
-          <button class="btn-reset-section" data-section="players">Resetear</button>
+          <button class="btn-reset-section" data-section="players" data-i18n="system.modals.reset.btnReset">Resetear</button>
         </div>
         <div class="reset-card reset-card-danger">
           <div class="reset-card-icon">💥</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Reset global</div>
-            <div class="reset-card-desc">Borra absolutamente todo y vuelve al estado inicial.</div>
+            <div class="reset-card-title" data-i18n="system.modals.reset.all.title">Reset global</div>
+            <div class="reset-card-desc" data-i18n="system.modals.reset.all.desc">Borra absolutamente todo y vuelve al estado inicial.</div>
           </div>
-          <button class="btn-reset-section btn-reset-all" data-section="all">Reset todo</button>
+          <button class="btn-reset-section btn-reset-all" data-section="all" data-i18n="system.modals.reset.btnAll">Reset todo</button>
         </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" data-modal="modal-reset">Cerrar</button>
+      <button class="btn-secondary" data-modal="modal-reset" data-i18n="common.close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -512,48 +512,48 @@
 <div id="modal-export" class="modal-overlay" style="display:none">
   <div class="modal">
     <div class="modal-header">
-      <h2>📤 Exportar datos</h2>
+      <h2 data-i18n="system.modals.export.title">📤 Exportar datos</h2>
       <button class="modal-close" data-modal="modal-export">✕</button>
     </div>
     <div class="modal-body">
-      <p class="section-intro">Selecciona qué sección quieres exportar.</p>
+      <p class="section-intro" data-i18n="system.modals.export.intro">Selecciona qué sección quieres exportar.</p>
       <div class="reset-cards">
         <div class="reset-card">
           <div class="reset-card-icon">👤</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Pilotos</div>
-            <div class="reset-card-desc">Exporta todos los pilotos y sus mejoras.</div>
+            <div class="reset-card-title" data-i18n="common.players">Pilotos</div>
+            <div class="reset-card-desc" data-i18n="system.modals.reset.players.desc">Exporta todos los pilotos y sus mejoras.</div>
           </div>
-          <button class="btn-export-section" data-section="players">Exportar</button>
+          <button class="btn-export-section" data-section="players" data-i18n="system.modals.export.btnExport">Exportar</button>
         </div>
         <div class="reset-card">
           <div class="reset-card-icon">🏁</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Carreras</div>
-            <div class="reset-card-desc">Exporta el calendario y resultados de carreras.</div>
+            <div class="reset-card-title" data-i18n="nav.championship">Carreras</div>
+            <div class="reset-card-desc" data-i18n="system.modals.reset.calendar.desc">Exporta el calendario y resultados de carreras.</div>
           </div>
-          <button class="btn-export-section" data-section="races">Exportar</button>
+          <button class="btn-export-section" data-section="races" data-i18n="system.modals.export.btnExport">Exportar</button>
         </div>
         <div class="reset-card">
           <div class="reset-card-icon">🏆</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Campeonato</div>
-            <div class="reset-card-desc">Exporta la configuración del campeonato.</div>
+            <div class="reset-card-title" data-i18n="common.event">Campeonato</div>
+            <div class="reset-card-desc" data-i18n="system.modals.reset.championship.desc">Exporta la configuración del campeonato.</div>
           </div>
-          <button class="btn-export-section" data-section="championship">Exportar</button>
+          <button class="btn-export-section" data-section="championship" data-i18n="system.modals.export.btnExport">Exportar</button>
         </div>
         <div class="reset-card">
           <div class="reset-card-icon">📦</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Todo</div>
-            <div class="reset-card-desc">Exporta todos los datos completos.</div>
+            <div class="reset-card-title" data-i18n="system.modals.export.all.title">Todo</div>
+            <div class="reset-card-desc" data-i18n="system.modals.export.all.desc">Exporta todos los datos completos.</div>
           </div>
-          <button class="btn-export-section" data-section="all">Exportar todo</button>
+          <button class="btn-export-section" data-section="all" data-i18n="system.modals.export.btnExport">Exportar todo</button>
         </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" data-modal="modal-export">Cerrar</button>
+      <button class="btn-secondary" data-modal="modal-export" data-i18n="common.close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -562,48 +562,48 @@
 <div id="modal-import" class="modal-overlay" style="display:none">
   <div class="modal">
     <div class="modal-header">
-      <h2>📥 Importar datos</h2>
+      <h2 data-i18n="system.modals.import.title">📥 Importar datos</h2>
       <button class="modal-close" data-modal="modal-import">✕</button>
     </div>
     <div class="modal-body">
-      <p class="section-intro">Selecciona qué sección quieres importar. Esta acción puede reemplazar datos existentes.</p>
+      <p class="section-intro" data-i18n="system.modals.import.intro">Selecciona qué sección quieres importar. Esta acción puede reemplazar datos existentes.</p>
       <div class="reset-cards">
         <div class="reset-card">
           <div class="reset-card-icon">👤</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Pilotos</div>
-            <div class="reset-card-desc">Importa pilotos y sus mejoras.</div>
+            <div class="reset-card-title" data-i18n="common.players">Pilotos</div>
+            <div class="reset-card-desc" data-i18n="system.modals.reset.players.desc">Importa pilotos y sus mejoras.</div>
           </div>
-          <button class="btn-import-section" data-section="players">Importar</button>
+          <button class="btn-import-section" data-section="players" data-i18n="system.modals.import.btnImport">Importar</button>
         </div>
         <div class="reset-card">
           <div class="reset-card-icon">🏁</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Carreras</div>
-            <div class="reset-card-desc">Importa calendario y resultados.</div>
+            <div class="reset-card-title" data-i18n="nav.championship">Carreras</div>
+            <div class="reset-card-desc" data-i18n="system.modals.reset.calendar.desc">Importa calendario y resultados.</div>
           </div>
-          <button class="btn-import-section" data-section="races">Importar</button>
+          <button class="btn-import-section" data-section="races" data-i18n="system.modals.import.btnImport">Importar</button>
         </div>
         <div class="reset-card">
           <div class="reset-card-icon">🏆</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Campeonato</div>
-            <div class="reset-card-desc">Importa configuración del campeonato.</div>
+            <div class="reset-card-title" data-i18n="common.event">Campeonato</div>
+            <div class="reset-card-desc" data-i18n="system.modals.reset.championship.desc">Importa configuración del campeonato.</div>
           </div>
-          <button class="btn-import-section" data-section="championship">Importar</button>
+          <button class="btn-import-section" data-section="championship" data-i18n="system.modals.import.btnImport">Importar</button>
         </div>
         <div class="reset-card reset-card-danger">
           <div class="reset-card-icon">⚠️</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Todo</div>
-            <div class="reset-card-desc">Reemplaza todos los datos actuales.</div>
+            <div class="reset-card-title" data-i18n="system.modals.export.all.title">Todo</div>
+            <div class="reset-card-desc" data-i18n="system.modals.import.intro">Reemplaza todos los datos actuales.</div>
           </div>
-          <button class="btn-import-section btn-import-all" data-section="all">Importar todo</button>
+          <button class="btn-import-section btn-import-all" data-section="all" data-i18n="system.modals.import.btnImport">Importar todo</button>
         </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" data-modal="modal-import">Cerrar</button>
+      <button class="btn-secondary" data-modal="modal-import" data-i18n="common.close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -639,15 +639,15 @@
 <div id="modal-champ-templates" class="modal-overlay" style="display:none">
   <div class="modal modal-wide">
     <div class="modal-header">
-      <h2>Campeonatos Históricos</h2>
+      <h2 data-i18n="modals.championshipTemplates.title">Campeonatos Históricos</h2>
       <button class="modal-close" data-modal="modal-champ-templates">✕</button>
     </div>
     <div class="modal-body">
-      <p class="form-hint" style="margin-bottom:16px">Selecciona un campeonato histórico para cargar sus carreras y reglas oficiales.</p>
+      <p class="form-hint" style="margin-bottom:16px" data-i18n="modals.championshipTemplates.description">Selecciona un campeonato histórico para cargar sus carreras y reglas oficiales.</p>
       <div class="templates-grid" id="templates-grid"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" data-modal="modal-champ-templates">Cerrar</button>
+      <button class="btn-secondary" data-modal="modal-champ-templates" data-i18n="common.close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -686,7 +686,7 @@
       <!-- El contenido se generará dinámicamente desde JavaScript -->
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" data-modal="modal-meta-info">Cerrar</button>
+      <button class="btn-secondary" data-modal="modal-meta-info" data-i18n="common.close">Cerrar</button>
     </div>
   </div>
 </div>
