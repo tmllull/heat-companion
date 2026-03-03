@@ -8,6 +8,7 @@ const CHAMPIONSHIP_TEMPLATES = [
     name: "Campeonato Histórico 1961",
     year: 1961,
     pointsSystem: "classic",
+    expansion: "Base",
     races: [
       {
         circuitId: "gb",
@@ -55,6 +56,7 @@ const CHAMPIONSHIP_TEMPLATES = [
     name: "Campeonato Histórico 1962",
     year: 1962,
     pointsSystem: "classic",
+    expansion: "Base",
     races: [
       {
         circuitId: "italy",
@@ -102,6 +104,7 @@ const CHAMPIONSHIP_TEMPLATES = [
     name: "Campeonato Histórico 1963",
     year: 1963,
     pointsSystem: "classic",
+    expansion: "Base",
     races: [
       {
         circuitId: "usa",
@@ -159,9 +162,10 @@ const CHAMPIONSHIP_TEMPLATES = [
   },
   {
     id: "1964",
-    name: "Campeonato Histórico 1964 (Lluvia Torrencial)",
+    name: "Campeonato Histórico 1964",
     year: 1964,
     pointsSystem: "classic",
+    expansion: "Lluvia Torrencial",
     races: [
       {
         circuitId: "japan",
@@ -222,9 +226,10 @@ const CHAMPIONSHIP_TEMPLATES = [
   },
   {
     id: "1965",
-    name: "Campeonato Histórico 1965 (Visión de Túnel)",
+    name: "Campeonato Histórico 1965",
     year: 1965,
     pointsSystem: "classic",
+    expansion: "Visión de Túnel",
     races: [
       {
         circuitId: "gb",

@@ -162,15 +162,35 @@ function openChampTemplatesModal() {
   newGrid.innerHTML = window.CHAMPIONSHIP_TEMPLATES.map(t => {
     const circuitNames = t.races.map(r => {
       const circuit = getCircuitById(r.circuitId);
-      
-      // Manejar diferentes casos para obtener el nombre del circuito
-      let circuitName = `Circuit ${r.circuitId}`;
-      
-      return circuitName;
+      if (!circuit) return `Circuit ${r.circuitId}`;
+      const country = getCountryById(circuit.countryId);
+      const flag = country ? country.flag + ' ' : '';
+      return flag + getCircuitName(circuit);
     });
+    
+    let badgeHtml = '';
+    if (t.expansion) {
+      const expansionKey = t.expansion === 'Lluvia Torrencial' ? 'heavyRain' : 
+                           t.expansion === 'Visión de Túnel' ? 'tunnelVision' : 
+                           t.expansion === 'Terreno Inestable' ? 'rockyRoads' :
+                           t.expansion.toLowerCase();
+      
+      let badgeClass;
+      if (t.expansion === 'Lluvia Torrencial') {
+        badgeClass = 'lluvia-torrencial';
+      } else if (t.expansion === 'Visión de Túnel') {
+        badgeClass = 'vision-de-tunel';
+      } else if (t.expansion === 'Terreno Inestable') {
+        badgeClass = 'terreno-inestable';
+      } else {
+        badgeClass = expansionKey.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+      }
+      badgeHtml = `<div class="diff-badge ${badgeClass}" style="margin-bottom: 8px; width: fit-content; margin-left: 0;">${i18n.t('data.expansions.' + expansionKey)}</div>`;
+    }
     
     return `<div class="template-card" data-template-id="${t.id}">
       <h3>${i18n.t('modals.championshipTemplates.championships.' + t.id)}</h3>
+      ${badgeHtml}
       <div class="template-race-mini-list">${i18n.t('modals.championshipTemplates.races', { n: t.races.length })}: ${circuitNames.join(' · ')}</div>
       <div class="template-card-footer">${i18n.t('modals.championshipTemplates.loadChampionship')}</div>
     </div>`;
