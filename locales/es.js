@@ -40,7 +40,6 @@ window.LOCALE_ES = {
     reset: "Resetear...",
     menu: "Menú",
     inicio: "Inicio",
-    tabla: "Tabla"
   },
   lang: {
     es: "Español",
