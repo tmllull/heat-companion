@@ -249,8 +249,8 @@ window.LOCALE_ES = {
         "1961": "Campeonato Histórico 1961",
         "1962": "Campeonato Histórico 1962", 
         "1963": "Campeonato Histórico 1963",
-        "1964": "Campeonato Histórico 1964 (Lluvia Torrencial)",
-        "1965": "Campeonato Histórico 1965 (Visión de Túnel)"
+        "1964": "Campeonato Histórico 1964",
+        "1965": "Campeonato Histórico 1965"
       }
     }
   },

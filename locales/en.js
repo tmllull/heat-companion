@@ -249,8 +249,8 @@ window.LOCALE_EN = {
         "1961": "Historic Championship 1961",
         "1962": "Historic Championship 1962",
         "1963": "Historic Championship 1963", 
-        "1964": "Historic Championship 1964 (Heavy Rain)",
-        "1965": "Historic Championship 1965 (Tunnel Vision)"
+        "1964": "Historic Championship 1964",
+        "1965": "Historic Championship 1965"
       }
     }
   },
