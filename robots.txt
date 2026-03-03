@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tmllull.github.io/heat-companion/sitemap.xml
