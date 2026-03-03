@@ -8,12 +8,6 @@ function resetSection(section) {
   const msg = i18n.t(`system.resetConfirm.${section}`);
   if (!msg || !confirm(msg)) return;
   switch (section) {
-    case 'championship':
-      state.championship = { ...defaultState().championship, playerIds: state.championship.playerIds, calendar: state.championship.calendar };
-      renderSidebarChamp(); renderView('dashboard'); renderView('championship');
-      showToast(i18n.t('system.resetSuccess'), 'info'); 
-      closeModal('modal-reset');
-      break;
     case 'calendar':
       state.championship.calendar = [];
       renderView('dashboard'); renderView('championship'); renderView('standings');

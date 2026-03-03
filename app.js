@@ -409,7 +409,7 @@ function renderStandings() {
 
   const ep = enrolledPlayers();
   if (ep.length === 0) {
-    wrap.innerHTML = `<table class="standings-table"><thead><tr><th>${i18n.t('standings.pos')}</th><th>${i18n.t('standings.player')}</th><th>${i18n.t('standings.pts')}</th><th>${i18n.t('standings.gap')}</th><th>${i18n.t('standings.races')}</th></tr></thead><tbody><tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:20px">${i18n.t('players.empty')}</td></tr></tbody></table>`;
+    wrap.innerHTML = `<table class="standings-table"><thead><tr><th>${i18n.t('standings.pos')}</th><th>${i18n.t('standings.player')}</th><th>${i18n.t('standings.pts')}</th><th>${i18n.t('standings.gap')}</th></tr></thead><tbody><tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:20px">${i18n.t('players.empty')}</td></tr></tbody></table>`;
     empty.style.display = 'none';
     return;
   }
@@ -417,17 +417,18 @@ function renderStandings() {
   empty.style.display = 'none';
   const standings = getStandings();
   const leader    = standings[0];
-  const completedRaces = state.championship.calendar.filter(r => r.status === 'completed');
+  const allRaces = state.championship.calendar;
 
-  const raceCols = completedRaces.map((r, i) => {
+  const raceCols = allRaces.map((r, i) => {
     const c = getCircuitById(r.circuitId);
-    return `<th title="${c?.name || ''}"> ${c?.flag || '🏁'} R${i + 1}</th>`;
+    const country = c ? getCountryById(c.countryId) : null;
+    return `<th title="${c?.name || ''}"> ${country ? country.flag : '🏁'}</th>`;
   }).join('');
 
   const rows = standings.map((s, i) => {
     const pos = i + 1;
-    const gap = pos === 1 || !completedRaces.length ? '' : `−${leader.points - s.points}`;
-    const racePts = completedRaces.map(r => {
+    const gap = pos === 1 || !allRaces.length ? '' : `−${leader.points - s.points}`;
+    const racePts = allRaces.map(r => {
       const res = r.results.find(x => x.playerId === s.player.id);
       if (!res) return '<td style="text-align:center"><span style="color:var(--text-dim)">—</span></td>';
       const p = res.dnf ? 0 : getPoints(res.position, r.id);
@@ -442,19 +443,17 @@ function renderStandings() {
         <div class="st-avatar" style="background:${s.player.color}">${escHtml(s.player.icon || initials(s.player.name))}</div>
         <div>
           <div class="st-name">${escHtml(s.player.name)}</div>
-          <div style="font-size:11px;color:var(--text-muted)">${s.wins}W · ${s.podiums} ${i18n.t('common.result').toLowerCase()}s</div>
         </div>
       </div></td>
       <td><span class="st-pts">${s.points}</span></td>
       <td><span class="gap-badge">${gap}</span></td>
-      <td style="text-align:center">${s.races}</td>
       ${racePts}
     </tr>`;
   }).join('');
 
   wrap.innerHTML = `<table class="standings-table">
     <thead><tr>
-      <th>${i18n.t('standings.pos')}</th><th>${i18n.t('standings.player')}</th><th>${i18n.t('standings.pts')}</th><th>${i18n.t('standings.gap')}</th><th>${i18n.t('standings.races')}</th>
+      <th>${i18n.t('standings.pos')}</th><th>${i18n.t('standings.player')}</th><th>${i18n.t('standings.pts')}</th><th>${i18n.t('standings.gap')}</th>
       ${raceCols}
     </tr></thead>
     <tbody>${rows}</tbody>
