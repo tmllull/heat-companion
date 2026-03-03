@@ -53,7 +53,10 @@ function renderDashboard() {
       return `<div class="recent-race-row" data-cal-race-id="${race.id}">
         <div class="race-flag">${circuit ? (getCountryById(circuit.countryId)?.flag || '🏁') : '🏁'}</div>
         <div class="race-info">
-          <div class="race-info-name">${escHtml(getCircuitName(circuit))}</div>
+          <div class="race-info-name">
+            ${escHtml(getCircuitName(circuit))}
+            ${circuit?.expansion ? `<span class="diff-badge ${circuit.expansion.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')}">${circuit.expansion}</span>` : ''}
+          </div>
           <div class="race-info-meta">
             <span class="race-info-laps">🏁 ${i18n.t('common.laps')}: ${race.laps || 3}</span>
             ${circuit ? `<span class="race-info-spaces">📏 ${i18n.t('common.spaces')}: ${circuit.spaces || 0}</span>` : ''}

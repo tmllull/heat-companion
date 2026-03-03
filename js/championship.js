@@ -51,7 +51,10 @@ function renderChampionship() {
         </div>
         <div class="cal-race-flag">${circuit ? (getCountryById(circuit.countryId)?.flag || '🏁') : '🏁'}</div>
         <div class="cal-race-info">
-          <div class="cal-race-name">${escHtml(circuit?.country || getCircuitName(circuit))}</div>
+          <div class="cal-race-name">
+            ${escHtml(circuit?.country || getCircuitName(circuit))}
+            ${circuit?.expansion ? `<span class="diff-badge ${circuit.expansion.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')}">${circuit.expansion}</span>` : ''}
+          </div>
           <div class="cal-race-event" style="font-size: smaller">${escHtml(getRaceEventData(race).id ? i18n.t('modals.championshipTemplates.events.' + getRaceEventData(race).id + '.name', { defaultValue: getRaceEventData(race).name }) : getRaceEventData(race).name)}</div>
           <div class="cal-race-meta">
             <span>🏁 ${i18n.t('common.laps')}: ${race.laps || 3}</span>
