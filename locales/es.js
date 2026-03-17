@@ -67,6 +67,8 @@ window.LOCALE_ES = {
     restart: "Reiniciar",
     addRace: {
       title: "Añadir carrera al calendario",
+      selectEvent: "Seleccionar evento (Opcional)",
+      customEvent: "Evento personalizado (manual)",
       eventName: "Nombre del evento",
       eventNamePlaceholder: "Ej: Gran Premio de España, Carrera Nocturna...",
       specialRules: "Reglas especiales",

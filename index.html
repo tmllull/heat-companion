@@ -421,7 +421,16 @@
       <div class="form-section">
         <h3 class="form-section-title">2. <span data-i18n="common.event">Evento</span></h3>
         <div class="form-group" style="margin-bottom: 20px;">
-          <label class="form-label" data-i18n="championship.addRace.eventName">Nombre del evento</label>
+          <label class="form-label" data-i18n="championship.addRace.selectEvent">Seleccionar evento</label>
+          <div id="add-race-events-grid">
+            <!-- Event cards/sections will be rendered here -->
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+            <label class="form-label" style="margin:0" data-i18n="championship.addRace.eventName">Nombre del evento</label>
+            <span class="section-badge" id="badge-custom-event" style="display:none" data-i18n="championship.addRace.customEvent">Personalizado</span>
+          </div>
           <input class="form-input" id="add-race-event-input" type="text" data-i18n-placeholder="championship.addRace.eventNamePlaceholder" placeholder="Ej: Gran Premio de España, Carrera Nocturna..." />
         </div>
         <div class="form-group">

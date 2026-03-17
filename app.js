@@ -560,8 +560,40 @@ function openAddRaceModal(raceId = null) {
   
   document.getElementById('modal-add-race-title').textContent = raceId ? i18n.t('common.edit') + ' ' + i18n.t('common.circuit').toLowerCase() : i18n.t('common.add') + ' ' + i18n.t('common.circuit').toLowerCase();
   document.getElementById('add-race-laps-input').value = addRaceSelectedLaps;
-  document.getElementById('add-race-event-input').value = race ? (race.event || '') : '';
-  document.getElementById('add-race-rules-input').value = race ? (race.rules || '') : '';
+  
+  // Render event cards
+  const eventGrid = document.getElementById('add-race-events-grid');
+  const selectedEventId = race ? (race.eventId || '') : '';
+  
+  // Start expanded if custom or historical selected
+  const isHistoricalSelected = !!selectedEventId;
+  const isExpanded = false; // Start collapsed as requested
+
+  let eventsHtml = `
+    <div class="section-card collapsible ${isExpanded ? '' : 'collapsed'}" style="margin-bottom: 0;">
+      <div class="section-header" onclick="toggleSection(this)">
+        <h3 data-i18n="common.event">${i18n.t('common.event')}</h3>
+        <span class="section-toggle">${isExpanded ? '▲' : '▼'}</span>
+      </div>
+      <div class="section-content">
+        <div class="events-grid">
+          <div class="event-card custom-event-card ${!selectedEventId ? 'selected' : ''}" data-event-id="">
+            <div class="event-card-title">${i18n.t('championship.addRace.customEvent')}</div>
+            <div class="event-card-rules">${i18n.t('championship.addRace.specialRulesPlaceholder')}</div>
+          </div>
+          ${Object.values(window.RACE_EVENTS).map(ev => renderEventCard(ev, selectedEventId)).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  eventGrid.innerHTML = eventsHtml;
+  
+  document.getElementById('badge-custom-event').style.display = !selectedEventId && (race?.event || race?.rules) ? 'block' : 'none';
+
+  const eventData = race ? getRaceEventData(race) : { name: '', description: '' };
+  document.getElementById('add-race-event-input').value = eventData.name || '';
+  document.getElementById('add-race-rules-input').value = eventData.description || '';
   
   const hasWeather = race ? !!race.mods?.weather : false;
   const hasSponsors = race ? !!race.mods?.sponsors : false;
@@ -685,6 +717,16 @@ function renderRaceCircuitCard(c) {
   </div>`;
 }
 
+function renderEventCard(ev, selectedId) {
+  const isSelected = ev.id === selectedId;
+  return `
+    <div class="event-card ${isSelected ? 'selected' : ''}" data-event-id="${ev.id}">
+      <div class="event-card-title">${ev.name}</div>
+      <div class="event-card-rules">${ev.description}</div>
+    </div>
+  `;
+}
+
 document.getElementById('add-race-mod-weather').addEventListener('change', e => {
   document.getElementById('add-race-weather-section').style.display = e.target.checked ? 'block' : 'none';
 });
@@ -731,6 +773,40 @@ document.getElementById('add-race-laps-input').addEventListener('change', e => {
   addRaceSelectedLaps = parseInt(e.target.value) || 3;
 });
 
+document.getElementById('add-race-events-grid').addEventListener('click', e => {
+  const card = e.target.closest('.event-card');
+  if (!card) return;
+  
+  const eventId = card.dataset.eventId;
+  
+  // Update all cards selection state (searching across sections)
+  document.querySelectorAll('#add-race-events-grid .event-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  
+  if (eventId) {
+    const ev = window.RACE_EVENTS[eventId];
+    if (ev) {
+      document.getElementById('add-race-event-input').value = ev.name;
+      document.getElementById('add-race-rules-input').value = ev.description;
+      document.getElementById('badge-custom-event').style.display = 'none';
+    }
+  } else {
+    // Custom selected
+    document.getElementById('badge-custom-event').style.display = 'block';
+  }
+});
+
+document.getElementById('add-race-event-input').addEventListener('input', () => {
+  document.querySelectorAll('#add-race-events-grid .event-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector('#add-race-events-grid .custom-event-card').classList.add('selected');
+  document.getElementById('badge-custom-event').style.display = 'block';
+});
+document.getElementById('add-race-rules-input').addEventListener('input', () => {
+  document.querySelectorAll('#add-race-events-grid .event-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector('#add-race-events-grid .custom-event-card').classList.add('selected');
+  document.getElementById('badge-custom-event').style.display = 'block';
+});
+
 document.getElementById('btn-save-cal-race').addEventListener('click', () => {
   if (!addRaceSelectedCircuit) { showToast(i18n.t('common.circuit'), 'error'); return; }
   
@@ -741,6 +817,7 @@ document.getElementById('btn-save-cal-race').addEventListener('click', () => {
   const raceData = {
     circuitId: addRaceSelectedCircuit,
     laps: addRaceSelectedLaps,
+    eventId: document.querySelector('#add-race-events-grid .event-card.selected')?.dataset.eventId || null,
     event: document.getElementById('add-race-event-input').value.trim(),
     rules: document.getElementById('add-race-rules-input').value.trim(),
     mods: {

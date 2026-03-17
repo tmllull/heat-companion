@@ -2866,6 +2866,74 @@ ul {
   color: #fb923c;
 }
 
+/* Events Selection Grid */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+.event-card {
+  background: var(--surface-3);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.event-card:hover {
+  border-color: var(--border-bright);
+  background: var(--surface-4);
+  transform: translateY(-2px);
+}
+.event-card.selected {
+  border-color: var(--heat-orange);
+  background: rgba(249, 115, 22, 0.08);
+  box-shadow: 0 0 16px rgba(249, 115, 22, 0.15);
+}
+.event-card.custom-event-card {
+  border-style: dashed;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+}
+.event-card-title {
+  font-family: "Rajdhani", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--heat-gold);
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+.light-theme .event-card-title {
+  color: var(--heat-orange-dark);
+}
+.event-card-rules {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.event-card-setup {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
 /* Detail Circuit Styles */
 .detail-circuit-meta-row {
   display: flex;

@@ -67,6 +67,8 @@ window.LOCALE_EN = {
     restart: "Restart",
     addRace: {
       title: "Add race to calendar",
+      selectEvent: "Select event (Optional)",
+      customEvent: "Custom event (manual)",
       eventName: "Event name",
       eventNamePlaceholder: "e.g.: Spanish Grand Prix, Night Race...",
       specialRules: "Special rules",

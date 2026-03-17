@@ -208,20 +208,23 @@ function openChampTemplatesModal() {
     // Si no hay carreras existentes, cargar directamente sin confirmación
     
     // Convert template races to calendar format
-    state.championship.calendar = t.races.map(r => ({
-      id: uid(),
-      circuitId: r.circuitId,
-      eventId: r.eventId || null,
-      event: r.event || '',
-      rules: r.rules || '',
-      laps: r.laps || 3,
-      mods: r.mods || { garage: true, weather: false, sponsors: false },
-      weatherType: r.weatherType || 'sun',
-      sponsorCards: r.sponsorCards || 0,
-      setup: r.setup || {},
-      status: 'scheduled',
-      results: []
-    }));
+    state.championship.calendar = t.races.map(r => {
+      const eventData = r.eventId ? window.RACE_EVENTS[r.eventId] : null;
+      return {
+        id: uid(),
+        circuitId: r.circuitId,
+        eventId: r.eventId || null,
+        event: r.event || (eventData ? eventData.name : ''),
+        rules: r.rules || (eventData ? eventData.description : ''),
+        laps: r.laps || 3,
+        mods: r.mods || { garage: true, weather: false, sponsors: false },
+        weatherType: r.weatherType || 'sun',
+        sponsorCards: r.sponsorCards || 0,
+        setup: r.setup || {},
+        status: 'scheduled',
+        results: []
+      };
+    });
 
     saveState();
     closeModal('modal-champ-templates');
