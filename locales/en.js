@@ -110,22 +110,119 @@ window.LOCALE_EN = {
   manual: {
     title: "Reference Manual",
     subtitle: "Check quick rules for Weather, Heat and Stress",
-    downloadBasic: "Download Basic Manual",
-    downloadAdvanced: "Download Advanced Manual",
-    basics: "Basic Mechanics",
-    weather: "Weather Effects",
+    downloadSection: "Downloads",
+    basicRules: "Basic Rules",
+    advancedRules: "Advanced Rules", 
+    expansions: "Expansions",
+    downloadBasic: "Basic Rules",
+    downloadAdvanced: "Advanced Rules",
+    basics: "🔥 Basic Mechanics",
+    weather: "🌤️ Weather Effects",
+    effectsTitle: "Effects:",
     heatTitle: "Heat",
     heatDescription: "Represents engine overheating.",
+    heatEffects: [
+      "• Used to go faster.",
+      "• Cycle: Heat → discard → deck → hand.",
+      "• Only Cooldown cards return to Heat.",
+      "• Cannot be played or discarded from hand."
+    ],
     stressTitle: "Stress",
     stressDescription: "Represents driver loss of concentration.",
+    stressEffects: [
+      "• You start with 3 Stress cards in your deck.",
+      "• You must play them to remove them from your hand.",
+      "• When played, they add randomness to your Speed."
+    ],
     slipstreamTitle: "Slipstream (Optional)",
     slipstreamDescription: "Represents the aerodynamic advantage of being close to another car.",
+    slipstreamEffects: [
+      "• If you end your movement next to or 1 space behind another car, you receive a Slipstream.",
+      "• Advance +2 additional spaces.",
+      "• Max. 1 use per turn.",
+      "• If the final space is occupied, place yourself in the first free space behind.",
+      "• Does NOT increase speed for curve checking."
+    ],
     spinoutTitle: "Spin",
     spinoutDescription: "Occurs when unable to pay Heat for a curve.",
+    spinoutEffects: [
+      "• If you cannot pay all excess speed with Forced Engine, you suffer a Spin.",
+      "• Pay all Forced Engine cards you have.",
+      "• Place the car before the curve that caused the spin.",
+      "• Steal Stress:",
+      "  • 1 card if you were in 1st–2nd gear.",
+      "  • 2 cards if you were in 3rd–4th gear.",
+      "• Downshift to 1st gear.",
+      "• Lose your current turn."
+    ],
     weatherTrackTitle: "Weather and track conditions",
     weatherTrackDescription: "and more...",
     weather_setupTitle: "Weather and track conditions",
-    weather_setupDescription: "Weather and road module preparation."
+    weather_setupDescription: "Weather and road module preparation.",
+    weather_setupEffects: [
+      "Weather:",
+      "• Draw the 6 Weather tokens and steal 1 for the entire race.",
+      "• Place it on the Billboard.",
+      "• Adjust your Forced Engine or Stress cards for the entire race according to their effect.",
+      " ",
+      "Track condition:",
+      "• Draw the 12 Track condition tokens.",
+      "• Steal 1 for each circuit curve.",
+      "• Reveal them in order, from the first curve.",
+      "• If it has sector symbol: affects all spaces until the next curve and is placed on the sector mat.",
+      "• If not: affects only that curve and is placed next to it."
+    ],
+    heavy_rain: "🌧️ Heavy Rain",
+    rainy_zonesTitle: "Rainy Zones",
+    rainy_zonesDescription: "Track areas that make downshifting more difficult.",
+    rainy_zonesEffects: [
+      "• If you start the round in a Rainy Zone, you pay +1 extra Heat to downshift.",
+      "• Downshifting 1 gear costs 1 Heat.",
+      "• Downshifting 2 gears costs 2 Heat."
+    ],
+    chicanesTitle: "Chicanes",
+    chicanesDescription: "Consecutive curves with the same maximum speed.",
+    chicanesEffects: [
+      "• No Weather/Track: play them as normal curves.",
+      "• With Weather/Track: draw only 1 token for the whole chicane.",
+      "• Sector symbol: affects the following sector.",
+      "• Curve symbol: affects both lines of the chicane."
+    ],
+    aggressive_legendsTitle: "Aggressive Legends",
+    aggressive_legendsDescription: "Legends (bots) can be faster in certain sections.",
+    aggressive_legendsEffects: [
+      "• If a Legend starts in a space with a chevron above the diamond, it will clear an additional curve line that round."
+    ],
+    tunnel_vision: "🔦 Tunnel Vision",
+    tunnelsTitle: "Tunnels",
+    tunnelsDescription: "Track sections that prevent car maintenance.",
+    tunnelsEffects: [
+      "• While in a tunnel, you cannot discard cards from your hand.",
+      "• This rule overrides any other discard effect (Event, Upgrade, etc.)."
+    ],
+    draftingTitle: "Draft Symbol",
+    draftingDescription: "Extra aerodynamic advantage from drafting.",
+    draftingEffects: [
+      "• Used in step 5 (Reaction).",
+      "• Move forward up to # spaces if they are free and you end directly behind another car.",
+      "• Does not count as speed.",
+      "• You can combine several Draft symbols.",
+      "• They can be used to cross or move past the finish line."
+    ],
+    rocky_roads: "⛰️ Rocky Roads",
+    gravelTitle: "Gravel",
+    gravelDescription: "Surface that damages the engine when stopping.",
+    gravelEffects: [
+      "• At the end of the turn (step 9), if you are on gravel and have Heat in the engine, pay 1 Heat.",
+      "• If no Heat is available, ignore the effect."
+    ],
+    extra_slipstreamTitle: "Extra Slipstream",
+    extra_slipstreamDescription: "Allows chaining multiple slipstreams in the same round.",
+    extra_slipstreamEffects: [
+      "• If a slipstream places you in a new valid position, you can take a second slipstream.",
+      "• All active bonuses for the round apply to this movement.",
+      "• Does not count as speed."
+    ]
   },
   modals: {
     raceDetail: {

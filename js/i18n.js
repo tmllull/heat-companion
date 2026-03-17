@@ -54,28 +54,34 @@ const i18n = {
   },
 
   /**
+   * Returns the raw value for a given key (useful for arrays or objects)
+   * @param {string} key 
+   * @returns {*} 
+   */
+  getRaw(key) {
+    const localeData = window[`LOCALE_${this.currentLocale.toUpperCase()}`];
+    if (!localeData) return undefined;
+
+    let value = key.split('.').reduce((obj, i) => (obj ? obj[i] : undefined), localeData);
+
+    if (value === undefined) {
+      if (this.currentLocale !== this.defaultLocale) {
+        const defaultData = window[`LOCALE_${this.defaultLocale.toUpperCase()}`];
+        value = key.split('.').reduce((obj, i) => (obj ? obj[i] : undefined), defaultData);
+      }
+    }
+
+    return value;
+  },
+
+  /**
    * Returns a translation for a given key
    * @param {string} key - The translation key (e.g. 'dashboard.title')
    * @param {Object} params - Placeholders to replace in the string (e.g. { name: 'Carlos' })
    * @returns {string} - The translated string
    */
   t(key, params = {}) {
-    const localeData = window[`LOCALE_${this.currentLocale.toUpperCase()}`];
-    if (!localeData) {
-      console.warn(`Locale data for ${this.currentLocale} not found!`);
-      return params.defaultValue !== undefined ? params.defaultValue : key;
-    }
-
-    // Traverse the object using dot notation (e.g. 'dashboard.title')
-    let value = key.split('.').reduce((obj, i) => (obj ? obj[i] : undefined), localeData);
-
-    if (value === undefined) {
-      // Fallback: search in default locale if current is different
-      if (this.currentLocale !== this.defaultLocale) {
-        const defaultData = window[`LOCALE_${this.defaultLocale.toUpperCase()}`];
-        value = key.split('.').reduce((obj, i) => (obj ? obj[i] : undefined), defaultData);
-      }
-    }
+    const value = this.getRaw(key);
 
     if (value === undefined) {
       if (params.defaultValue !== undefined) return params.defaultValue;

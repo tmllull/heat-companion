@@ -110,22 +110,119 @@ window.LOCALE_ES = {
   manual: {
     title: "Manual de Referencia",
     subtitle: "Consulta las reglas rápidas de Clima, Motor Forzado y Estrés",
-    downloadBasic: " Descargar Manual Básico",
-    downloadAdvanced: " Descargar Manual Avanzado",
-    basics: " Mecánicas Básicas",
-    weather: " Efectos de Clima",
+    downloadSection: "Descargas",
+    basicRules: "Reglas Básicas",
+    advancedRules: "Reglas Avanzadas",
+    expansions: "Expansiones",
+    downloadBasic: "Manual Básico",
+    downloadAdvanced: "Manual Avanzado",
+    basics: "🔥 Mecánicas Básicas",
+    weather: "🌤️ Efectos de Clima",
+    effectsTitle: "Efectos:",
     heatTitle: "Motor Forzado",
     heatDescription: "Representa el sobrecalentamiento del motor.",
+    heatEffects: [
+      "• Se usan para ir más rápido.",
+      "• Ciclo: Motor → descarte → mazo → mano.",
+      "• Solo el Enfriamiento las devuelve al Motor.",
+      "• No se pueden jugar ni descartar desde la mano."
+    ],
     stressTitle: "Estrés",
     stressDescription: "Representa pérdida de concentración del piloto.",
+    stressEffects: [
+      "• Empiezas la carrera con 3 cartas de Estrés en tu mazo.",
+      "• Debes jugarlas para quitarlas de la mano.",
+      "• Al jugarlas, añaden aleatoriedad a tu Velocidad."
+    ],
     slipstreamTitle: "Rebufo (Opcional)",
     slipstreamDescription: "Representa la ventaja aerodinámica de estar cerca de otro coche.",
+    slipstreamEffects: [
+      "• Si terminas tu movimiento al lado o a 1 espacio de otro coche, recibes un Rebufo.",
+      "• Avanza +2 espacios",
+      "• Máx. 1 vez por turno.",
+      "• Si el espacio final está ocupado, colócate en el primer espacio libre detrás.",
+      "• No aumenta la velocidad al comprobar una curva."
+    ],
     spinoutTitle: "Trompo",
-    spinoutDescription: "Ocurre al no poder pagar el Heat de una curva.",
+    spinoutDescription: "Ocurre al no poder pagar cartas de Motor forzado de una curva.",
+    spinoutEffects: [
+      "• Si no puedes pagar todo el exceso de velocidad con Motor forzado, sufres un trompo.",
+      "• Paga todas las cartas de Motor forzado que tengas.",
+      "• Coloca el coche antes de la curva que causó el trompo.",
+      "• Roba Estrés:",
+      "  • 1 carta si estabas en 1ª–2ª.",
+      "  • 2 cartas si estabas en 3ª–4ª.",
+      "• Baja la Caja de cambios a 1ª Marcha.",
+      "• Pierdes tu turno actual."
+    ],
     weatherTrackTitle: "Clima y estado de la pista",
     weatherTrackDescription: "y mas...",
     weather_setupTitle: "Clima y estado de la pista",
-    weather_setupDescription: "Preparación del módulo de clima y carretera."
+    weather_setupDescription: "Preparación del módulo de clima y carretera.",
+    weather_setupEffects: [
+      "Clima:",
+      "• Baraja las 6 fichas de Clima y roba 1 para toda la carrera.",
+      "• Colócala en la Cartelera.",
+      "• Ajusta para toda la carrera tus cartas de Motor forzado o Estrés según su efecto.",
+      " ",
+      "Estado de la pista:",
+      "• Baraja las 12 fichas de Estado de la pista.",
+      "• Roba 1 por cada curva del circuito.",
+      "• Revélalas en orden, desde la primera curva.",
+      "• Si tiene símbolo de sector: afecta a todos los espacios hasta la siguiente curva y se coloca en la caseta del sector.",
+      "• Si no: afecta solo a esa curva y se coloca junto a ella."
+    ],
+    heavy_rain: "🌧️ Lluvia Torrencial",
+    rainy_zonesTitle: "Zonas Lluviosas",
+    rainy_zonesDescription: "Zonas de la pista que dificultan la reducción de marchas.",
+    rainy_zonesEffects: [
+      "• Si empiezas la ronda en una Zona Lluviosa, pagarás +1 Heat adicional para reducir marchas.",
+      "• Reducir 1 marcha cuesta 1 Heat.",
+      "• Reducir 2 marchas cuesta 2 Heat."
+    ],
+    chicanesTitle: "Chicanes",
+    chicanesDescription: "Curvas consecutivas con la misma velocidad máxima.",
+    chicanesEffects: [
+      "• Sin Clima/Estado: júgalas como curvas normales.",
+      "• Con Clima/Estado: roba solo 1 ficha para toda la chicane.",
+      "• Símbolo sector: afecta al sector siguiente.",
+      "• Símbolo curva: afecta a ambas líneas de la chicane."
+    ],
+    aggressive_legendsTitle: "Leyendas Agresivas",
+    aggressive_legendsDescription: "Las Leyendas (bots) pueden ser más rápidas en ciertos tramos.",
+    aggressive_legendsEffects: [
+      "• Si una Leyenda empieza en un espacio con chevrón sobre el diamante, superará una línea de curva adicional esa ronda."
+    ],
+    tunnel_vision: "🔦 Visión de Túnel",
+    tunnelsTitle: "Túneles",
+    tunnelsDescription: "Tramos de pista que impiden el mantenimiento del coche.",
+    tunnelsEffects: [
+      "• Mientras estés en un túnel, no puedes descartar cartas de la mano.",
+      "• Esta regla anula cualquier otro efecto de descarte (Evento, Mejora, etc.)."
+    ],
+    draftingTitle: "Símbolo de Ráfaga",
+    draftingDescription: "Ventaja aerodinámica extra por ir a rebufo.",
+    draftingEffects: [
+      "• Se usa en el paso 5 (Reacción).",
+      "• Avanza hasta # casillas si están libres y terminas justo detrás de otro coche.",
+      "• No cuenta como velocidad.",
+      "• Puedes combinar varios símbolos de Ráfaga.",
+      "• Se pueden usar para cruzar o avanzar tras la línea de meta."
+    ],
+    rocky_roads: "⛰️ Terreno Inestable",
+    gravelTitle: "Grava",
+    gravelDescription: "Superficie que daña el motor al detenerse.",
+    gravelEffects: [
+      "• Al final del turno (paso 9), si estás en grava y tienes Heat en el motor, paga 1 Heat.",
+      "• Si no tienes Heat disponible, ignora el efecto."
+    ],
+    extra_slipstreamTitle: "Rebufo adicional",
+    extra_slipstreamDescription: "Permite encadenar rebufos en una misma ronda.",
+    extra_slipstreamEffects: [
+      "• Si un rebufo te coloca en una nueva posición válida, puedes hacer un segundo rebufo.",
+      "• Se aplican todas las bonificaciones activas de la ronda.",
+      "• No cuenta como velocidad."
+    ]
   },
   modals: {
     raceDetail: {

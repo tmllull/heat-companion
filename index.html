@@ -238,9 +238,8 @@
         <div>
           <h1 data-i18n="manual.title">Manual de Referencia</h1>
           <p data-i18n="manual.subtitle">Consulta las reglas rápidas de Clima, Motor Forzado y Estrés</p>
-          <div class="manual-downloads">
-            <a href="files/Rules-ES.pdf" download class="btn btn-secondary" target="_blank" data-i18n="manual.downloadBasic">📄 Descargar Manual Básico</a>
-            <a href="files/RulesAdvanced-ES.pdf" download class="btn btn-secondary" target="_blank" data-i18n="manual.downloadAdvanced">📄 Descargar Manual Avanzado</a>
+          <div class="manual-downloads" id="manual-downloads">
+            <!-- Manual download links will be populated dynamically based on language -->
           </div>
         </div>
       </div>
@@ -259,6 +258,27 @@
             <span class="section-toggle">▼</span>
           </div>
           <div id="manual-weather-list" class="manual-list section-content"></div>
+        </div>
+        <div class="section-card collapsible collapsed">
+          <div class="section-header" onclick="toggleSection(this)">
+            <h2 data-i18n="manual.heavy_rain">🌧️ Lluvia Torrencial</h2>
+            <span class="section-toggle">▼</span>
+          </div>
+          <div id="manual-heavy-rain-list" class="manual-list section-content"></div>
+        </div>
+        <div class="section-card collapsible collapsed">
+          <div class="section-header" onclick="toggleSection(this)">
+            <h2 data-i18n="manual.tunnel_vision">🔦 Visión de Túnel</h2>
+            <span class="section-toggle">▼</span>
+          </div>
+          <div id="manual-tunnel-vision-list" class="manual-list section-content"></div>
+        </div>
+        <div class="section-card collapsible collapsed">
+          <div class="section-header" onclick="toggleSection(this)">
+            <h2 data-i18n="manual.rocky_roads">⛰️ Terreno Inestable</h2>
+            <span class="section-toggle">▼</span>
+          </div>
+          <div id="manual-rocky-roads-list" class="manual-list section-content"></div>
         </div>
       </div>
     </div>
@@ -730,6 +750,7 @@
 <script src="data/circuits.js"></script>
 <script src="data/weather.js"></script>
 <script src="data/game-basics.js"></script>
+<script src="data/expansions.js"></script>
 <script src="data/upgrades.js"></script>
 <script src="data/sponsors.js"></script>
 <script src="data/points.js"></script>

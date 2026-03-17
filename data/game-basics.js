@@ -27,13 +27,14 @@ window.GAME_BASICS = {
   slipstream: {
     name: "Rebufo (Opcional)",
     emoji: "💨",
-    description: "Representa la ventaja aerodinámica de estar cerca de otro coche.",
+    description: "Solo se aplica si al llegar a este punto estás al lado o detrás de otro Coche de carreras. El Rebufo es opcional siempre que tu Coche de carreras termine su movimiento al lado de otro Coche o en el espacio que se encuentra detrás de uno o más Coches. Si decides usar el Rebufo, puedes avanzar con tu Coche de carreras 2 espacios adicionales. Solo puedes aprovecharte del Rebufo una vez por turno. En el caso de que todos los espacios finales de tu Rebufo estén ocupados, pon tu Coche en el primer espacio libre que haya por detrás de esos espacios. Atención: el Rebufo NO aumenta tu valor de velocidad para el paso de Comprobar curva.",
     effects: [
       "• Si terminas tu movimiento al lado o a 1 espacio de otro coche, recibes un Rebufo.",
       "• Avanza +2 espacios",
       "• Máx. 1 vez por turno.",
       "• Si el espacio final está ocupado, colócate en el primer espacio libre detrás.",
-      "• No aumenta la velocidad al comprobar una curva."]
+      "• No aumenta la velocidad al comprobar una curva."
+    ]
   },
   spinout: {
     name: "Trompo",

@@ -566,7 +566,7 @@ ul {
   padding: 20px;
   border: 1px solid var(--border);
   overflow: hidden;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
 
 .section-card.collapsible {
@@ -576,7 +576,7 @@ ul {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 12px 20px;
   cursor: pointer;
   transition: background-color var(--transition);
   user-select: none;
@@ -2141,6 +2141,59 @@ ul {
   display: block;
 }
 
+/* Grouped manual downloads sections */
+.manual-downloads-sections {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  .manual-downloads-sections {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.download-section {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  transition: var(--transition);
+}
+
+.download-section:hover {
+  border-color: var(--border-bright);
+  background: var(--surface-3);
+}
+
+.download-section-title {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--heat-gold);
+  text-transform: uppercase;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.5px;
+}
+
+.light-theme .download-section-title {
+  color: var(--heat-orange-dark);
+}
+
+.download-section-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.btn-small {
+  font-size: 12px;
+  padding: 6px 12px;
+  font-weight: 500;
+}
+
 /* Championship Templates */
 .templates-grid {
   display: grid;
@@ -2194,7 +2247,7 @@ ul {
 .manual-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 20px;
+  gap: 8px;
   align-items: start;
 }
 .manual-item {
@@ -2236,7 +2289,7 @@ ul {
 .manual-item-rules li {
   margin-bottom: 4px;
   line-height: 1.4;
-  white-space: pre; /* preserve leading spaces in rule text */
+  white-space: pre-wrap; /* preserve leading spaces and allow wrap */
 }
 .manual-item-effect-pill {
   display: inline-block;
