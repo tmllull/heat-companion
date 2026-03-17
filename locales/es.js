@@ -408,7 +408,7 @@ window.LOCALE_ES = {
         players: { title: "Pilotos", desc: "Elimina todos los pilotos y también el calendario." },
         all: { title: "Reset global", desc: "Borra absolutamente todo y vuelve al estado inicial." },
         btnReset: "Resetear",
-        btnAll: "Reset todo"
+        btnAll: "Resetear todo"
       },
       export: {
         title: "📤 Exportar datos",
