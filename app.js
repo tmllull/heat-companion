@@ -31,7 +31,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('Service Worker registered', reg))
+        .then(reg => {
+          console.log('Service Worker registered', reg);
+          
+          // Detect updates
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New version found! Show toast
+                showUpdateToast();
+              }
+            });
+          });
+        })
         .catch(err => console.error('Service Worker registration failed', err));
     });
   }
@@ -306,6 +319,33 @@ function showToast(msg, type = 'info') {
   el.style.display = 'block';
   if (toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { el.style.display = 'none'; }, 3200);
+}
+
+function showUpdateToast() {
+  const el = document.getElementById('toast');
+  const msg = i18n.currentLocale === 'es' 
+    ? '✨ Nueva versión disponible. Toca para actualizar.' 
+    : '✨ New version available. Tap to update.';
+  
+  el.textContent = msg;
+  el.className = 'toast info toast-update';
+  el.style.display = 'block';
+  el.style.cursor = 'pointer';
+  
+  // Custom click handler for update
+  const updateHandler = () => {
+    window.location.reload();
+  };
+  
+  el.onclick = updateHandler;
+  
+  if (toastTimer) clearTimeout(toastTimer);
+  // Keep update toast visible longer
+  toastTimer = setTimeout(() => { 
+    el.style.display = 'none';
+    el.onclick = null;
+    el.style.cursor = 'default';
+  }, 10000);
 }
 
 function openModal(id)  { document.getElementById(id).style.display = 'flex'; }
