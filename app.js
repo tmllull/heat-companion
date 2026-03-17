@@ -27,6 +27,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 2. Inicializar i18n (esto disparará setLanguage -> languageChanged)
   await i18n.init();
   
+  // Register Service Worker for PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker registered', reg))
+        .catch(err => console.error('Service Worker registration failed', err));
+    });
+  }
+  
   // 3. Update initial flag
   const flagEl = document.getElementById('current-lang-flag');
   if (flagEl) {
