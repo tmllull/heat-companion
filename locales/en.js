@@ -65,6 +65,7 @@ window.LOCALE_EN = {
     calendar: "Race Calendar",
     historics: "Historics",
     restart: "Restart",
+    empty: "The calendar is empty. Add the first race!",
     addRace: {
       title: "Add race to calendar",
       selectEvent: "Select event (Optional)",

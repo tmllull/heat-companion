@@ -65,6 +65,7 @@ window.LOCALE_ES = {
     calendar: "Calendario de carreras",
     historics: "Históricos",
     restart: "Reiniciar",
+    empty: "El calendario está vacío. ¡Añade la primera carrera!",
     addRace: {
       title: "Añadir carrera al calendario",
       selectEvent: "Seleccionar evento (Opcional)",

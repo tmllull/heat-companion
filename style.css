@@ -604,10 +604,10 @@ ul {
     padding 0.3s ease-out;
 }
 .section-card.collapsible:not(.collapsed) .section-content {
-  max-height: 2000px;
-  padding: 0 20px 20px;
+  max-height: 5000px;
+  padding: 0 20px 32px;
   transition:
-    max-height 0.3s ease-in,
+    max-height 0.4s ease-in,
     padding 0.3s ease-in;
 }
 .section-card.collapsible:not(.collapsed) .section-toggle {
@@ -1685,8 +1685,9 @@ ul {
 @media (max-width: 768px) {
   #circuits-grid .circuits-sections-container .circuits-grid,
   #add-race-circuits-grid .circuits-sections-container .circuits-grid {
-    grid-template-columns: repeat(auto-fill, 180px) !important;
-    gap: 8px !important;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    gap: 10px !important;
+    padding-bottom: 12px;
   }
 
   #circuits-grid .circuits-sections-container .circuits-grid .circuit-card,
@@ -1694,8 +1695,8 @@ ul {
     .circuits-sections-container
     .circuits-grid
     .circuit-card {
-    width: 180px !important;
-    min-width: 180px !important;
+    width: auto !important;
+    min-width: 0 !important;
   }
 }
 
@@ -2020,7 +2021,7 @@ ul {
 
 .modal-body {
   padding: 24px;
-  overflow-y: auto;
+  overflow: auto;
   flex: 1;
 }
 .modal-body::-webkit-scrollbar {
@@ -2199,6 +2200,13 @@ ul {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
+}
+@media (max-width: 600px) {
+  .templates-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    padding-bottom: 20px;
+  }
 }
 .template-card {
   background: var(--surface-2);
@@ -2874,6 +2882,12 @@ ul {
   margin-top: 12px;
   margin-bottom: 12px;
 }
+@media (max-width: 600px) {
+  .events-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
 .event-card {
   background: var(--surface-3);
   border: 1.5px solid var(--border);
@@ -2956,6 +2970,17 @@ ul {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 10px;
+}
+@media (max-width: 600px) {
+  .weather-selector-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding-bottom: 12px;
+  }
+  .weather-card {
+    height: auto !important;
+    min-height: 140px;
+  }
 }
 .weather-card {
   padding: 14px;
@@ -3524,9 +3549,27 @@ ul {
   .view-header h1 {
     font-size: 24px;
   }
-  .view-header .btn-primary {
+  /* Header Buttons Reduction */
+  .view-header button.btn-primary,
+  #btn-add-circuit,
+  #btn-add-cal-race {
+    width: auto !important;
+    font-size: 11px !important;
+    padding: 6px 12px !important;
+    min-height: 0 !important;
+    white-space: nowrap !important;
+  }
+  /* Stacking for section headers with multiple actions (Championship) */
+  .section-header:has(.header-actions) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .section-header:has(.header-actions) .header-actions {
     width: 100%;
-    text-align: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   /* Grid adjustments */
@@ -3631,7 +3674,8 @@ ul {
   }
   .circuits-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    gap: 10px;
+    padding-bottom: 12px;
   }
   .circuit-card {
     padding: 10px 8px;
