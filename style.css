@@ -139,6 +139,7 @@ body {
   z-index: 2;
   display: flex;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 a {
@@ -3267,7 +3268,8 @@ ul {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--surface-1);
   border-top: 1px solid var(--border);
   z-index: 100;
@@ -3531,7 +3533,9 @@ ul {
   .view {
     padding: 20px 16px;
     height: calc(100vh - 64px);
-    padding-bottom: 20px;
+    height: calc(100dvh - 64px);
+    padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
   }
 
   /* Show mobile nav */
