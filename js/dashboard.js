@@ -55,7 +55,13 @@ function renderDashboard() {
         <div class="race-info">
           <div class="race-info-name">
             ${escHtml(getCircuitName(circuit))}
-            ${circuit?.expansion ? `<span class="diff-badge ${circuit.expansion.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')}">${circuit.expansion}</span>` : ''}
+            ${circuit?.expansion ? (() => {
+              let badgeClass = circuit.expansion === 'Lluvia Torrencial' ? 'lluvia-torrencial' : 
+                               circuit.expansion === 'Visión de Túnel' ? 'vision-de-tunel' : 
+                               circuit.expansion === 'Terreno Inestable' ? 'terreno-inestable' :
+                               circuit.expansion.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+              return `<span class="diff-badge ${badgeClass}">${circuit.expansion}</span>`;
+            })() : ''}
           </div>
           <div class="race-info-meta">
             <span class="race-info-laps">🏁 ${i18n.t('common.laps')}: ${race.laps || 3}</span>
