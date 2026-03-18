@@ -139,8 +139,13 @@ body {
   z-index: 2;
   display: flex;
   height: 100vh;
-  height: 100dvh;
   overflow: hidden;
+}
+@media (max-width: 768px) {
+  #app {
+    height: calc(100dvh - 64px);
+    height: calc(100dvh - (64px + env(safe-area-inset-bottom, 0px)));
+  }
 }
 a {
   color: inherit;
@@ -3532,10 +3537,13 @@ ul {
   }
   .view {
     padding: 20px 16px;
-    height: calc(100vh - 64px);
-    height: calc(100dvh - 64px);
-    padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));
+    height: 100%;
+    padding-bottom: 24px;
     overflow-y: auto;
+  }
+  .modal-overlay {
+    height: calc(100dvh - 64px);
+    height: calc(100dvh - (64px + env(safe-area-inset-bottom, 0px)));
   }
 
   /* Show mobile nav */
