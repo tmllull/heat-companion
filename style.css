@@ -651,18 +651,34 @@ ul {
   background: var(--surface-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  transition: border-color var(--transition);
+  cursor: pointer;
+  transition: all var(--transition);
 }
 .reset-card:hover {
   border-color: var(--border-bright);
+  background: var(--surface-4);
+}
+
+.reset-card.btn-export-section,
+.reset-card.btn-import-section,
+.reset-card.btn-reset-section {
+  border-color: rgba(120, 120, 160, 0.2);
+  background: rgba(120, 120, 160, 0.05);
+}
+.reset-card.btn-export-section:hover,
+.reset-card.btn-import-section:hover,
+.reset-card.btn-reset-section:hover {
+  border-color: rgba(120, 120, 160, 0.4);
+  background: rgba(120, 120, 160, 0.1);
 }
 
 .reset-card-danger {
-  border-color: rgba(230, 59, 46, 0.25);
-  background: rgba(230, 59, 46, 0.04);
+  border-color: rgba(230, 59, 46, 0.25) !important;
+  background: rgba(230, 59, 46, 0.08) !important;
 }
 .reset-card-danger:hover {
-  border-color: rgba(230, 59, 46, 0.5);
+  border-color: rgba(230, 59, 46, 0.5) !important;
+  background: rgba(230, 59, 46, 0.12) !important;
 }
 
 .reset-card-icon {
@@ -1042,7 +1058,7 @@ ul {
   font-weight: 600;
 }
 .race-info-meta {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-muted);
   margin-top: 1px;
   display: flex;
@@ -1622,7 +1638,7 @@ ul {
   display: flex;
   justify-content: center;
   gap: 12px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
   line-height: 1.4;
 }
@@ -2709,7 +2725,7 @@ ul {
   font-weight: 600;
 }
 .cal-race-meta {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-muted);
   margin-top: 2px;
   display: flex;

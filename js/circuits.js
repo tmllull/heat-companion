@@ -105,7 +105,7 @@ function renderCircuitCard(c) {
     ${badgeHtml}
     <div class="circuit-details">
       ${c.spaces ? `<div>📏 ${c.spaces}</div>` : ''}
-      ${c.curves ? `<div>⤴️ ${c.curves}</div>` : ''}
+      ${c.curves ? `<div>⤵ ${c.curves}</div>` : ''}
       ${c.laps ? `<div>🏁 ${c.laps}</div>` : ''}
     </div>
   </div>`;

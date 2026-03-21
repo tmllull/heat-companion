@@ -176,7 +176,7 @@
           <div class="header-actions">
             <button class="btn-historical" id="btn-show-champ-templates" data-i18n="championship.historics">📜 Históricos</button>
             <button class="btn-primary" id="btn-add-cal-race"><span>+</span> <span data-i18n="common.add">Añadir</span> <span data-i18n="common.circuit">circuito</span></button>
-            <button class="btn-danger" id="btn-reset-championship" data-i18n="championship.restart">🔄 Reiniciar</button>
+            <button class="btn-danger" id="btn-reset-championship" data-i18n="championship.restart">🏁 Reiniciar</button>
           </div>
         </div>
         <div id="calendar-list" class="calendar-list"></div>
@@ -516,29 +516,26 @@
     <div class="modal-body">
       <p class="reset-intro" data-i18n="system.modals.reset.intro">Selecciona qué sección quieres borrar. Esta acción <strong>no se puede deshacer</strong>.</p>
       <div class="reset-cards">
-        <div class="reset-card">
+        <div class="reset-card btn-reset-section" data-section="calendar">
           <div class="reset-card-icon">🏁</div>
           <div class="reset-card-info">
             <div class="reset-card-title" data-i18n="system.modals.reset.calendar.title">Calendario de carreras</div>
             <div class="reset-card-desc" data-i18n="system.modals.reset.calendar.desc">Elimina todas las carreras y resultados. Mantiene los pilotos.</div>
           </div>
-          <button class="btn-reset-section" data-section="calendar" data-i18n="system.modals.reset.btnReset">Resetear</button>
         </div>
-        <div class="reset-card">
+        <div class="reset-card btn-reset-section" data-section="players">
           <div class="reset-card-icon">👤</div>
           <div class="reset-card-info">
             <div class="reset-card-title" data-i18n="system.modals.reset.players.title">Pilotos</div>
             <div class="reset-card-desc" data-i18n="system.modals.reset.players.desc">Elimina todos los pilotos y también el calendario.</div>
           </div>
-          <button class="btn-reset-section" data-section="players" data-i18n="system.modals.reset.btnReset">Resetear</button>
         </div>
-        <div class="reset-card reset-card-danger">
+        <div class="reset-card reset-card-danger btn-reset-section btn-reset-all" data-section="all">
           <div class="reset-card-icon">💥</div>
           <div class="reset-card-info">
             <div class="reset-card-title" data-i18n="system.modals.reset.all.title">Reset global</div>
             <div class="reset-card-desc" data-i18n="system.modals.reset.all.desc">Borra absolutamente todo y vuelve al estado inicial.</div>
           </div>
-          <button class="btn-reset-section btn-reset-all" data-section="all" data-i18n="system.modals.reset.btnAll">Resetear todo</button>
         </div>
       </div>
     </div>
@@ -558,29 +555,26 @@
     <div class="modal-body">
       <p class="section-intro" data-i18n="system.modals.export.intro">Selecciona qué sección quieres exportar.</p>
       <div class="reset-cards">
-        <div class="reset-card">
+        <div class="reset-card btn-export-section" data-section="players">
           <div class="reset-card-icon">👤</div>
           <div class="reset-card-info">
-            <div class="reset-card-title" data-i18n="common.players">Pilotos</div>
-            <div class="reset-card-desc">Exporta todos los pilotos y sus mejoras.</div>
+            <div class="reset-card-title" data-i18n="system.modals.export.players.title">Pilotos</div>
+            <div class="reset-card-desc" data-i18n="system.modals.export.players.desc">Exporta todos los pilotos.</div>
           </div>
-          <button class="btn-export-section" data-section="players" data-i18n="system.modals.export.btnExport">Exportar</button>
         </div>
-        <div class="reset-card">
+        <div class="reset-card btn-export-section" data-section="championship">
           <div class="reset-card-icon">🏆</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Campeonato</div>
-            <div class="reset-card-desc">Exporta el campeonato completo (configuración y lista de carreras).</div>
+            <div class="reset-card-title" data-i18n="system.modals.export.championship.title">Campeonato</div>
+            <div class="reset-card-desc" data-i18n="system.modals.export.championship.desc">Exporta el campeonato completo.</div>
           </div>
-          <button class="btn-export-section" data-section="championship" data-i18n="system.modals.export.btnExport">Exportar</button>
         </div>
-        <div class="reset-card">
+        <div class="reset-card btn-export-section" data-section="all">
           <div class="reset-card-icon">📦</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Exportar todo</div>
-            <div class="reset-card-desc">Crea un backup completo con todos los datos (pilotos, carreras, resultados, clasificación).</div>
+            <div class="reset-card-title" data-i18n="system.modals.export.all.title">Exportar todo</div>
+            <div class="reset-card-desc" data-i18n="system.modals.export.all.desc">Crea un backup completo.</div>
           </div>
-          <button class="btn-export-section" data-section="all" data-i18n="system.modals.export.btnExport">Exportar todo</button>
         </div>
       </div>
     </div>
@@ -600,29 +594,26 @@
     <div class="modal-body">
       <p class="section-intro" data-i18n="system.modals.import.intro">Selecciona qué sección quieres importar. Esta acción puede reemplazar datos existentes.</p>
       <div class="reset-cards">
-        <div class="reset-card">
+        <div class="reset-card btn-import-section" data-section="players">
           <div class="reset-card-icon">👤</div>
           <div class="reset-card-info">
-            <div class="reset-card-title" data-i18n="common.players">Pilotos</div>
-            <div class="reset-card-desc">Importa pilotos y sus mejoras.</div>
+            <div class="reset-card-title" data-i18n="system.modals.import.players.title">Pilotos</div>
+            <div class="reset-card-desc" data-i18n="system.modals.import.players.desc">Importa pilotos.</div>
           </div>
-          <button class="btn-import-section" data-section="players" data-i18n="system.modals.import.btnImport">Importar</button>
         </div>
-        <div class="reset-card">
+        <div class="reset-card btn-import-section" data-section="championship">
           <div class="reset-card-icon">🏆</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Campeonato</div>
-            <div class="reset-card-desc">Importa el campeonato completo (configuración y lista de carreras).</div>
+            <div class="reset-card-title" data-i18n="system.modals.import.championship.title">Campeonato</div>
+            <div class="reset-card-desc" data-i18n="system.modals.import.championship.desc">Importa el campeonato completo.</div>
           </div>
-          <button class="btn-import-section" data-section="championship" data-i18n="system.modals.import.btnImport">Importar</button>
         </div>
-        <div class="reset-card reset-card-danger">
+        <div class="reset-card reset-card-danger btn-import-section btn-import-all" data-section="all">
           <div class="reset-card-icon">⚠️</div>
           <div class="reset-card-info">
-            <div class="reset-card-title">Importar todo</div>
-            <div class="reset-card-desc">Restaura un backup completo. Reemplazará todos los datos actuales.</div>
+            <div class="reset-card-title" data-i18n="system.modals.import.all.title">Importar todo</div>
+            <div class="reset-card-desc" data-i18n="system.modals.import.all.desc">Restaura un backup completo.</div>
           </div>
-          <button class="btn-import-section btn-import-all" data-section="all" data-i18n="system.modals.import.btnImport">Importar todo</button>
         </div>
       </div>
     </div>

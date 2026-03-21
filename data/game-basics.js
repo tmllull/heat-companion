@@ -38,7 +38,7 @@ window.GAME_BASICS = {
   },
   spinout: {
     name: "Trompo",
-    emoji: "🔄",
+    emoji: "🏁",
     description: "Ocurre al no poder pagar el Heat de una curva.",
     effects: [
       "• Si no puedes pagar todo el exceso de velocidad con Motor forzado, sufres un trompo.",

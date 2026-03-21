@@ -410,12 +410,17 @@ window.LOCALE_ES = {
       export: {
         title: "📤 Exportar datos",
         intro: "Selecciona qué sección quieres exportar.",
-        all: { title: "Todo", desc: "Exporta todos los datos completos." },
+        players: { title: "Pilotos", desc: "Exporta todos los pilotos." },
+        championship: { title: "Campeonato", desc: "Exporta el campeonato completo (configuración y lista de carreras)." },
+        all: { title: "Exportar todo", desc: "Crea un backup completo con todos los datos (pilotos, carreras, resultados, clasificación)." },
         btnExport: "Exportar"
       },
       import: {
         title: "📥 Importar datos",
         intro: "Selecciona qué sección quieres importar. Esta acción puede reemplazar datos existentes.",
+        players: { title: "Pilotos", desc: "Importa pilotos." },
+        championship: { title: "Campeonato", desc: "Importa el campeonato completo (configuración y lista de carreras)." },
+        all: { title: "Importar todo", desc: "Restaura un backup completo. Reemplazará todos los datos actuales." },
         btnImport: "Importar"
       },
       welcome: {

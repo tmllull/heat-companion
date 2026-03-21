@@ -410,12 +410,17 @@ window.LOCALE_EN = {
       export: {
         title: "📤 Export data",
         intro: "Select the section you want to export.",
-        all: { title: "Everything", desc: "Export all data." },
+        players: { title: "Drivers", desc: "Export all drivers." },
+        championship: { title: "Championship", desc: "Export the full championship (config and race calendar)." },
+        all: { title: "Export everything", desc: "Export all data as a backup." },
         btnExport: "Export"
       },
       import: {
         title: "📥 Import data",
         intro: "Select the section you want to import. This can replace existing data.",
+        players: { title: "Drivers", desc: "Import drivers." },
+        championship: { title: "Championship", desc: "Import the full championship (config and race calendar)." },
+        all: { title: "Import everything", desc: "Restore a complete backup. This will replace all current data." },
         btnImport: "Import"
       },
       welcome: {
