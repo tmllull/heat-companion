@@ -54,6 +54,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (flagEl) {
     flagEl.textContent = i18n.currentLocale === 'es' ? '🇪🇸' : '🇬🇧';
   }
+
+  // 4. Privacy Notice (first time only)
+  if (!localStorage.getItem('heat-privacy-notice-v1')) {
+    setTimeout(() => {
+      openModal('modal-privacy-notice');
+      
+      const markAsRead = () => {
+        localStorage.setItem('heat-privacy-notice-v1', 'true');
+      };
+      
+      const modal = document.getElementById('modal-privacy-notice');
+      // Cerrar con botones
+      modal.querySelectorAll('[data-modal="modal-privacy-notice"]').forEach(btn => {
+        btn.addEventListener('click', markAsRead, { once: true });
+      });
+      // Cerrar con click fuera (backdrop)
+      modal.addEventListener('click', (e) => {
+        if (e.target.id === 'modal-privacy-notice') markAsRead();
+      }, { once: true });
+      // Cerrar con Escape
+      const onEsc = (e) => {
+        if (e.key === 'Escape') {
+          markAsRead();
+          window.removeEventListener('keydown', onEsc);
+        }
+      };
+      window.addEventListener('keydown', onEsc);
+    }, 1000);
+  }
 });
 
 function defaultState() {
@@ -62,11 +91,10 @@ function defaultState() {
       name: 'Mi Campeonato Heat',
       pointsSystem: 'classic',
       customPoints: [],
-      playerIds: [],   // IDs of enrolled players
-      calendar: []     // CalendarRace[]
+      playerIds: [],
+      calendar: []
     },
-    players: [],
-    circuits: [] // Circuitos personalizados creados por el usuario
+    players: []
   };
 }
 
@@ -81,10 +109,6 @@ function loadState() {
     const raw = localStorage.getItem('heat-companion-v2');
     if (raw) {
       const loadedState = JSON.parse(raw);
-      // Asegurar que el campo circuits exista
-      if (!loadedState.circuits) {
-        loadedState.circuits = [];
-      }
       return loadedState;
     }
     // migrate from v1 if present
@@ -260,8 +284,8 @@ function getPoints(position, raceId = null) {
 
 // ---- OTHER HELPERS ----
 function getCircuitById(id) { 
-  // Buscar en circuitos oficiales y personalizados
-  const allCircuits = [...(window.CIRCUITS || []), ...(state.circuits || [])];
+  // Buscar solo en circuitos oficiales
+  const allCircuits = window.CIRCUITS || [];
   if (!allCircuits || !Array.isArray(allCircuits)) {
     console.warn('CIRCUITS not available:', allCircuits);
     return null;
@@ -592,8 +616,22 @@ function openAddRaceModal(raceId = null) {
   document.getElementById('badge-custom-event').style.display = !selectedEventId && (race?.event || race?.rules) ? 'block' : 'none';
 
   const eventData = race ? getRaceEventData(race) : { name: '', description: '' };
-  document.getElementById('add-race-event-input').value = eventData.name || '';
-  document.getElementById('add-race-rules-input').value = eventData.description || '';
+  const eventNameInput = document.getElementById('add-race-event-input');
+  const eventRulesInput = document.getElementById('add-race-rules-input');
+  
+  eventNameInput.value = eventData.name || '';
+  eventRulesInput.value = eventData.description || '';
+
+  // Bloquear edición si es un evento predefinido
+  const isPredefined = !!selectedEventId;
+  eventNameInput.readOnly = isPredefined;
+  eventRulesInput.readOnly = isPredefined;
+  eventNameInput.style.opacity = isPredefined ? '0.7' : '1';
+  eventRulesInput.style.opacity = isPredefined ? '0.7' : '1';
+  eventNameInput.style.pointerEvents = isPredefined ? 'none' : 'auto';
+  eventRulesInput.style.pointerEvents = isPredefined ? 'none' : 'auto';
+  eventNameInput.tabIndex = isPredefined ? -1 : 0;
+  eventRulesInput.tabIndex = isPredefined ? -1 : 0;
   
   const hasWeather = race ? !!race.mods?.weather : false;
   const hasSponsors = race ? !!race.mods?.sponsors : false;
@@ -621,8 +659,8 @@ function openAddRaceModal(raceId = null) {
 
   // render circuits
   const grid = document.getElementById('add-race-circuits-grid');
-  // Combinar circuitos oficiales con personalizados
-  const allCircuits = [...(window.CIRCUITS || []), ...(state.circuits || [])];
+  // Solo circuitos oficiales
+  const allCircuits = window.CIRCUITS || [];
   
   // Separar circuitos en originales y fanmade
   const originalCircuits = allCircuits.filter(c => 
@@ -637,10 +675,10 @@ function openAddRaceModal(raceId = null) {
   // Sección de circuitos originales
   if (originalCircuits.length > 0) {
     circuitsHtml += `
-      <div class="section-card collapsible collapsed" style="margin-bottom: 0;">
+      <div class="section-card collapsible" style="margin-bottom: 0;">
         <div class="section-header" onclick="toggleSection(this)">
           <h3 data-i18n="circuits.original">${i18n.t('circuits.original')}</h3>
-          <span class="section-toggle">▼</span>
+          <span class="section-toggle">▲</span>
         </div>
         <div class="section-content">
           <div class="circuits-grid">
@@ -654,10 +692,10 @@ function openAddRaceModal(raceId = null) {
   // Sección de circuitos fanmade
   if (fanmadeCircuits.length > 0) {
     circuitsHtml += `
-      <div class="section-card collapsible collapsed" style="margin-bottom: 0;">
+      <div class="section-card collapsible" style="margin-bottom: 0;">
         <div class="section-header" onclick="toggleSection(this)">
           <h3 data-i18n="circuits.fanmade">${i18n.t('circuits.fanmade')}</h3>
-          <span class="section-toggle">▼</span>
+          <span class="section-toggle">▲</span>
         </div>
         <div class="section-content">
           <div class="circuits-grid">
@@ -711,8 +749,8 @@ function renderRaceCircuitCard(c) {
     <div class="circuit-name">${c.name || (country ? i18n.t('data.countries.' + country.id) : '')}</div>
     ${badgeHtml}
     <div class="circuit-info-stats">
-      <span>🏁 ${i18n.t('common.laps')}: ${c.laps}</span>
-      <span>⤵ ${i18n.t('common.curves')}: ${c.curves}</span>
+      <span>🏁 ${c.laps}</span>
+      <span>⤵ ${c.curves}</span>
     </div>
   </div>`;
 }
@@ -783,16 +821,39 @@ document.getElementById('add-race-events-grid').addEventListener('click', e => {
   document.querySelectorAll('#add-race-events-grid .event-card').forEach(c => c.classList.remove('selected'));
   card.classList.add('selected');
   
+  const eventNameInput = document.getElementById('add-race-event-input');
+  const eventRulesInput = document.getElementById('add-race-rules-input');
+
   if (eventId) {
     const ev = window.RACE_EVENTS[eventId];
     if (ev) {
-      document.getElementById('add-race-event-input').value = ev.name;
-      document.getElementById('add-race-rules-input').value = ev.description;
+      eventNameInput.value = ev.name;
+      eventRulesInput.value = ev.description;
       document.getElementById('badge-custom-event').style.display = 'none';
+      
+      // Bloquear edición
+      eventNameInput.readOnly = true;
+      eventRulesInput.readOnly = true;
+      eventNameInput.style.opacity = '0.7';
+      eventRulesInput.style.opacity = '0.7';
+      eventNameInput.style.pointerEvents = 'none';
+      eventRulesInput.style.pointerEvents = 'none';
+      eventNameInput.tabIndex = -1;
+      eventRulesInput.tabIndex = -1;
     }
   } else {
     // Custom selected
     document.getElementById('badge-custom-event').style.display = 'block';
+    
+    // Permitir edición
+    eventNameInput.readOnly = false;
+    eventRulesInput.readOnly = false;
+    eventNameInput.style.opacity = '1';
+    eventRulesInput.style.opacity = '1';
+    eventNameInput.style.pointerEvents = 'auto';
+    eventRulesInput.style.pointerEvents = 'auto';
+    eventNameInput.tabIndex = 0;
+    eventRulesInput.tabIndex = 0;
   }
 });
 

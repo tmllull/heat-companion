@@ -96,8 +96,8 @@ window.LOCALE_EN = {
   },
   circuits: {
     title: "Circuits",
-    subtitle: "Manage available circuits for races",
-    empty: "No circuits configured. Add the first one!",
+    subtitle: "Check available official circuits",
+    empty: "Loading circuits...",
     original: "🏁 Original Circuits",
     fanmade: "📐 Fanmade Circuits"
   },
@@ -236,13 +236,6 @@ window.LOCALE_EN = {
       hint: "Order drivers by final position. Use ▲▼ buttons or drag.",
       saveResult: "Save result"
     },
-    addCircuit: {
-      title: "Add circuit",
-      name: "Circuit name",
-      country: "Country",
-      selectCountry: "Select a country...",
-      placeholderDescription: "Circuit characteristics..."
-    },
     addPlayer: {
       title: "Add driver",
       name: "Driver name",
@@ -379,6 +372,7 @@ window.LOCALE_EN = {
       "south-africa": "South Africa",
       netherlands: "Netherlands",
       germany: "Germany",
+      hungary: "Hungary",
       belgium: "Belgium",
       monaco: "Monaco",
       canada: "Canada",
@@ -423,6 +417,12 @@ window.LOCALE_EN = {
         title: "📥 Import data",
         intro: "Select the section you want to import. This can replace existing data.",
         btnImport: "Import"
+      },
+      welcome: {
+        title: "Important Notice",
+        content: "No data from your championship is saved on any server. All information is stored locally in this browser.",
+        action: "If you want to use your data in another browser or device, remember to use the **Export** option in the sidebar.",
+        btnOk: "Got it!"
       }
     },
     resetSuccess: "Reset successfully",
@@ -433,7 +433,6 @@ window.LOCALE_EN = {
     themeChanged: "Theme changed",
     settingsUpdated: "Settings updated ✓",
     raceUpdated: "Race updated ✓",
-    circuitAdded: "{{emoji}} {{name}} added to calendar ✓",
     selectCircuit: "Select a circuit"
   }
 };

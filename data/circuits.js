@@ -110,16 +110,6 @@ window.CIRCUITS = [
 
   // Fan made
   {
-    id: "bilbao-urban-circuit",
-    name: "Bilbao Urban Circuit",
-    countryId: "spain",
-    curves: 7,
-    spaces: 53,
-    expansion: "Fanmade",
-    laps: 2,
-    mapImage: "bilbao-urban-circuit.jpg"
-  },
-  {
     id: "adelaide",
     name: "Adelaide",
     countryId: "australia",
@@ -130,8 +120,18 @@ window.CIRCUITS = [
     mapImage: "adelaide.jpg"
   },
   {
+    id: "bilbao-urban-circuit",
+    name: "Bilbao Urban Circuit",
+    countryId: "spain",
+    curves: 7,
+    spaces: 53,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "bilbao-urban-circuit.jpg"
+  },
+  {
     id: "autodromo-buenos-aires",
-    name: "Autodromo Buenos Aires",
+    name: "Buenos Aires",
     countryId: "argentina",
     curves: 7,
     spaces: 126,
@@ -140,44 +140,34 @@ window.CIRCUITS = [
     mapImage: "autodromo-buenos-aires.jpg"
   },
   {
-    id: "jarama",
-    name: "Jarama",
-    countryId: "spain",
+    id: "gilles-villeneuve",
+    name: "Gilles Villeneuve",
+    countryId: "canada",
+    curves: 6,
+    spaces: 80,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "gilles-villeneuve.jpg"
+  },
+  {
+    id: "hockenheim",
+    name: "Hockenheim",
+    countryId: "germany",
     curves: 8,
-    spaces: 112,
+    spaces: 117,
     expansion: "Fanmade",
     laps: 2,
-    mapImage: "jarama.jpg"
+    mapImage: "hockenheim.jpg"
   },
   {
-    id: "jerez",
-    name: "Jerez",
-    countryId: "spain",
-    curves: 9,
-    spaces: 113,
-    expansion: "Fanmade",
-    laps: 2,
-    mapImage: "jerez.jpg"
-  },
-  {
-    id: "monaco",
-    name: "Monaco",
-    countryId: "monaco",
-    curves: 8,
-    spaces: 100,
-    expansion: "Fanmade",
-    laps: 2,
-    mapImage: "monaco.jpg"
-  },
-  {
-    id: "le-mans",
-    name: "Le Mans",
-    countryId: "france",
+    id: "hungaroring",
+    name: "Hungaroring",
+    countryId: "hungary",
     curves: 7,
-    spaces: 115,
+    spaces: 91,
     expansion: "Fanmade",
     laps: 2,
-    mapImage: "le-mans.jpg"
+    mapImage: "hungaroring.jpg"
   },
   {
     id: "imola",
@@ -200,14 +190,134 @@ window.CIRCUITS = [
     mapImage: "interlagos.jpg"
   },
   {
-    id: "gilles-villeneuve",
-    name: "Gilles Villeneuve",
-    countryId: "canada",
-    curves: 6,
-    spaces: 80,
+    id: "jarama",
+    name: "Jarama",
+    countryId: "spain",
+    curves: 8,
+    spaces: 112,
     expansion: "Fanmade",
     laps: 2,
-    mapImage: "gilles-villeneuve.jpg"
+    mapImage: "jarama.jpg"
+  },
+  {
+    id: "jerez",
+    name: "Jerez",
+    countryId: "spain",
+    curves: 9,
+    spaces: 113,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "jerez.jpg"
+  },
+  {
+    id: "laguna-seca",
+    name: "Laguna Seca",
+    countryId: "usa",
+    curves: 9,
+    spaces: 100,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "laguna-seca.jpg"
+  },
+  {
+    id: "le-mans",
+    name: "Le Mans",
+    countryId: "france",
+    curves: 7,
+    spaces: 115,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "le-mans.jpg"
+  },
+  {
+    id: "melbourne",
+    name: "Melbourne",
+    countryId: "australia",
+    curves: 8,
+    spaces: 84,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "melbourne.jpg"
+  },
+  {
+    id: "monaco",
+    name: "Monaco",
+    countryId: "monaco",
+    curves: 8,
+    spaces: 100,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "monaco.jpg"
+  },
+  {
+    id: "montjuic",
+    name: "Montjuic",
+    countryId: "spain",
+    curves: 8,
+    spaces: 71,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "montjuic.jpg"
+  },
+  {
+    id: "monza",
+    name: "Monza",
+    countryId: "italy",
+    curves: 5,
+    spaces: 72,
+    expansion: "Fanmade",
+    laps: 3,
+    mapImage: "monza.jpg"
+  },
+  {
+    id: "nurburgring",
+    name: "Nurburgring",
+    countryId: "germany",
+    curves: 9,
+    spaces: 100,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "nurburgring.jpg"
+  },
+  {
+    id: "san-marino",
+    name: "San Marino",
+    countryId: "italy",
+    curves: 7,
+    spaces: 71,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "san-marino.jpg"
+  },
+  {
+    id: "silverstone",
+    name: "Silverstone",
+    countryId: "gb",
+    curves: 6,
+    spaces: 67,
+    expansion: "Fanmade",
+    laps: 3,
+    mapImage: "silverstone.jpg"
+  },
+  {
+    id: "spa",
+    name: "Spa",
+    countryId: "belgium",
+    curves: 5,
+    spaces: 94,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "spa.jpg"
+  },
+  {
+    id: "spa-rain",
+    name: "Spa-Rain",
+    countryId: "belgium",
+    curves: 7,
+    spaces: 79,
+    expansion: "Fanmade",
+    laps: 2,
+    mapImage: "spa-rain.jpg"
   },
   {
     id: "suzuka",

@@ -96,8 +96,8 @@ window.LOCALE_ES = {
   },
   circuits: {
     title: "Circuitos",
-    subtitle: "Gestiona los circuitos disponibles para las carreras",
-    empty: "No hay circuitos configurados. ¡Añade el primero!",
+    subtitle: "Consulta los circuitos oficiales disponibles",
+    empty: "Cargando circuitos...",
     original: "🏁 Circuitos Originales",
     fanmade: "📐 Circuitos Fanmade"
   },
@@ -236,13 +236,6 @@ window.LOCALE_ES = {
       hint: "Ordena los pilotos según la posición final. Usa los botones ▲▼ o arrastra.",
       saveResult: "Guardar resultado"
     },
-    addCircuit: {
-      title: "Añadir circuito",
-      name: "Nombre del circuito",
-      country: "País",
-      selectCountry: "Selecciona un país...",
-      placeholderDescription: "Características del circuito..."
-    },
     addPlayer: {
       title: "Añadir piloto",
       name: "Nombre del piloto",
@@ -379,6 +372,7 @@ window.LOCALE_ES = {
       "south-africa": "Sudáfrica",
       netherlands: "Países Bajos",
       germany: "Alemania",
+      hungary: "Hungría",
       belgium: "Bélgica",
       monaco: "Mónaco",
       canada: "Canadá",
@@ -423,6 +417,12 @@ window.LOCALE_ES = {
         title: "📥 Importar datos",
         intro: "Selecciona qué sección quieres importar. Esta acción puede reemplazar datos existentes.",
         btnImport: "Importar"
+      },
+      welcome: {
+        title: "Aviso importante",
+        content: "Ningún dato de tu campeonato se guarda en ningún servidor. Toda la información se almacena localmente en este navegador.",
+        action: "Si quieres usar tus datos en otro navegador o dispositivo, recuerda usar la opción **Exportar** del menú lateral.",
+        btnOk: "¡Entendido!"
       }
     },
     resetSuccess: "Reseteado correctamente",
@@ -433,7 +433,6 @@ window.LOCALE_ES = {
     themeChanged: "Tema cambiado",
     settingsUpdated: "Configuración actualizada ✓",
     raceUpdated: "Carrera actualizada ✓",
-    circuitAdded: "{{emoji}} {{name}} añadido al calendario ✓",
     selectCircuit: "Selecciona un circuito"
   }
 };

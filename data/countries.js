@@ -44,6 +44,11 @@ const COUNTRIES = [
     flag: "🇩🇪"
   },
   {
+    id: "hungary",
+    name: "Hungría",
+    flag: "🇭🇺"
+  },
+  {
     id: "belgium",
     name: "Bélgica",
     flag: "🇧🇪"

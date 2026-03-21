@@ -53,32 +53,38 @@ function resetChampionship() {
 
 // ---- EXPORT / IMPORT FUNCTIONS ----
 function exportData(section = 'all') {
-  let payload;
-  let filename;
+  let payload = {};
+  let filename = 'heat-companion-backup.json';
   
+  const userChampionship = {
+    name:         state.championship?.name || '',
+    pointsSystem: state.championship?.pointsSystem || 'classic',
+    customPoints: state.championship?.customPoints || [],
+    calendar:     state.championship?.calendar || []
+  };
+
+  const userPlayers = state.players || [];
+
   switch (section) {
     case 'players':
-      payload = { players: state.players };
+      payload = { players: userPlayers };
       filename = 'heat-pilotos.json';
       break;
     case 'races':
-      payload = { championship: { calendar: state.championship.calendar } };
+      payload = { championship: { calendar: userChampionship.calendar } };
       filename = 'heat-carreras.json';
       break;
     case 'championship':
-      payload = { 
-        championship: { 
-          name: state.championship.name,
-          pointsSystem: state.championship.pointsSystem,
-          customPoints: state.championship.customPoints
-        }
-      };
+      payload = { championship: userChampionship };
       filename = 'heat-campeonato.json';
       break;
     case 'all':
     default:
-      payload = state;
-      filename = 'heat-companion-backup.json';
+      payload = {
+        championship: userChampionship,
+        players:      userPlayers
+      };
+      filename = 'heat-companion-v2-backup.json';
       break;
   }
   
@@ -99,33 +105,35 @@ function importData(file, section = 'all') {
   reader.onload = e => {
     try {
       const data = JSON.parse(e.target.result);
+      
+      // Basic validation: must have at least one of these
       if (!data.championship && !data.players && !data.calendar && !data.races) {
-        showToast('El archivo no parece ser de HEAT Companion', 'error');
+        showToast('El archivo no parece ser un backup válido', 'error');
         return;
       }
       
       const importFunction = () => {
-        switch (section) {
-          case 'players':
-            if (data.players) {
-              state.players = data.players;
-              state.championship.playerIds = data.players.map(p => p.id);
-            }
-            break;
-          case 'races':
-            if (data.championship?.calendar || data.calendar || data.races) {
-              state.championship.calendar = data.championship?.calendar || data.calendar || data.races || [];
-            }
-            break;
-          case 'championship':
-            if (data.championship) {
-              state.championship = { ...state.championship, ...data.championship };
-            }
-            break;
-          case 'all':
-          default:
-            state = data;
-            break;
+        if (section === 'all' || section === 'players') {
+          if (data.players && Array.isArray(data.players)) {
+            state.players = data.players;
+            state.championship.playerIds = data.players.map(p => p.id);
+          }
+        }
+
+        if (section === 'all' || section === 'races') {
+          // calendar can be root or inside championship
+          const newCalendar = data.championship?.calendar || data.calendar || data.races;
+          if (newCalendar && Array.isArray(newCalendar)) {
+            state.championship.calendar = newCalendar;
+          }
+        }
+
+        if (section === 'all' || section === 'championship') {
+          if (data.championship) {
+            state.championship.name = data.championship.name || state.championship.name;
+            state.championship.pointsSystem = data.championship.pointsSystem || state.championship.pointsSystem;
+            state.championship.customPoints = data.championship.customPoints || state.championship.customPoints;
+          }
         }
       };
       
@@ -185,7 +193,7 @@ function openChampTemplatesModal() {
     return `<div class="template-card" data-template-id="${t.id}">
       <h3>${i18n.t('modals.championshipTemplates.championships.' + t.id)}</h3>
       ${badgeHtml}
-      <div class="template-race-mini-list">${i18n.t('modals.championshipTemplates.races', { n: t.races.length })}: ${circuitNames.join(' · ')}</div>
+      <div class="template-race-mini-list">${i18n.t('modals.championshipTemplates.races', { n: t.races.length })}<br>${circuitNames.join(' · ')}</div>
       <div class="template-card-footer">${i18n.t('modals.championshipTemplates.loadChampionship')}</div>
     </div>`;
   }).join('');

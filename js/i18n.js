@@ -94,6 +94,11 @@ const i18n = {
     Object.keys(params).forEach(param => {
       result = result.replace(new RegExp(`{{${param}}}`, 'g'), params[param]);
     });
+    
+    // Replace markdown bold: **text** -> <strong>text</strong> (only if it contains **)
+    if (result.includes('**')) {
+      result = result.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    }
 
     return result;
   },
@@ -102,10 +107,16 @@ const i18n = {
    * Scans the DOM for [data-i18n] attributes and updates their content
    */
   updatePage() {
-    // Translate textContent
+    // Translate with support for HTML if it contains tags
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
-      el.textContent = this.t(key);
+      const translated = this.t(key);
+      
+      if (translated.includes('<')) {
+        el.innerHTML = translated;
+      } else {
+        el.textContent = translated;
+      }
     });
 
     // Translate placeholders

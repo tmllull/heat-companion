@@ -174,9 +174,9 @@
         <div class="section-header">
           <h2 data-i18n="championship.calendar">🗓 Calendario de carreras</h2>
           <div class="header-actions">
-            <button class="btn-text-icon" id="btn-show-champ-templates" data-i18n="championship.historics">📜 Históricos</button>
-            <button class="btn-text-icon" id="btn-reset-championship" data-i18n="championship.restart">🔄 Reiniciar</button>
+            <button class="btn-historical" id="btn-show-champ-templates" data-i18n="championship.historics">📜 Históricos</button>
             <button class="btn-primary" id="btn-add-cal-race"><span>+</span> <span data-i18n="common.add">Añadir</span> <span data-i18n="common.circuit">circuito</span></button>
+            <button class="btn-danger" id="btn-reset-championship" data-i18n="championship.restart">🔄 Reiniciar</button>
           </div>
         </div>
         <div id="calendar-list" class="calendar-list"></div>
@@ -194,7 +194,6 @@
           <h1 data-i18n="circuits.title">Circuitos</h1>
           <p data-i18n="circuits.subtitle">Gestiona los circuitos disponibles para las carreras</p>
         </div>
-        <button class="btn-primary" id="btn-add-circuit"><span>+</span> <span data-i18n="common.add">Añadir</span> <span data-i18n="common.circuit">circuito</span></button>
       </div>
       <div id="circuits-grid" class="circuits-grid"></div>
       <div id="circuits-empty" class="empty-state" style="display:none">
@@ -288,40 +287,6 @@
   </main>
 </div>
 
-<!-- Add / Edit Circuit -->
-<div id="modal-circuit" class="modal-overlay" style="display:none">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 id="modal-circuit-title" data-i18n="modals.addCircuit.title">Añadir circuito</h2>
-      <button class="modal-close" data-modal="modal-circuit">✕</button>
-    </div>
-    <div class="modal-body">
-      <label class="form-label"><span data-i18n="modals.addCircuit.name">Nombre del circuito</span> <span style="color:var(--error);">*</span></label>
-      <input class="form-input" id="circuit-name-input" type="text" placeholder="Ej: Circuit de Barcelona-Catalunya" maxlength="60" />
-      
-      <label class="form-label" data-i18n="modals.addCircuit.country">País <span style="color:var(--error);">*</span></label>
-      <select class="form-select" id="circuit-country-select">
-        <option value="" data-i18n="modals.addCircuit.selectCountry">Selecciona un país...</option>
-      </select>
-      
-      <label class="form-label" data-i18n="modals.addCircuit.description">Descripción</label>
-      <textarea class="form-input" id="circuit-description-input" rows="3" placeholder="Características del circuito..."></textarea>
-      
-      <label class="form-label" data-i18n="modals.addCircuit.spaces">Espacios (casillas)</label>
-      <input class="form-input" id="circuit-spaces-input" type="number" min="1" max="200" placeholder="Ej: 69" />
-      
-      <label class="form-label" data-i18n="modals.addCircuit.curves">Número de curvas</label>
-      <input class="form-input" id="circuit-curves-input" type="number" min="1" max="30" placeholder="Ej: 16" />
-      
-      <label class="form-label" data-i18n="modals.addCircuit.laps">Vueltas recomendadas</label>
-      <input class="form-input" id="circuit-laps-input" type="number" min="1" max="10" placeholder="Ej: 2" />
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" data-modal="modal-circuit" data-i18n="common.cancel">Cancelar</button>
-      <button class="btn-primary" id="btn-save-circuit" data-i18n="common.save">Guardar</button>
-    </div>
-  </div>
-</div>
 
 <!-- Hidden file input -->
 <input type="file" id="import-file-input" accept=".json,application/json" style="display:none" />
@@ -728,6 +693,28 @@
       <div id="circuit-map-error" style="display:none; color:var(--error); padding:20px;">
         No se pudo cargar la imagen del mapa del circuito.
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Privacy Notice Modal -->
+<div id="modal-privacy-notice" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 data-i18n="system.modals.welcome.title">Aviso</h2>
+      <button class="modal-close" data-modal="modal-privacy-notice">✕</button>
+    </div>
+    <div class="modal-body" style="text-align:center; padding:20px;">
+      <div style="font-size: 48px; margin-bottom: 16px;">🛡️</div>
+      <p data-i18n="system.modals.welcome.content" style="margin-bottom: 20px; font-size: 1.1em; font-weight: 500;">
+        Ningún dato se guarda en ningún servidor, y sólo se almacena localmente en el navegador.
+      </p>
+      <p data-i18n="system.modals.welcome.action" style="font-size: 1.05em; line-height: 1.5; color: var(--text-main);">
+        Si quieres descargar los datos para usarlos más tarde o en otro navegador, usa la opción Exportar.
+      </p>
+    </div>
+    <div class="modal-footer" style="justify-content: center;">
+      <button class="btn-primary" data-modal="modal-privacy-notice" style="min-width: 120px;" data-i18n="system.modals.welcome.btnOk">¡Entendido!</button>
     </div>
   </div>
 </div>

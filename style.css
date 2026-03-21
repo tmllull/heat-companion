@@ -1619,12 +1619,15 @@ ul {
   text-align: center;
 }
 .circuit-details {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
   font-size: 11px;
   color: var(--text-muted);
   line-height: 1.4;
 }
 .circuit-details div {
-  margin-bottom: 2px;
+  margin-bottom: 0;
 }
 
 /* Circuits grid */
@@ -2090,10 +2093,28 @@ ul {
   border-radius: var(--radius-sm);
   border: 1px solid rgba(230, 59, 46, 0.3);
   transition: all var(--transition);
-  margin-right: auto;
 }
 .btn-danger:hover {
   background: rgba(230, 59, 46, 0.22);
+}
+.btn-historical {
+  background: rgba(251, 191, 36, 0.12);
+  color: var(--heat-gold);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  transition: all var(--transition);
+}
+.btn-historical:hover {
+  background: rgba(251, 191, 36, 0.22);
+  border-color: rgba(251, 191, 36, 0.5);
+}
+.light-theme .btn-historical {
+  background: rgba(139, 69, 19, 0.1);
+  color: var(--heat-orange-dark);
+  border-color: rgba(139, 69, 19, 0.2);
 }
 
 .btn-text-icon {
