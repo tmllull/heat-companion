@@ -3006,20 +3006,21 @@ ul {
   }
   .weather-card {
     height: auto !important;
-    min-height: 140px;
+    min-height: 80px;
   }
 }
 .weather-card {
-  padding: 14px;
+  padding: 12px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   cursor: pointer;
   position: relative;
-  height: 180px;
+  height: 80px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center;
   transition: all var(--transition);
 }
 .weather-card:hover {

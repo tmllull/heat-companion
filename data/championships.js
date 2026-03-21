@@ -15,7 +15,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1961-inauguracion-tribuna",
         setup: {
           sponsors: 2,
-          press: "A"
+          press: ["A"]
         },
         mods: {
           weather: true,
@@ -28,7 +28,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1961-nuevo-record-velocidad",
         setup: {
           sponsors: 1,
-          press: "B"
+          press: ["B"]
         },
         mods: {
           weather: true,
@@ -41,7 +41,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1961-huelga-pilotos",
         setup: {
           sponsors: 1,
-          press: "C"
+          press: ["C"]
         },
         mods: {
           weather: true,
@@ -63,7 +63,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1962-restricciones-mecanicas",
         setup: {
           sponsors: 2,
-          press: "E"
+          press: ["E"]
         },
         mods: {
           weather: true,
@@ -76,7 +76,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1962-record-afluencia",
         setup: {
           sponsors: 1,
-          press: "C y E"
+          press: ["C", "E"]
         },
         mods: {
           weather: true,
@@ -89,7 +89,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1962-corrupcion-comision",
         setup: {
           sponsors: 1,
-          press: "C"
+          press: ["C"]
         },
         mods: {
           weather: true,
@@ -111,7 +111,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1963-cambio-patrocinador",
         setup: {
           sponsors: 3,
-          press: "A"
+          press: ["A"]
         },
         mods: {
           weather: true,
@@ -124,7 +124,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1963-primera-tv-directo",
         setup: {
           sponsors: 1,
-          press: "B y D"
+          press: ["B", "D"]
         },
         mods: {
           weather: true,
@@ -137,7 +137,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1963-nueva-normativa-seguridad",
         setup: {
           sponsors: 1,
-          press: "D"
+          press: ["D"]
         },
         mods: {
           weather: true,
@@ -150,7 +150,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1963-patrocinador-retira",
         setup: {
           sponsors: 0,
-          press: "D"
+          press: ["D"]
         },
         mods: {
           weather: true,
@@ -172,7 +172,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1964-internacionalizacion",
         setup: {
           sponsors: 0,
-          press: "B y C"
+          press: ["B", "C"]
         },
         mods: {
           weather: true,
@@ -186,7 +186,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1964-vientes-turbulentos",
         setup: {
           sponsors: 1,
-          press: "B"
+          press: ["B"]
         },
         mods: {
           weather: true,
@@ -200,7 +200,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1964-chicanes-seguridad",
         setup: {
           sponsors: 1,
-          press: "C"
+          press: ["C"]
         },
         mods: {
           weather: true,
@@ -213,7 +213,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1964-lluvia-retrasa",
         setup: {
           sponsors: 1,
-          press: "-"
+          press: []
         },
         mods: {
           weather: true,
@@ -236,7 +236,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1965-sujetate-bien",
         setup: {
           sponsors: 2,
-          press: "D"
+          press: ["D"]
         },
         mods: {
           weather: true,
@@ -249,7 +249,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1965-sonrie-saluda",
         setup: {
           sponsors: 0,
-          press: "C"
+          press: ["C"]
         },
         mods: {
           weather: true,
@@ -262,7 +262,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1965-vision-tunel",
         setup: {
           sponsors: 0,
-          press: "A y C"
+          press: ["A", "C"]
         },
         mods: {
           weather: true,
@@ -275,7 +275,7 @@ const CHAMPIONSHIP_TEMPLATES = [
         eventId: "1965-olla-presion",
         setup: {
           sponsors: 1,
-          press: "B"
+          press: ["B"]
         },
         mods: {
           weather: true,

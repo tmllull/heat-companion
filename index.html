@@ -67,7 +67,7 @@
 
     <ul class="nav-links">
       <li><a href="#" class="nav-link active" data-view="dashboard" id="nav-dashboard">
-        <span class="nav-icon">🏁</span><span data-i18n="nav.dashboard">Dashboard</span>
+        <span class="nav-icon">🚦</span><span data-i18n="nav.dashboard">Dashboard</span>
       </a></li>
       <li><a href="#" class="nav-link" data-view="players" id="nav-players">
         <span class="nav-icon">👤</span><span data-i18n="nav.players">Pilotos</span>
@@ -79,7 +79,7 @@
         <span class="nav-icon">🗺️</span><span data-i18n="nav.circuits">Circuitos</span>
       </a></li>
       <li><a href="#" class="nav-link" data-view="standings" id="nav-standings">
-        <span class="nav-icon">📊</span><span data-i18n="nav.standings">Clasificación</span>
+        <span class="nav-icon">🥇</span><span data-i18n="nav.standings">Clasificación</span>
       </a></li>
       <li><a href="#" class="nav-link" data-view="manual" id="nav-manual">
         <span class="nav-icon">📖</span><span data-i18n="nav.manual">Referencia</span>
@@ -409,7 +409,14 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" data-i18n="common.laps">Vueltas</label>
-            <input class="form-input" id="add-race-laps-input" type="number" min="1" max="10" value="3" style="width: 80px;" />
+            <div class="number-selector-grid" id="add-race-laps-grid">
+              <div class="number-chip" data-val="1">1</div>
+              <div class="number-chip" data-val="2">2</div>
+              <div class="number-chip selected" data-val="3">3</div>
+              <div class="number-chip" data-val="4">4</div>
+              <div class="number-chip" data-val="5">5</div>
+              <div class="number-chip" data-val="6">6</div>
+            </div>
           </div>
         </div>
       </div>
@@ -434,7 +441,7 @@
         </div>
 
         <div id="add-race-sponsors-section" style="display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--border)">
-          <label class="form-label"><span data-i18n="common.sponsors">Patrocinios</span> <span data-i18n="championship.addRace.sponsorCards">al inicio</span></label>
+          <label class="form-label" data-i18n="championship.addRace.sponsorCards">Patrocinios</label>
           <div class="number-selector-grid" id="add-race-sponsors-grid">
             <div class="number-chip" data-val="0">0</div>
             <div class="number-chip selected" data-val="1">1</div>
@@ -445,7 +452,13 @@
 
         <div id="add-race-press-section" style="display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--border)">
           <label class="form-label" data-i18n="championship.addRace.pressLocation">Ubicación de la Prensa (Curvas)</label>
-          <input class="form-input" id="add-race-press-input" type="text" data-i18n-placeholder="championship.addRace.pressLocationPlaceholder" placeholder="Ej: A, B y D..." />
+          <div class="number-selector-grid" id="add-race-press-grid">
+            <div class="number-chip" data-val="A">A</div>
+            <div class="number-chip" data-val="B">B</div>
+            <div class="number-chip" data-val="C">C</div>
+            <div class="number-chip" data-val="D">D</div>
+            <div class="number-chip" data-val="E">E</div>
+          </div>
         </div>
 
       </div>
@@ -554,26 +567,18 @@
           <button class="btn-export-section" data-section="players" data-i18n="system.modals.export.btnExport">Exportar</button>
         </div>
         <div class="reset-card">
-          <div class="reset-card-icon">🏁</div>
-          <div class="reset-card-info">
-            <div class="reset-card-title" data-i18n="nav.championship">Carreras</div>
-            <div class="reset-card-desc">Exporta el calendario y resultados de carreras.</div>
-          </div>
-          <button class="btn-export-section" data-section="races" data-i18n="system.modals.export.btnExport">Exportar</button>
-        </div>
-        <div class="reset-card">
           <div class="reset-card-icon">🏆</div>
           <div class="reset-card-info">
-            <div class="reset-card-title" data-i18n="common.event">Campeonato</div>
-            <div class="reset-card-desc">Exporta la configuración del campeonato.</div>
+            <div class="reset-card-title">Campeonato</div>
+            <div class="reset-card-desc">Exporta el campeonato completo (configuración y lista de carreras).</div>
           </div>
           <button class="btn-export-section" data-section="championship" data-i18n="system.modals.export.btnExport">Exportar</button>
         </div>
         <div class="reset-card">
           <div class="reset-card-icon">📦</div>
           <div class="reset-card-info">
-            <div class="reset-card-title" data-i18n="system.modals.export.all.title">Todo</div>
-            <div class="reset-card-desc" data-i18n="system.modals.export.all.desc">Exporta todos los datos completos.</div>
+            <div class="reset-card-title">Exportar todo</div>
+            <div class="reset-card-desc">Crea un backup completo con todos los datos (pilotos, carreras, resultados, clasificación).</div>
           </div>
           <button class="btn-export-section" data-section="all" data-i18n="system.modals.export.btnExport">Exportar todo</button>
         </div>
@@ -604,26 +609,18 @@
           <button class="btn-import-section" data-section="players" data-i18n="system.modals.import.btnImport">Importar</button>
         </div>
         <div class="reset-card">
-          <div class="reset-card-icon">🏁</div>
-          <div class="reset-card-info">
-            <div class="reset-card-title" data-i18n="nav.championship">Carreras</div>
-            <div class="reset-card-desc">Importa calendario y resultados.</div>
-          </div>
-          <button class="btn-import-section" data-section="races" data-i18n="system.modals.import.btnImport">Importar</button>
-        </div>
-        <div class="reset-card">
           <div class="reset-card-icon">🏆</div>
           <div class="reset-card-info">
-            <div class="reset-card-title" data-i18n="common.event">Campeonato</div>
-            <div class="reset-card-desc">Importa configuración del campeonato.</div>
+            <div class="reset-card-title">Campeonato</div>
+            <div class="reset-card-desc">Importa el campeonato completo (configuración y lista de carreras).</div>
           </div>
           <button class="btn-import-section" data-section="championship" data-i18n="system.modals.import.btnImport">Importar</button>
         </div>
         <div class="reset-card reset-card-danger">
           <div class="reset-card-icon">⚠️</div>
           <div class="reset-card-info">
-            <div class="reset-card-title" data-i18n="system.modals.export.all.title">Todo</div>
-            <div class="reset-card-desc" data-i18n="system.modals.import.intro">Reemplaza todos los datos actuales.</div>
+            <div class="reset-card-title">Importar todo</div>
+            <div class="reset-card-desc">Restaura un backup completo. Reemplazará todos los datos actuales.</div>
           </div>
           <button class="btn-import-section btn-import-all" data-section="all" data-i18n="system.modals.import.btnImport">Importar todo</button>
         </div>
@@ -641,7 +638,7 @@
 <!-- MOBILE BOTTOM NAV -->
 <nav id="mobile-nav">
   <a href="#" class="mobile-nav-item active" data-view="dashboard" id="mnav-dashboard">
-    <span class="mnav-icon">🏁</span><span class="mnav-label" data-i18n="nav.inicio">Inicio</span>
+    <span class="mnav-icon">🚦</span><span class="mnav-label" data-i18n="nav.inicio">Inicio</span>
   </a>
   <a href="#" class="mobile-nav-item" data-view="championship" id="mnav-championship">
     <span class="mnav-icon">🏆</span><span class="mnav-label" data-i18n="nav.championship">Campeonato</span>
@@ -653,7 +650,7 @@
     <span class="mnav-icon">🗺️</span><span class="mnav-label" data-i18n="nav.circuits">Circuitos</span>
   </a>
   <a href="#" class="mobile-nav-item" data-view="standings" id="mnav-standings">
-    <span class="mnav-icon">📊</span><span class="mnav-label" data-i18n="nav.standings">Clasificación</span>
+    <span class="mnav-icon">🥇</span><span class="mnav-label" data-i18n="nav.standings">Clasificación</span>
   </a>
   <button class="mobile-nav-item" id="mnav-menu-btn">
     <span class="mnav-icon">☰</span><span class="mnav-label" data-i18n="nav.menu">Menú</span>
@@ -760,6 +757,10 @@
 <script src="js/dashboard.js"></script>
 <script src="js/manual.js"></script>
 <script src="js/system.js"></script>
+<script src="app.js"></script>
+<script defer data-domain="tmllull.github.io/heat-companion" src="https://analytics.tonimiquel.com/js/script.js"></script>
+</body>
+</html>
 <script src="app.js"></script>
 <script defer data-domain="tmllull.github.io/heat-companion" src="https://analytics.tonimiquel.com/js/script.js"></script>
 </body>

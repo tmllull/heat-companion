@@ -65,7 +65,7 @@ function renderChampionship() {
           <div class="cal-race-meta">
             <span>🏁 ${i18n.t('common.laps')}: ${race.laps || 3}</span>
             ${race.setup?.sponsors !== undefined ? `<span>📋 ${i18n.t('common.sponsors')}: ${race.setup.sponsors}</span>` : ''}
-            ${race.setup?.press ? `<span>🎥 ${i18n.t('common.press')}: ${race.setup.press}</span>` : ''}
+            ${race.setup?.press?.length ? `<span>🎥 ${i18n.t('common.press')}: ${Array.isArray(race.setup.press) ? race.setup.press.join(', ') : race.setup.press}</span>` : ''}
             ${mods.length ? `<span class="cal-mods">${mods.join(' ')}</span>` : `<span style="color:var(--text-dim)">${i18n.t('common.noModules')}</span>`}
           </div>
           ${podiumHtml}

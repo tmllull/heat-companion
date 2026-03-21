@@ -109,6 +109,31 @@ function loadState() {
     const raw = localStorage.getItem('heat-companion-v2');
     if (raw) {
       const loadedState = JSON.parse(raw);
+      
+      // Auto-migrate press from string to array if needed
+      if (loadedState.championship?.calendar) {
+        loadedState.championship.calendar.forEach(race => {
+          if (race.setup && typeof race.setup.press === 'string') {
+            const str = race.setup.press.trim();
+            if (!str || str === '-' || str === 'Ninguna') {
+              race.setup.press = [];
+            } else {
+              // Convert "A, B y D" or "B y D" to ["A", "B", "D"]
+              race.setup.press = str.replace(/ y /g, ',').split(',').map(s => s.trim()).filter(Boolean);
+            }
+          }
+          if (typeof race.press === 'string') {
+             // also migrate the top-level press field if it exists
+             const str = race.press.trim();
+             if (!str || str === '-' || str === 'Ninguna') {
+               race.press = [];
+             } else {
+               race.press = str.replace(/ y /g, ',').split(',').map(s => s.trim()).filter(Boolean);
+             }
+          }
+        });
+      }
+      
       return loadedState;
     }
     // migrate from v1 if present
@@ -174,7 +199,7 @@ function getRaceEventData(race) {
   // Legacy fallback: use event and rules directly from race
   return {
     id: race.eventId,
-    name: race.event || i18n.t('common.circuit'),
+    name: race.event || '',
     description: race.rules || '',
     pointsOverride: null
   };
@@ -583,7 +608,9 @@ function openAddRaceModal(raceId = null) {
   addRaceSelectedLaps = race ? (race.laps || 3) : 3;
   
   document.getElementById('modal-add-race-title').textContent = raceId ? i18n.t('common.edit') + ' ' + i18n.t('common.circuit').toLowerCase() : i18n.t('common.add') + ' ' + i18n.t('common.circuit').toLowerCase();
-  document.getElementById('add-race-laps-input').value = addRaceSelectedLaps;
+  document.querySelectorAll('#add-race-laps-grid .number-chip').forEach(c => {
+    c.classList.toggle('selected', parseInt(c.dataset.val) === addRaceSelectedLaps);
+  });
   
   // Render event cards
   const eventGrid = document.getElementById('add-race-events-grid');
@@ -653,8 +680,10 @@ function openAddRaceModal(raceId = null) {
     });
   }
   if (hasPress) {
-    const setupPress = race ? (race.setup?.press || '') : '';
-    document.getElementById('add-race-press-input').value = setupPress;
+    const selectedLetters = Array.isArray(race.setup?.press) ? race.setup.press : [];
+    document.querySelectorAll('#add-race-press-grid .number-chip').forEach(c => {
+      c.classList.toggle('selected', selectedLetters.includes(c.dataset.val));
+    });
   }
 
   // render circuits
@@ -675,10 +704,10 @@ function openAddRaceModal(raceId = null) {
   // Sección de circuitos originales
   if (originalCircuits.length > 0) {
     circuitsHtml += `
-      <div class="section-card collapsible" style="margin-bottom: 0;">
+      <div class="section-card collapsible collapsed" style="margin-bottom: 0;">
         <div class="section-header" onclick="toggleSection(this)">
           <h3 data-i18n="circuits.original">${i18n.t('circuits.original')}</h3>
-          <span class="section-toggle">▲</span>
+          <span class="section-toggle">▼</span>
         </div>
         <div class="section-content">
           <div class="circuits-grid">
@@ -692,10 +721,10 @@ function openAddRaceModal(raceId = null) {
   // Sección de circuitos fanmade
   if (fanmadeCircuits.length > 0) {
     circuitsHtml += `
-      <div class="section-card collapsible" style="margin-bottom: 0;">
+      <div class="section-card collapsible collapsed" style="margin-bottom: 0;">
         <div class="section-header" onclick="toggleSection(this)">
           <h3 data-i18n="circuits.fanmade">${i18n.t('circuits.fanmade')}</h3>
-          <span class="section-toggle">▲</span>
+          <span class="section-toggle">▼</span>
         </div>
         <div class="section-content">
           <div class="circuits-grid">
@@ -716,10 +745,6 @@ function openAddRaceModal(raceId = null) {
     <div class="weather-card ${w.id === addRaceSelectedWeather ? 'selected' : ''}" data-weather="${w.id}">
       <div class="weather-card-emoji">${w.emoji}</div>
       <div class="weather-card-name">${i18n.t('data.weather.' + w.id + '.name')}</div>
-      <div class="weather-card-effect">
-        <div><strong>${i18n.t('modals.championshipTemplates.setup')}:</strong> ${i18n.t('data.weather.' + w.id + '.prep')}</div>
-        <div><strong>${i18n.t('modals.championshipTemplates.trackEffect')}:</strong> ${i18n.t('data.weather.' + w.id + '.track')}</div>
-      </div>
     </div>`).join('');
 
   openModal('modal-add-race');
@@ -788,9 +813,14 @@ document.getElementById('add-race-weather-grid').addEventListener('click', e => 
 document.getElementById('add-race-sponsors-grid').addEventListener('click', e => {
   const chip = e.target.closest('.number-chip');
   if (!chip) return;
-  const val = parseInt(chip.dataset.val);
   document.querySelectorAll('#add-race-sponsors-grid .number-chip').forEach(c => c.classList.remove('selected'));
   chip.classList.add('selected');
+});
+
+document.getElementById('add-race-press-grid').addEventListener('click', e => {
+  const chip = e.target.closest('.number-chip');
+  if (!chip) return;
+  chip.classList.toggle('selected');
 });
 
 document.getElementById('add-race-circuits-grid').addEventListener('click', e => {
@@ -801,14 +831,20 @@ document.getElementById('add-race-circuits-grid').addEventListener('click', e =>
   const circuit = getCircuitById(card.dataset.circuit);
   if (circuit) {
     addRaceSelectedLaps = circuit.laps;
-    document.getElementById('add-race-laps-input').value = circuit.laps;
+    document.querySelectorAll('#add-race-laps-grid .number-chip').forEach(c => {
+      c.classList.toggle('selected', parseInt(c.dataset.val) === addRaceSelectedLaps);
+    });
   }
   document.querySelectorAll('#add-race-circuits-grid .circuit-card').forEach(c => c.classList.remove('selected'));
   card.classList.add('selected');
 });
 
-document.getElementById('add-race-laps-input').addEventListener('change', e => {
-  addRaceSelectedLaps = parseInt(e.target.value) || 3;
+document.getElementById('add-race-laps-grid').addEventListener('click', e => {
+  const chip = e.target.closest('.number-chip');
+  if (!chip) return;
+  addRaceSelectedLaps = parseInt(chip.dataset.val) || 3;
+  document.querySelectorAll('#add-race-laps-grid .number-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
 });
 
 document.getElementById('add-race-events-grid').addEventListener('click', e => {
@@ -877,7 +913,7 @@ document.getElementById('btn-save-cal-race').addEventListener('click', () => {
   
   const raceData = {
     circuitId: addRaceSelectedCircuit,
-    laps: addRaceSelectedLaps,
+    laps: parseInt(document.querySelector('#add-race-laps-grid .number-chip.selected')?.dataset.val || '3'),
     eventId: document.querySelector('#add-race-events-grid .event-card.selected')?.dataset.eventId || null,
     event: document.getElementById('add-race-event-input').value.trim(),
     rules: document.getElementById('add-race-rules-input').value.trim(),
@@ -889,10 +925,10 @@ document.getElementById('btn-save-cal-race').addEventListener('click', () => {
     },
     weatherType: isWeatherActive ? addRaceSelectedWeather : 'sun',
     sponsorCards: 0,
-    press: '',
+    press: isPressActive ? [...document.querySelectorAll('#add-race-press-grid .number-chip.selected')].map(c => c.dataset.val).sort() : [],
     setup: {
       sponsors: isSponsorsActive ? parseInt(document.querySelector('#add-race-sponsors-grid .number-chip.selected')?.dataset.val || '1') : 0,
-      press: isPressActive ? document.getElementById('add-race-press-input').value.trim() : ''
+      press: isPressActive ? [...document.querySelectorAll('#add-race-press-grid .number-chip.selected')].map(c => c.dataset.val).sort() : []
     }
   };
 
@@ -944,8 +980,9 @@ function openRaceDetailModal(raceId) {
     const count = race.sponsorCards || 1;
     activeMods.push(`💰 ${i18n.t('common.sponsors')} (${count})`);
   }
-  if (race.mods?.press && race.setup?.press) {
-    activeMods.push(`📷 ${i18n.t('common.press')} (${race.setup.press})`);
+  if (race.mods?.press && race.setup?.press?.length) {
+    const pressDisplay = Array.isArray(race.setup.press) ? race.setup.press.join(', ') : race.setup.press;
+    activeMods.push(`📷 ${i18n.t('common.press')} (${pressDisplay})`);
   }
 
   // DESHABILITADO TEMPORALMENTE: Visualización de mejoras en campeonato
@@ -985,20 +1022,14 @@ function openRaceDetailModal(raceId) {
   if (wOpt || race.setup?.sponsors !== undefined || race.setup?.press) {
     let bannerContent = '';
     if (wOpt) {
-      bannerContent += `
-        <div style="margin-bottom:8px">
-          <div style="font-size:13px; font-weight:600"><span style="font-size:16px">${wOpt.emoji}</span> ${i18n.t('common.weather')}: ${i18n.t('data.weather.' + wOpt.id + '.name')}</div>
-          <div style="font-size:11px; color:var(--text-muted); margin-left:24px">
-            ${i18n.t('modals.championshipTemplates.setup')}: ${i18n.t('data.weather.' + wOpt.id + '.prep')}<br>
-            ${i18n.t('modals.championshipTemplates.trackEffect')}: ${i18n.t('data.weather.' + wOpt.id + '.track')}
-          </div>
-        </div>`;
+      bannerContent += `<div style="font-size:13px; margin-bottom:4px; font-weight:600"><span style="font-size:16px">${wOpt.emoji}</span> ${i18n.t('data.weather.' + wOpt.id + '.name')}</div>`;
     }
     if (race.setup?.sponsors !== undefined) {
-      bannerContent += `<div style="font-size:13px"><span style="font-weight:600">📋 ${i18n.t('common.sponsors')}:</span> ${race.setup.sponsors}</div>`;
+      bannerContent += `<div style="font-size:13px; margin-bottom:4px"><span style="font-weight:600">📋 ${i18n.t('common.sponsors')}:</span> ${race.setup.sponsors}</div>`;
     }
-    if (race.setup?.press) {
-      bannerContent += `<div style="font-size:13px"><span style="font-weight:600">🎥 ${i18n.t('common.press')}:</span> ${race.setup.press}</div>`;
+    if (race.setup?.press?.length) {
+      const pressDisplay = Array.isArray(race.setup.press) ? race.setup.press.join(', ') : race.setup.press;
+      bannerContent += `<div style="font-size:13px"><span style="font-weight:600">🎥 ${i18n.t('common.press')}:</span> ${pressDisplay}</div>`;
     }
     moduleBannerHtml = `
     <div style="margin-top:8px; padding:8px 12px; background:rgba(139,92,246,0.05); border:1px solid rgba(139,92,246,0.2); border-radius:var(--radius-sm)">
@@ -1007,7 +1038,7 @@ function openRaceDetailModal(raceId) {
   }
 
   const eventData = getRaceEventData(race);
-  const historicHtml = eventData.name && eventData.name !== 'Carrera' ? `
+  const historicHtml = eventData.name && eventData.name !== 'Carrera' && eventData.name !== 'Circuito' ? `
     <div class="detail-section">
       <h3>${i18n.t('modals.championshipTemplates.historicEvent')}</h3>
       <div class="historic-event-card">
@@ -1015,7 +1046,7 @@ function openRaceDetailModal(raceId) {
         ${eventData.description ? `<div class="historic-event-rules"><strong>${i18n.t('modals.championshipTemplates.rulesSection')}</strong><br>${eventData.id ? i18n.t('modals.championshipTemplates.events.' + eventData.id + '.description', { defaultValue: eventData.description }) : eventData.description}</div>` : ''}
         <div class="historic-event-setup"><strong>${i18n.t('modals.championshipTemplates.setup')}</strong><br>
           📋 ${i18n.t('common.sponsors')}: ${race.setup.sponsors}<br>
-          🎥 ${i18n.t('common.press')}: ${race.setup.press}
+          🎥 ${i18n.t('common.press')}: ${Array.isArray(race.setup.press) ? race.setup.press.join(', ') : (race.setup.press || '')}
         </div>
       </div>
     </div>` : '';

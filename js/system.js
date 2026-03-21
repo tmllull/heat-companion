@@ -70,12 +70,16 @@ function exportData(section = 'all') {
       payload = { players: userPlayers };
       filename = 'heat-pilotos.json';
       break;
-    case 'races':
-      payload = { championship: { calendar: userChampionship.calendar } };
-      filename = 'heat-carreras.json';
-      break;
     case 'championship':
-      payload = { championship: userChampionship };
+      // Exportar campeonato completo: configuración + calendario de carreras
+      payload = { 
+        championship: {
+          name:         state.championship?.name || '',
+          pointsSystem: state.championship?.pointsSystem || 'classic',
+          customPoints: state.championship?.customPoints || [],
+          calendar:     state.championship?.calendar || []
+        }
+      };
       filename = 'heat-campeonato.json';
       break;
     case 'all':
@@ -107,7 +111,7 @@ function importData(file, section = 'all') {
       const data = JSON.parse(e.target.result);
       
       // Basic validation: must have at least one of these
-      if (!data.championship && !data.players && !data.calendar && !data.races) {
+      if (!data.championship && !data.players) {
         showToast('El archivo no parece ser un backup válido', 'error');
         return;
       }
@@ -120,19 +124,15 @@ function importData(file, section = 'all') {
           }
         }
 
-        if (section === 'all' || section === 'races') {
-          // calendar can be root or inside championship
-          const newCalendar = data.championship?.calendar || data.calendar || data.races;
-          if (newCalendar && Array.isArray(newCalendar)) {
-            state.championship.calendar = newCalendar;
-          }
-        }
-
         if (section === 'all' || section === 'championship') {
           if (data.championship) {
             state.championship.name = data.championship.name || state.championship.name;
             state.championship.pointsSystem = data.championship.pointsSystem || state.championship.pointsSystem;
             state.championship.customPoints = data.championship.customPoints || state.championship.customPoints;
+            // Importar también el calendario si existe
+            if (data.championship.calendar && Array.isArray(data.championship.calendar)) {
+              state.championship.calendar = data.championship.calendar;
+            }
           }
         }
       };
